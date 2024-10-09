@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Product;
+use App\Models\Warehouse;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,6 +15,11 @@ return new class extends Migration
     {
         Schema::create('inventories', function (Blueprint $table) {
             $table->id();
+            $table->foreignIdFor(Product::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Warehouse::class)->constrained()->cascadeOnDelete();
+            $table->integer('quantity_available');
+            $table->integer('minimum_stock_level');
+            $table->integer('reorder_point');
             $table->timestamps();
         });
     }

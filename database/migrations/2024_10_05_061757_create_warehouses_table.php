@@ -16,9 +16,8 @@ return new class extends Migration
             $table->string('name', 100);
             $table->string('address', 150);
             $table->integer('capacity');
-            $table->integer('used_capacity');
-            $table->integer('remaining_capacity');
-            $table->text('description');
+            $table->decimal('size', 10, 2);
+            $table->boolean('isRefrigerated');
             $table->timestamps();
         });
     }

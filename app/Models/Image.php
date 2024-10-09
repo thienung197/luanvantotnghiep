@@ -14,13 +14,8 @@ class Image extends Model
         'imageable_type'
     ];
 
-    public function user()
+    public function imageable()
     {
-        return $this->belongsTo(User::class);
-    }
-
-    public function product()
-    {
-        return $this->belongsTo(Product::class);
+        return $this->morphTo();
     }
 }

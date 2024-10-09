@@ -14,11 +14,25 @@ class GoodsReceipt extends Model
         'creator_id',
         'provider_id',
         'discount',
-        'status'
     ];
 
     public function provider()
     {
         return $this->belongsTo(Provider::class);
+    }
+
+    public function goodsReceiptDetails()
+    {
+        return $this->hasMany(GoodsReceiptDetail::class);
+    }
+
+    public function warehouse()
+    {
+        return $this->belongsTo(Warehouse::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

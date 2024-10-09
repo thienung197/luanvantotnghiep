@@ -22,4 +22,9 @@ class GoodsReceiptDetail extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
+    public function goodsReceipt()
+    {
+        return $this->belongsTo(GoodsReceipt::class);
+    }
 }

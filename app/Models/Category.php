@@ -13,6 +13,16 @@ class Category extends Model
         'parent_id'
     ];
 
+    public function parent()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function children()
+    {
+        return $this->hasMany(Category::class);
+    }
+
     public function products()
     {
         return $this->hasMany(Product::class);

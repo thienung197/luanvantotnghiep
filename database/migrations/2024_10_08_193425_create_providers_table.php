@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('providers', function (Blueprint $table) {
             $table->id();
+            $table->string('name', 100);
+            $table->string('phone', 20);
+            $table->string('email', 150);
+            $table->string('address', 150);
+            $table->enum('status', ['active', 'inactive', 'terminated', 'suspended'])->default('active');
             $table->timestamps();
         });
     }
