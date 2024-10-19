@@ -15,12 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string('name', 100)->nullable();
             $table->enum('gender', ['male', 'female'])->nullable();
-            $table->dateTime('birth_date')->nullable();
+            $table->date('birth_date')->nullable();
             $table->string('phone', 20)->nullable();
             $table->string('address', 150)->nullable();
-            $table->enum('status', ['active', 'suspended', 'locked', 'inactive']);
+            $table->enum('status', ['active', 'locked', 'inactive']);
             $table->string('email')->unique();
-            // $table->timestamp('email_verified_at')->nullable();
+            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();

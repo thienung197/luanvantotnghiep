@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('phone', 20);
             $table->string('email', 150);
             $table->string('address', 150);
-            $table->enum('status', ['active', 'inactive', 'terminated', 'suspended'])->default('active');
+            $table->enum('status', ['active', 'inactive', 'suspended'])->default('active'); //terminated
             $table->timestamps();
         });
     }

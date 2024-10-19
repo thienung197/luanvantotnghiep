@@ -9,9 +9,9 @@ use Spatie\Permission\Models\Role as ModelsRole;
 class Role extends ModelsRole
 {
     use HasFactory;
-    protected $fillable=[
-        'code',
+    protected $fillable = [
         'name',
-        'group'
-    ]
+        // 'group',
+        'guard_name'
+    ];
 }

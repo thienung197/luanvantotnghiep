@@ -23,6 +23,8 @@
     /* Default text color */
     --color-default: #a3afd1;
     --color-default-rgb: 163, 175, 209;
+    --color-default-light: rgb(91, 99, 135);
+    --color-default-dark: #3a3232;
 
     /* Default links color */
     --color-links: #f5f8ff;
@@ -30,7 +32,7 @@
 
     /* Primay colors */
     --color-primary: rgb(78, 39, 250);
-    --color-primary-light: rgb(81, 42, 252);
+    --color-primary-light: rgb(100, 79, 255);
     --color-primary-dark: #0b0c0e;
 
     --color-primary-rgb: 65, 23, 255;
@@ -47,8 +49,8 @@
     --color-secondary-dark-rgb: 64, 79, 92;
 
     /* General colors */
-    --color-blue: #0d6efd;
-    --color-blue-rgb: 13, 110, 253;
+    --color-blue: #4117ff;
+    --color-blue-rgb: 65, 23, 255;
 
     --color-indigo: #6610f2;
     --color-indigo-rgb: 102, 16, 242;
@@ -83,8 +85,8 @@
     --color-gray: #6c757d;
     --color-gray-rgb: 108, 117, 125;
 
-    --color-black: #000000;
-    --color-black-rgb: 0, 0, 0;
+    --color-black: #1b2559;
+    --color-black-rgb: 27, 37, 89;
 }
 
 /*--------------------------------------------------------------

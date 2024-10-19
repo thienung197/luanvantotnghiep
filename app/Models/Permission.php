@@ -9,9 +9,8 @@ use Spatie\Permission\Models\Permission as ModelsPermission;
 class Permission extends ModelsPermission
 {
     use HasFactory;
-    protected $fillable=[
-        'code',
+    protected $fillable = [
         'name',
         'group',
-    ]
+    ];
 }

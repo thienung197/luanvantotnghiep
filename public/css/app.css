@@ -5,11 +5,24 @@
 }
 
 body {
-    height: 100vh;
+    height: auto;
     font-family: var(--font-default);
     background: linear-gradient(rgb(245, 248, 255), rgb(245, 248, 255));
 }
 
+ul,
+li {
+    padding: 0;
+}
+
+/* input,
+button,
+select,
+textarea,
+a:focus {
+    box-shadow: none;
+    outline: none;
+} */
 .row {
     display: flex;
 }
@@ -18,7 +31,8 @@ body {
 #aside {
     width: 20%;
     background-color: var(--color-white);
-    height: 100vh;
+    height: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* end of body  */
@@ -87,6 +101,19 @@ body {
     border-radius: 5px;
     transition: all 0.5s;
     cursor: pointer;
+    overflow: hidden;
+}
+
+#menu-container li.bg-blue .flex-left-content span {
+    color: var(--color-white);
+}
+
+#menu-container li.bg-blue:hover .flex-left-content span {
+    color: var(--color-white);
+}
+
+#menu-container li.bg-blue:hover a {
+    background-color: var(--color-blue);
 }
 
 #menu-container li:hover a {
@@ -167,7 +194,7 @@ ul.sub-menu li {
 /* begin of navbar  */
 #navbar {
     width: 100%;
-    height: 90px;
+    height: 100px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -177,6 +204,21 @@ ul.sub-menu li {
 #navbar-left {
     flex-grow: 1;
 }
+
+/* #navbar-left {
+    color: var(--color-default);
+}
+
+#navbar-left p:last-child {
+    font-size: 21px;
+    color: var(--color-black);
+    font-weight: 600;
+}
+
+#navbar-left span {
+    color: var(--color-black);
+    font-weight: 500;
+} */
 
 #navbar-right {
     display: flex;
@@ -207,3 +249,263 @@ img.avatar {
 }
 
 /* end of navbar  */
+
+/* begin of footer */
+.footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 50px;
+    color: var(--color-default);
+    padding: 0 40px;
+    margin-top: 20px;
+}
+
+.footer-right {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.footer-right a {
+    color: var(--color-default);
+    text-decoration: none;
+    margin-right: 25px;
+}
+/* end of footer  */
+
+/* begin of content  */
+
+.content {
+    width: 100%;
+    padding: 0 40px;
+}
+
+.content-path {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.content-path img {
+    width: 25px;
+    margin-right: 5px;
+}
+
+.content_header {
+    width: 100%;
+    height: 95px;
+    background-color: var(--color-white);
+    border-radius: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.content_header--title {
+    color: var(--color-black);
+    font-size: 22px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.content_header a {
+    text-decoration: none;
+}
+
+.content_header--path {
+    display: flex;
+    align-items: center;
+}
+
+.content_header--path img {
+    width: 30px;
+    margin-right: 5px;
+}
+
+.content_header--path p a {
+    display: inline-block;
+    margin-top: 15px;
+    color: var(--color-default);
+}
+/* Custom btn  */
+
+.btn-cs a,
+.btn-cs button {
+    text-decoration: none;
+    margin: 30px 20px;
+    height: 60px;
+    padding: 0 20px;
+    border-radius: 20px;
+    font-size: 21px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-white);
+    width: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+}
+
+.btn-cs.btn-add a,
+.btn-cs.btn-add button {
+    background-color: var(--color-primary-light);
+}
+
+.btn-cs.btn-save a,
+.btn-cs.btn-save button {
+    background-color: var(--color-green);
+}
+
+.btn-cs.btn-delete a {
+    background-color: var(--color-red);
+}
+
+/* End of custom btn  */
+/* Begin of custom table  */
+.table_container {
+    width: 100%;
+    margin: 0 40px;
+    background-color: var(--color-white);
+    border-radius: 20px;
+    margin: 0 auto;
+    padding: 20px 40px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.table_title {
+    height: 40px;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    font-size: 27px;
+    font-weight: 600;
+    color: var(--color-black);
+    margin-bottom: 10px;
+}
+
+.table_filter-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    letter-spacing: 1px;
+}
+
+.table_filter-controls input {
+    margin-left: 10px;
+    padding: 7px;
+    color: var(--color-default);
+}
+
+.table_filter-controls select {
+    margin: 0 5px;
+    padding: 7px;
+}
+
+#table-list tr th,
+#table-list tr td {
+    text-align: center;
+    vertical-align: middle;
+    padding: 20px 0;
+}
+
+#table-list tr td {
+    color: var(--color-default-light);
+}
+
+.btn-cell img {
+    width: 35px;
+    height: 35px;
+    margin-right: 20px;
+    cursor: pointer;
+}
+
+.btn-cell button {
+    border: none;
+    background-color: unset;
+}
+
+.btn-cell form {
+    display: inline;
+}
+/* End of custom table  */
+/* end of content  */
+
+/* content 10  */
+.content-10 {
+    width: 100%;
+    background-color: var(--color-white);
+    padding: 20px 40px;
+    border-radius: 20px;
+    margin-top: 40px;
+    font-size: 20px;
+}
+
+/* tai hinh anh */
+.show-image {
+    width: 140px;
+    height: 140px;
+    margin: 20px 0;
+}
+
+.show-image img {
+    width: 100%;
+    object-fit: cover;
+}
+
+/* nut dieu khien  */
+.btn-controls {
+    display: flex;
+    align-items: center;
+}
+
+/* css cho input  */
+.input-div input {
+    margin: 10px 0;
+    padding: 12px;
+    color: var(--color-default-dark);
+    border: none;
+    border-bottom: 1px solid var(--color-default);
+}
+
+.input-div input:focus {
+    color: var(--color-default-dark);
+    box-shadow: none;
+}
+
+/* css cho message  */
+.error.message {
+    margin: 10px 0;
+    color: red;
+}
+
+/* css cho heading  */
+.input-div h4 {
+    margin-bottom: 20px;
+}
+
+.input-div h5 {
+    margin: 15px 0;
+}
+
+.input-div h4,
+.input-div h5 {
+    color: var(--color-default-dark);
+}
+
+/* css cho list group  */
+.lst-group-header {
+    border-bottom: 1px solid var(--color-default);
+    margin: 15px 0;
+}
+
+.lst-group-content {
+    margin-bottom: 10px;
+}
+
+.toast {
+    font-size: 18px; /* Change this value to your desired font size */
+}
