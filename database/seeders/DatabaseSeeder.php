@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Models\Category;
 use App\Models\Permission;
 use Illuminate\Database\Seeder;
 
@@ -20,6 +21,11 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
-        $this->call(RoleDatabaseSeeder::class);
+        $this->call([
+            RoleDatabaseSeeder::class,
+            UserDatabaseSeeder::class,
+            UnitDatabaseSeeder::class,
+            CategorySeeder::class
+        ]);
     }
 }

@@ -1,12 +1,18 @@
 <?php
 
+use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\ProviderController;
 use App\Http\Controllers\Admin\WarehouseController;
+use App\Http\Controllers\ApiController;
+use App\Http\Controllers\Employee\GoodsReceiptController;
+use App\Models\AttributeValue;
 use App\Models\Customer;
+use App\Models\GoodsReceipt;
 use App\Models\Provider;
 use App\Models\Warehouse;
 use Illuminate\Support\Facades\Route;
@@ -39,3 +45,13 @@ Route::resource('/categories', CategoryController::class);
 Route::resource('/providers', ProviderController::class);
 Route::resource('/warehouses', WarehouseController::class);
 Route::resource('/customers', CustomerController::class);
+Route::resource('/attributes', AttributeController::class);
+Route::get('edit-attribute/{id}', [AttributeController::class, 'editAttribute']);
+Route::post('/attributes/update/{id}', [AttributeController::class, 'updateAttribute']);
+Route::delete('attributes/{attribute}/values/{value}', [AttributeController::class, 'destroyValues'])->name('attributes.destroyValues');
+Route::post('/attributes/{attribute}', [AttributeController::class, 'storeValue'])->name('attributes.storeValue');
+Route::get('/attribute/{attribute}/edit/{attributeValue}', [AttributeController::class, 'editAttributeValue']);
+Route::post('/attribute/{attribute}/update/{attributeValue}', [AttributeController::class, 'updateAttributeValue']);
+Route::resource('/products', ProductController::class);
+Route::resource('/goodsreceipts', GoodsReceiptController::class);
+Route::get('/ajax-search-product', [ApiController::class, 'ajaxSearch'])->name('ajax-search-product');

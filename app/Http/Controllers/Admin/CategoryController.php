@@ -46,7 +46,7 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $dataCreate = $request->all();
-        $this->category->create($dataCreate);
+        $attribute = $this->category->create($dataCreate);
         return to_route('categories.index')->with(['message' => 'Tạo danh mục thành công!']);
     }
 

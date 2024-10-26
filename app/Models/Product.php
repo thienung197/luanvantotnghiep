@@ -2,15 +2,17 @@
 
 namespace App\Models;
 
+use App\Traits\HandleUploadImageTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
-    use HasFactory;
+    use HasFactory, HandleUploadImageTrait;
     protected $fillable = [
         'code',
         'name',
+        'category_id',
         'description',
         'price', //So luong ton kho
         'unit_id',
@@ -23,9 +25,14 @@ class Product extends Model
         return $this->belongsTo(Unit::class);
     }
 
-    public function productAttributes()
+    public function getUnitName()
     {
-        return $this->hasMany(ProductAttribute::class);
+        return $this->unit ? $this->unit->name : 'No Unit';
+    }
+
+    public function productValues()
+    {
+        return $this->hasMany(ProductValue::class);
     }
 
     public function category()
@@ -46,5 +53,10 @@ class Product extends Model
     public function goodsReceiptDetails()
     {
         return $this->hasMany(GoodsReceiptDetail::class);
+    }
+
+    public function batches()
+    {
+        return $this->hasMany(Batch::class);
     }
 }

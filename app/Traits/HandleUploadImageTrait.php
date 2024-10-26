@@ -9,8 +9,7 @@ use Illuminate\Support\Facades\Log;
 
 trait  HandleUploadImageTrait
 {
-    protected $user_path = 'upload/users/';
-    protected $product_path = 'upload/products/';
+    protected $path = 'upload/';
     public function verify($request)
     {
         return $request->has('image');
@@ -21,7 +20,7 @@ trait  HandleUploadImageTrait
         if ($this->verify($request)) {
             $image = $request->file('image');
             $name = time() . '.' . $image->getClientOriginalExtension();
-            Image::make($image)->resize(300, 300)->save($this->user_path . $name);
+            Image::make($image)->resize(300, 300)->save($this->path . $name);
             return $name;
         }
     }
@@ -39,11 +38,11 @@ trait  HandleUploadImageTrait
 
     public function deleteImage($imageName)
     {
-        if ($imageName && file_exists($this->user_path . $imageName)) {
-            unlink($this->user_path . $imageName);
-            Log::info('File deleted successfully: ' . $this->user_path . $imageName);
+        if ($imageName && file_exists($this->path . $imageName)) {
+            unlink($this->path . $imageName);
+            Log::info('File deleted successfully: ' . $this->path . $imageName);
         } else {
-            Log::info('File does not exist or imageName is empty: ' . $this->user_path . $imageName);
+            Log::info('File does not exist or imageName is empty: ' . $this->path . $imageName);
         }
     }
 }

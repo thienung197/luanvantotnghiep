@@ -92,7 +92,9 @@ class UserController extends Controller
         $user->update($dataUpdate);
         $user->images()->delete();
         $user->images()->create(['url' => $dataUpdate['image']]);
-        $user->roles()->sync($dataUpdate['role_ids']);
+        if ($request->has('role_ids')) {
+            $user->roles()->sync($dataUpdate['role_ids']);
+        }
         return to_route('users.index')->with(['<mes></mes>sage' => 'Cập nhật người dùng thành công!']);
     }
 

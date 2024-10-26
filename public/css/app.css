@@ -303,6 +303,7 @@ img.avatar {
     justify-content: space-between;
     padding: 0 30px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 20px 0;
 }
 
 .content_header--title {
@@ -310,6 +311,13 @@ img.avatar {
     font-size: 22px;
     text-transform: uppercase;
     font-weight: 600;
+}
+
+.content_header--title span {
+    border: none;
+    margin-left: 40px;
+    font-size: 20px;
+    text-transform: capitalize;
 }
 
 .content_header a {
@@ -416,10 +424,19 @@ img.avatar {
     color: var(--color-default-light);
 }
 
+/* .btn-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+} */
+
+.btn-cell a {
+    margin-right: 50px;
+}
+
 .btn-cell img {
     width: 35px;
     height: 35px;
-    margin-right: 20px;
     cursor: pointer;
 }
 
@@ -506,6 +523,44 @@ img.avatar {
     margin-bottom: 10px;
 }
 
+/* css cho toast  */
+
 .toast {
     font-size: 18px; /* Change this value to your desired font size */
+}
+
+/* css cho modal  */
+.modal-cs {
+    font-size: 16px;
+    color: var(--color-default-dark);
+}
+
+.modal-cs .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.modal-cs .content-10 {
+    margin: 0;
+    padding: 0;
+}
+
+.modal-cs .content-10 h4 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.modal-cs .modal-header button {
+    border: none;
+    background-color: transparent;
+}
+
+.modal-cs .modal-header button img {
+    width: 22px;
+}
+
+.modal-cs .modal-footer button,
+.modal-cs .modal-footer a {
+    padding: 10px;
 }

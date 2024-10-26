@@ -103,11 +103,29 @@
                             </a>
 
                         </li>
-                        <li>
-                            <a href="">
+                        <li class="{{ request()->routeIs('attributes.*') ? 'bg-blue' : '' }}">
+                            <a href="{{ route('attributes.index') }}">
+                                <div class="flex-left-content">
+                                    <img src="{{ asset('img/category.png') }}" alt="">
+                                    <span>Thuộc tính</span>
+                                </div>
+                            </a>
+
+                        </li>
+                        <li class="{{ request()->routeIs('products.*') ? 'bg-blue' : '' }}">
+                            <a href="{{ route('products.index') }}">
                                 <div class="flex-left-content">
                                     <img src="{{ asset('img/product.png') }}" alt="">
                                     <span>Hàng hóa</span>
+
+                                </div>
+                            </a>
+                        </li>
+                        <li class="{{ request()->routeIs('goodsreceipts.*') ? 'bg-blue' : '' }}">
+                            <a href="{{ route('goodsreceipts.index') }}">
+                                <div class="flex-left-content">
+                                    <img src="{{ asset('img/product.png') }}" alt="">
+                                    <span>Nhập hàng</span>
 
                                 </div>
                             </a>
@@ -126,6 +144,7 @@
                                 <li><a href="">Kiểm kho</a></li>
                             </ul>
                         </li>
+
                         <li>
                             <a href="">
                                 <div class="flex-left-content">
@@ -166,22 +185,28 @@
                 <div class="content">
                     @yield('content')
                 </div>
-                <div class="footer">
-                    <div class="footer-left">
-                        Copyright &copy; 2024.All right reserved.
-                    </div>
-                    <div class="footer-right">
-                        <a href=""><span>About us</span></a>
-                        <a href=""><span>License</span></a>
-                        <span>Version 1.0.0</span>
-                    </div>
-                </div>
-            </main>
-            {{-- Main end  --}}
+
         </div>
+        <div class="footer">
+            <div class="footer-left">
+                Copyright &copy; 2024.All right reserved.
+            </div>
+            <div class="footer-right">
+                <a href=""><span>About us</span></a>
+                <a href=""><span>License</span></a>
+                <span>Version 1.0.0</span>
+            </div>
+        </div>
+        </main>
+        {{-- Main end  --}}
+    </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
         integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    {{-- js cho bootstrap modal  --}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"
+        integrity="sha512-7Pi/otdlbbCR+LnW+F7PwFcSDJOuUJB3OxtEHbg4vSMvzvJjde4Po1v4BR9Gdc9aXNUNFVUY+SK51wWT8WF0Gg=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"

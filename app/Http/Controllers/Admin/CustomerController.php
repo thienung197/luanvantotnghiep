@@ -48,17 +48,15 @@ class CustomerController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-        //
-    }
+    public function show(string $id) {}
 
     /**
      * Show the form for editing the specified resource.
      */
     public function edit(string $id)
     {
-        //
+        $customer = $this->customer->findOrFail($id);
+        return view('admin.customers.edit', compact('customer'));
     }
 
     /**
@@ -66,7 +64,10 @@ class CustomerController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $customer = $this->customer->findOrFail($id);
+        $dataUpdate = $request->all();
+        $customer->update($dataUpdate);
+        return to_route('customers.index')->with(['message' => 'Cập nhật khách hàng thành công!']);
     }
 
     /**
@@ -74,6 +75,8 @@ class CustomerController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $customer = $this->customer->findOrFail($id);
+        $customer->delete();
+        return to_route('customers.index')->with(['message' => 'Xóa khách hàng thành công!']);
     }
 }
