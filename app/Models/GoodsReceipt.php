@@ -21,6 +21,11 @@ class GoodsReceipt extends Model
         return $this->belongsTo(Provider::class);
     }
 
+    public function getProviderName()
+    {
+        return $this->provider->name;
+    }
+
     public function goodsReceiptDetails()
     {
         return $this->hasMany(GoodsReceiptDetail::class);
@@ -29,6 +34,11 @@ class GoodsReceipt extends Model
     public function warehouse()
     {
         return $this->belongsTo(Warehouse::class);
+    }
+
+    public function getWarehouseName()
+    {
+        return $this->warehouse->name;
     }
 
     public function user()

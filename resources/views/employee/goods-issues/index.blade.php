@@ -1,24 +1,24 @@
 @extends('layouts.app')
-@section('title', 'Phiếu nhập hàng')
+@section('title', 'Phiếu xuất hàng')
 @section('content')
     <div class="content_header">
         <div class="content_header--title">
-            Quản lý phiếu nhập hàng
+            Quản lý phiếu xuất hàng
         </div>
         <div class="content_header--path">
             <img src="{{ asset('img/home.png') }}" alt="">
-            <p><a href="">Home</a> > <a href="">Phiếu nhập hàng</a></p>
+            <p><a href="">Home</a> > <a href="">Phiếu xuất hàng</a></p>
         </div>
     </div>
     <div class="btn-cs btn-add">
-        <a href="{{ route('goodsreceipts.create') }}">Thêm phiếu nhập hàng</a>
+        <a href="{{ route('goodsissues.create') }}">Thêm phiếu xuất hàng</a>
     </div>
     <div class="table_container">
         <div class="table_title">
-            Danh sách phiếu nhập hàng
+            Danh sách phiếu xuất hàng
         </div>
         <div class="table_filter-controls">
-            <form action="{{ route('goodsreceipts.index') }}" method="GET">
+            <form action="{{ route('goodsissues.index') }}" method="GET">
                 <label for="">Hiển thị </label>
                 <select name="entries" id="entries" onchange="this.form.submit()">
                     <option value="5" {{ request('entries') == 5 ? 'selected' : '' }}>5</option>
@@ -28,17 +28,17 @@
                 mục
             </form>
             <div class="table_search-box">
-                <form action="{{ route('goodsreceipts.index') }}" method="GET">
+                <form action="{{ route('goodsissues.index') }}" method="GET">
                     <input type="text" name="search" id="search" value="{{ request('search') }}"
-                        placeholder="Nhập tên phiếu nhập hàng">
+                        placeholder="Nhập tên phiếu xuất hàng">
                     <button type="submit">Tìm </button>
                 </form>
             </div>
         </div>
         <table class="table" id="table-list">
             <tr>
-                <th>Mã phiếu nhập hàng</th>
-                <th>Nhà cung cấp</th>
+                <th>Mã phiếu xuất hàng</th>
+                <th>Khách hàng</th>
                 <th>Nhà kho</th>
                 <th>Ngày tạo </th>
                 <th>Thao tác</th>
@@ -46,21 +46,21 @@
             {{-- @php
                 $stt = ($goodsReceipts->currentPage() - 1) * $goodsReceipts->perPage() + 1;
             @endphp --}}
-            @foreach ($goodsReceipts as $goodsReceipt)
+            @foreach ($goodsIssues as $goodsIssue)
                 <tr>
-                    <td>{{ $goodsReceipt->code }}</td>
-                    <td>{{ $goodsReceipt->getProviderName() }}</td>
-                    <td>{{ $goodsReceipt->getWarehouseName() }}</td>
-                    <td>{{ $goodsReceipt->created_at }}</td>
+                    <td>{{ $goodsIssue->code }}</td>
+                    <td>{{ $goodsIssue->getProviderName() }}</td>
+                    <td>{{ $goodsIssue->getWarehouseName() }}</td>
+                    <td>{{ $goodsIssue->created_at }}</td>
                     <td class="btn-cell">
-                        <a href="{{ route('goodsreceipts.edit', $goodsReceipt->id) }}"><img
-                                src="{{ asset('img/edit.png') }}" alt=""></a>
-                        <form action="{{ route('goodsreceipts.destroy', $goodsReceipt->id) }}" method="POST"
-                            id="form-delete{{ $goodsReceipt->id }}">
+                        <a href="{{ route('goodsissues.edit', $goodsIssue->id) }}"><img src="{{ asset('img/edit.png') }}"
+                                alt=""></a>
+                        <form action="{{ route('goodsissues.destroy', $goodsIssue->id) }}" method="POST"
+                            id="form-delete{{ $goodsIssue->id }}">
                             @csrf
                             @method('delete')
                         </form>
-                        <button type="submit" class="btn-delete" data-id="{{ $goodsReceipt->id }}"><img
+                        <button type="submit" class="btn-delete" data-id="{{ $goodsIssue->id }}"><img
                                 src="{{ asset('img/delete.png') }}" alt=""></button>
 
                     </td>

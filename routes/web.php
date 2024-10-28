@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\ProviderController;
 use App\Http\Controllers\Admin\WarehouseController;
 use App\Http\Controllers\ApiController;
+use App\Http\Controllers\Employee\GoodsIssueController;
 use App\Http\Controllers\Employee\GoodsReceiptController;
 use App\Models\AttributeValue;
 use App\Models\Customer;
@@ -54,4 +55,6 @@ Route::get('/attribute/{attribute}/edit/{attributeValue}', [AttributeController:
 Route::post('/attribute/{attribute}/update/{attributeValue}', [AttributeController::class, 'updateAttributeValue']);
 Route::resource('/products', ProductController::class);
 Route::resource('/goodsreceipts', GoodsReceiptController::class);
-Route::get('/ajax-search-product', [ApiController::class, 'ajaxSearch'])->name('ajax-search-product');
+Route::resource('/goodsissues', GoodsIssueController::class);
+Route::get('/ajax-search-product', [ApiController::class, 'ajaxSearchProduct'])->name('ajax-search-product');
+Route::get('/ajax-search-batch', [ApiController::class, 'ajaxSearchBatch'])->name('ajax-search-batch');

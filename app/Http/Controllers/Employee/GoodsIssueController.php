@@ -4,34 +4,35 @@ namespace App\Http\Controllers\Employee;
 
 use App\Http\Controllers\Controller;
 use App\Models\Batch;
-use App\Models\GoodsReceipt;
-use App\Models\GoodsReceiptDetail;
+use App\Models\Customer;
+use App\Models\GoodsIssue;
+use App\Models\GoodsIssueDetail;
 use App\Models\Inventory;
 use App\Models\Provider;
 use App\Models\Warehouse;
 use Illuminate\Http\Request;
 
-class GoodsReceiptController extends Controller
+class GoodsIssueController extends Controller
 {
-    protected $goodsReceipt;
-    protected $goodsReceiptDetail;
+    protected $goodsIssue;
+    protected $goodsIssueDetail;
     protected $batch;
     protected $warehouse;
-    protected $provider;
+    protected $customer;
     protected $inventory;
     public function __construct(
-        GoodsReceipt $goodsReceipt,
+        GoodsIssue $goodsIssue,
         Warehouse $warehouse,
-        Provider $provider,
-        GoodsReceiptDetail $goodsReceiptDetail,
+        Customer $customer,
+        GoodsIssueDetail $goodsIssueDetail,
         Batch $batch,
         Inventory $inventory
     ) {
-        $this->goodsReceipt = $goodsReceipt;
-        $this->goodsReceiptDetail = $goodsReceiptDetail;
+        $this->goodsIssue = $goodsIssue;
+        $this->goodsIssueDetail = $goodsIssueDetail;
         $this->batch = $batch;
         $this->warehouse = $warehouse;
-        $this->provider = $provider;
+        $this->customer = $customer;
         $this->inventory = $inventory;
     }
     /**
@@ -39,8 +40,8 @@ class GoodsReceiptController extends Controller
      */
     public function index()
     {
-        $goodsReceipts = $this->goodsReceipt->all();
-        return view('employee.goods-receipts.index', compact('goodsReceipts'));
+        $goodsIssues = $this->goodsIssue->all();
+        return view('employee.goods-issues.index', compact('goodsIssues'));
     }
 
     /**
@@ -49,8 +50,8 @@ class GoodsReceiptController extends Controller
     public function create()
     {
         $warehouses = $this->warehouse->all();
-        $providers = $this->provider->all();
-        return view('employee.goods-receipts.create', compact('warehouses', 'providers'));
+        $customers = $this->customer->all();
+        return view('employee.goods-issues.create', compact('warehouses', 'customers'));
     }
 
     /**
@@ -59,22 +60,22 @@ class GoodsReceiptController extends Controller
     public function store(Request $request)
     {
         // dd($request->all());
-        $goodsReceipt = $this->goodsReceipt->create([
+        $goodsIssue = $this->goodsIssue->create([
             'code' => $request->code,
             'warehouse_id' => $request->warehouse_id,
             'creator_id' => 1,
-            'provider_id' => $request->provider_id,
+            'customer_id' => $request->customer_id,
             'total_discount' => $request->total_discount
         ]);
         foreach ($request->inputs as $input) {
-            $this->goodsReceiptDetail->create([
-                'goods_receipt_id' => $goodsReceipt->id,
+            $this->goodsIssueDetail->create([
+                'goods_receipt_id' => $goodsIssue->id,
                 'product_id' => $input['product_id'],
                 'quantity' => $input['quantity'],
                 'unit_price' => $input['unit-price'],
                 'discount' => $input['discount'],
-                'manufacturing_date' => $input['manufacturing_date'] ?? null,
-                'expiry_date' => $input['expiry_date'] ?? null
+                // 'manufacturing_date' => $input['manufacturing_date'] ?? null,
+                // 'expiry_date' => $input['expiry_date'] ?? null
             ]);
 
             // $product_batch_id = $this->batch->where('product_id', $input['product_id'])->value('id');
@@ -83,26 +84,27 @@ class GoodsReceiptController extends Controller
             //     $product_inventory->quantity_available += $input['quantity'];
             //     $product_inventory->save();
             // } else {
-            $newBatch = $this->batch->create([
-                'code' => $goodsReceipt->id,
-                'product_id' => $input['product_id'],
-                'price' => $input['unit-price'],
-                'manufacturing_date' => $input['manufacturing_date'] ?? null,
-                'expiry_date' => $input['expiry_date'] ?? null
-            ]);
-            if ($newBatch && isset($newBatch->id)) {
-                $this->inventory->create([
-                    'warehouse_id' => $request->warehouse_id,
-                    'quantity_available' => $input['quantity'],
-                    // 'minimum_stock_level' => 20,
-                    'batch_id' => $newBatch->id,
-                ]);
-                // }
-            }
+            // $newBatch = $this->batch->create([
+            //     'code' => $goodsIssue->id,
+            //     'product_id' => $input['product_id'],
+            //     'price' => $input['unit-price'],
+            //     'manufacturing_date' => $input['manufacturing_date'] ?? null,
+            //     'expiry_date' => $input['expiry_date'] ?? null
+            // ]);
+            // $newBatch=$this->batch->where('')
+            // if ($newBatch && isset($newBatch->id)) {
+            //     $this->inventory->create([
+            //         'warehouse_id' => $request->warehouse_id,
+            //         'quantity_available' => $input['quantity'],
+            //         // 'minimum_stock_level' => 20,
+            //         'batch_id' => $newBatch->id,
+            //     ]);
+            //     // }
+            // }
         }
 
 
-        return to_route("goodsreceipts.index")->with(["message", "Tạo phiếu nhập hàng thành công!"]);
+        return to_route("goodsissues.index")->with(["message", "Tạo phiếu nhập hàng thành công!"]);
     }
 
     /**

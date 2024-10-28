@@ -130,6 +130,14 @@
                                 </div>
                             </a>
                         </li>
+                        <li class="{{ request()->routeIs('goodsissues.*') ? 'bg-blue' : '' }}">
+                            <a href="{{ route('goodsissues.index') }}">
+                                <div class="flex-left-content">
+                                    <img src="{{ asset('img/product.png') }}" alt="">
+                                    <span>Xuất hàng</span>
+                                </div>
+                            </a>
+                        </li>
                         <li>
                             <a href="">
                                 <div class="flex-left-content">

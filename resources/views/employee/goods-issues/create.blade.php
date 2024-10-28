@@ -1,14 +1,14 @@
 @extends('layouts.app')
-@section('title', 'Phiếu nhập hàng')
+@section('title', 'Phiếu xuất hàng')
 @section('content')
     <div class="content_header">
         <div class="content_header--title">
-            Thêm phiếu nhập hàng
+            Thêm phiếu xuất hàng
         </div>
         <div class="content_header--path">
             <img src="{{ asset('img/home.png') }}" alt="">
-            <p><a href="">Home</a> > <a href="{{ route('goodsreceipts.index') }}">Phiếu nhập hàng</a> > <a
-                    href="">Thêm phiếu nhập hàng</a>
+            <p><a href="">Home</a> > <a href="{{ route('goodsissues.index') }}">Phiếu xuất hàng</a> > <a
+                    href="">Thêm phiếu xuất hàng</a>
             </p>
         </div>
     </div>
@@ -23,7 +23,7 @@
                     </div>
                 </div>
             </form>
-            <form action="{{ route('goodsreceipts.store') }}" method="POST">
+            <form action="{{ route('goodsissues.store') }}" method="POST">
 
                 <table id="product-table" class="table ">
                     <thead>
@@ -32,7 +32,7 @@
                         <th>Ngày sản xuất</th>
                         <th>Hạn sử dụng</th>
                         <th>Số lượng</th>
-                        <th>Đơn giá</th>
+                        <th>Giá bán</th>
                         <th>Giảm giá</th>
                         <th>Thành tiền</th>
                         <th>Xóa</th>
@@ -56,22 +56,22 @@
             @enderror
         </div>
         <div class="form-group input-div">
-            <h4>Mã phiếu nhập </h4>
+            <h4>Mã phiếu xuất </h4>
             <input type="text" name="code" value="{{ old('code') }}" id="code" class="form-control">
             @error('code')
                 <div class="error message">{{ $message }}</div>
             @enderror
         </div>
         <div class="form-group input-div">
-            <h4>Nhà cung cấp</h4>
-            <select name="provider_id" id="" class="form-control">
-                <option value="">---Chọn nhà cung cấp---</option>
-                @foreach ($providers as $provider)
-                    <option value="{{ $provider->id }}" {{ old('provider') == $provider->id ? 'selected' : '' }}>
-                        {{ $provider->name }}</option>
+            <h4>Khách hàng</h4>
+            <select name="customer_id" id="" class="form-control">
+                <option value="">---Chọn khách hàng---</option>
+                @foreach ($customers as $customer)
+                    <option value="{{ $customer->id }}" {{ old('customer') == $customer->id ? 'selected' : '' }}>
+                        {{ $customer->name }}</option>
                 @endforeach
             </select>
-            @error('provier_id')
+            @error('customer_id')
                 <div class="error message">{{ $message }}</div>
             @enderror
         </div>
@@ -116,7 +116,7 @@
         </div>
         <div class="btn-controls">
             <div class="btn-cs btn-save"><button type="submit">Lưu thay đổi</button></div>
-            <div class="btn-cs btn-delete"><a href="{{ route('goodsreceipts.index') }}">Quay lại </a></div>
+            <div class="btn-cs btn-delete"><a href="{{ route('goodsissues.index') }}">Quay lại </a></div>
         </div>
         </form>
     </div>
@@ -125,6 +125,7 @@
 
 @push('js')
     <script>
+        //hien KQ tim kiem
         $(document).ready(function() {
             $(document).on("click", ".search-input", function(e) {
                 let _text = $(this).val();
@@ -133,12 +134,11 @@
                 }
             })
         })
-
         $(document).on("input", ".search-input", function() {
             var _text = $(this).val();
             if (_text.length > 0) {
                 $.ajax({
-                    url: "{{ route('ajax-search-product') }}",
+                    url: "{{ route('ajax-search-batch') }}",
                     type: "GET",
                     data: {
                         key: _text
@@ -150,19 +150,24 @@
             } else {
                 $(".search-result").css("display", "none");
             }
-        })
-        //hide search result when clicking outside ...
+        });
+
         $(document).on("click", function(e) {
             if (!$(e.target).closest(".search-result-container").length) {
                 $(".search-result").css("display", "none");
             }
-        })
+        });
 
         let indexRow = 0;
         $(".search-result").on("click", ".search-result-item", function() {
             let name = $(this).find("h4").data("name");
             let code = $(this).find("p").data('code');
+            let manufacturingDate = $(this).find(".product_manufacturing_date").data('manufacturing');
+            let expiryDate = $(this).find(".product_expiry_date").data('expiry');
+            let quantityAvailable = $(this).find(".product_quantity_available").data('quantity');
+            let batchId = $(this).find(".product_batch_id").data('batch');
             let id = $(this).find("h6").data('id');
+
             let newRow = document.createElement("tr");
 
             let idCell = document.createElement("td");
@@ -191,81 +196,35 @@
 
             let manufacturingDateCell = document.createElement("td");
             let manufacturingDateInput = document.createElement("input");
-            manufacturingDateInput.setAttribute("type", "date");
+            manufacturingDateInput.setAttribute("type", "text");
             manufacturingDateInput.setAttribute("name", `inputs[${indexRow}][manufacturing_date]`);
+            manufacturingDateInput.value = manufacturingDate;
             manufacturingDateInput.style.width = "160px";
             manufacturingDateCell.appendChild(manufacturingDateInput);
 
             let expiryDateCell = document.createElement("td");
             let expiryDateInput = document.createElement("input");
-            expiryDateInput.setAttribute("type", "date");
+            expiryDateInput.setAttribute("type", "text");
             expiryDateInput.setAttribute("name", `inputs[${indexRow}][expiry_date]`);
+            expiryDateInput.value = expiryDate;
             expiryDateInput.style.width = "160px";
             expiryDateCell.appendChild(expiryDateInput);
 
 
-            let quantityCell = document.createElement("td");
-            let quantityControlDiv = document.createElement("div");
-            quantityControlDiv.classList.add("quantity-control");
-            let quantityInput = document.createElement("input");
-            quantityInput.classList.add("quantity");
-            quantityInput.setAttribute("type", "number");
-            quantityInput.setAttribute("name", `inputs[${indexRow}][quantity]`);
-            quantityInput.setAttribute("min", 1);
-            quantityInput.style.width = "120px";
-            quantityControlDiv.appendChild(quantityInput);
-            quantityCell.appendChild(quantityControlDiv);
 
-            let unitPriceCell = document.createElement("td");
-            unitPriceInput = document.createElement("input");
-            unitPriceInput.classList.add("unit-price");
-            unitPriceInput.setAttribute("type", "number");
-            unitPriceInput.setAttribute("name", `inputs[${indexRow}][unit-price]`);
-            unitPriceInput.setAttribute("min", 0);
-            unitPriceInput.style.width = "140px";
-            unitPriceCell.appendChild(unitPriceInput);
-
-
-            let discountCell = document.createElement("td");
-            let discountInput = document.createElement("input");
-            discountInput.classList.add("discount");
-            discountInput.setAttribute("type", "number");
-            discountInput.setAttribute("name", `inputs[${indexRow}][discount]`);
-            discountInput.setAttribute("min", 0);
-            discountInput.style.width = "140px";
-            discountCell.appendChild(discountInput);
-
-            let totalPriceCell = document.createElement("td");
-            let totalPriceInput = document.createElement("input");
-            totalPriceInput.classList.add("total-price");
-            totalPriceInput.setAttribute("type", "number");
-            totalPriceInput.setAttribute("min", 0);
-            totalPriceInput.setAttribute("readonly", true);
-            totalPriceInput.style.width = "140px";
-            totalPriceCell.appendChild(totalPriceInput);
-
-            let removeCell = document.createElement("td");
-            let removeBtn = document.createElement("button");
-            removeBtn.classList.add("remove-product");
-            removeBtn.textContent = "Xóa";
-            removeBtn.style.width = "100px";
-            removeCell.appendChild(removeBtn);
+            // Add the remaining columns like quantity, unit price, discount, etc.
 
             newRow.appendChild(idCell);
             newRow.appendChild(codeCell);
             newRow.appendChild(nameCell);
             newRow.appendChild(manufacturingDateCell);
             newRow.appendChild(expiryDateCell);
-            newRow.appendChild(quantityCell);
-            newRow.appendChild(unitPriceCell);
-            newRow.appendChild(discountCell);
-            newRow.appendChild(totalPriceCell);
-            newRow.appendChild(removeCell);
+            // Append other cells here...
 
             document.querySelector("#body-product-table").appendChild(newRow);
             $(".search-result").css("display", "none");
             indexRow++;
-        })
+        });
         //Ham cap nhat gia tri total-price
         function updateTotalPrice(row) {
             let quantity = parseFloat(row.find(".quantity").val());

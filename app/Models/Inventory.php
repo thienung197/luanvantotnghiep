@@ -13,7 +13,8 @@ class Inventory extends Model
         'warehouse_id',
         'quantity_available',
         'minimum_stock_level',
-        'reorder_point'
+        'reorder_point',
+        'batch_id'
     ];
 
     public function product()

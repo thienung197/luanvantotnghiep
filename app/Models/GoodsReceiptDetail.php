@@ -14,8 +14,8 @@ class GoodsReceiptDetail extends Model
         'quantity',
         'unit_price',
         'discount',
-        'manufacture_date',
-        'expiration_date'
+        'manufacturing_date',
+        'expiry_date'
     ];
 
     public function product()
