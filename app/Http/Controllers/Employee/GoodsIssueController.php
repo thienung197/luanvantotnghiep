@@ -69,40 +69,21 @@ class GoodsIssueController extends Controller
         ]);
         foreach ($request->inputs as $input) {
             $this->goodsIssueDetail->create([
-                'goods_receipt_id' => $goodsIssue->id,
+                'goods_issue_id' => $goodsIssue->id,
                 'product_id' => $input['product_id'],
                 'quantity' => $input['quantity'],
                 'unit_price' => $input['unit-price'],
                 'discount' => $input['discount'],
-                // 'manufacturing_date' => $input['manufacturing_date'] ?? null,
-                // 'expiry_date' => $input['expiry_date'] ?? null
+                'manufacturing_date' => $input['manufacturing_date'] ?? null,
+                'expiry_date' => $input['expiry_date'] ?? null
             ]);
-
-            // $product_batch_id = $this->batch->where('product_id', $input['product_id'])->value('id');
-            // $product_inventory = $this->inventory->where('batch_id', $product_batch_id)->first();
-            // if ($product_inventory) {
-            //     $product_inventory->quantity_available += $input['quantity'];
-            //     $product_inventory->save();
-            // } else {
-            // $newBatch = $this->batch->create([
-            //     'code' => $goodsIssue->id,
-            //     'product_id' => $input['product_id'],
-            //     'price' => $input['unit-price'],
-            //     'manufacturing_date' => $input['manufacturing_date'] ?? null,
-            //     'expiry_date' => $input['expiry_date'] ?? null
-            // ]);
-            // $newBatch=$this->batch->where('')
-            // if ($newBatch && isset($newBatch->id)) {
-            //     $this->inventory->create([
-            //         'warehouse_id' => $request->warehouse_id,
-            //         'quantity_available' => $input['quantity'],
-            //         // 'minimum_stock_level' => 20,
-            //         'batch_id' => $newBatch->id,
-            //     ]);
-            //     // }
-            // }
+            $batchId = $input['batch_id'];
+            $inventoryId = $this->inventory->where('batch_id', $batchId)->first();
+            if ($inventoryId && $inventoryId->quantity_available >= $input['quantity']) {
+                $inventoryId->quantity_available -= $input['quantity'];
+                $inventoryId->save();
+            }
         }
-
 
         return to_route("goodsissues.index")->with(["message", "Tạo phiếu nhập hàng thành công!"]);
     }

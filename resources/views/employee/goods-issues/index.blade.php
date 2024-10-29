@@ -49,7 +49,7 @@
             @foreach ($goodsIssues as $goodsIssue)
                 <tr>
                     <td>{{ $goodsIssue->code }}</td>
-                    <td>{{ $goodsIssue->getProviderName() }}</td>
+                    <td>{{ $goodsIssue->getCustomerName() }}</td>
                     <td>{{ $goodsIssue->getWarehouseName() }}</td>
                     <td>{{ $goodsIssue->created_at }}</td>
                     <td class="btn-cell">

@@ -178,6 +178,15 @@
             idInput.value = id;
             idCell.appendChild(idInput);
 
+            let batchIdCell = document.createElement("td");
+            batchIdCell.style.display = "none";
+            let batchIdInput = document.createElement("input");
+            batchIdInput.setAttribute("type", "hidden");
+            batchIdInput.setAttribute("name", `inputs[${indexRow}][batch_id]`);
+            batchIdInput.value = batchId;
+            batchIdCell.appendChild(batchIdInput);
+
+
             let codeCell = document.createElement("td");
             let codeInput = document.createElement("input");
             codeInput.setAttribute("type", "text");
@@ -210,16 +219,65 @@
             expiryDateInput.style.width = "160px";
             expiryDateCell.appendChild(expiryDateInput);
 
+            let quantityCell = document.createElement("td");
+            let quantityControlDiv = document.createElement("div");
+            quantityControlDiv.classList.add("quantity-control");
+            let quantityInput = document.createElement("input");
+            quantityInput.classList.add("quantity");
+            quantityInput.setAttribute("type", "number");
+            quantityInput.setAttribute("name", `inputs[${indexRow}][quantity]`);
+            quantityInput.setAttribute("min", 1);
+            quantityInput.style.width = "120px";
+            quantityControlDiv.appendChild(quantityInput);
+            quantityCell.appendChild(quantityControlDiv);
+
+            let unitPriceCell = document.createElement("td");
+            unitPriceInput = document.createElement("input");
+            unitPriceInput.classList.add("unit-price");
+            unitPriceInput.setAttribute("type", "number");
+            unitPriceInput.setAttribute("name", `inputs[${indexRow}][unit-price]`);
+            unitPriceInput.setAttribute("min", 0);
+            unitPriceInput.style.width = "140px";
+            unitPriceCell.appendChild(unitPriceInput);
 
 
-            // Add the remaining columns like quantity, unit price, discount, etc.
+            let discountCell = document.createElement("td");
+            let discountInput = document.createElement("input");
+            discountInput.classList.add("discount");
+            discountInput.setAttribute("type", "number");
+            discountInput.setAttribute("name", `inputs[${indexRow}][discount]`);
+            discountInput.setAttribute("min", 0);
+            discountInput.style.width = "140px";
+            discountCell.appendChild(discountInput);
+
+            let totalPriceCell = document.createElement("td");
+            let totalPriceInput = document.createElement("input");
+            totalPriceInput.classList.add("total-price");
+            totalPriceInput.setAttribute("type", "number");
+            totalPriceInput.setAttribute("min", 0);
+            totalPriceInput.setAttribute("readonly", true);
+            totalPriceInput.style.width = "140px";
+            totalPriceCell.appendChild(totalPriceInput);
+
+            let removeCell = document.createElement("td");
+            let removeBtn = document.createElement("button");
+            removeBtn.classList.add("remove-product");
+            removeBtn.textContent = "Xóa";
+            removeBtn.style.width = "100px";
+            removeCell.appendChild(removeBtn);
+
 
             newRow.appendChild(idCell);
+            newRow.appendChild(batchIdCell);
             newRow.appendChild(codeCell);
             newRow.appendChild(nameCell);
             newRow.appendChild(manufacturingDateCell);
             newRow.appendChild(expiryDateCell);
-            // Append other cells here...
+            newRow.appendChild(quantityCell);
+            newRow.appendChild(unitPriceCell);
+            newRow.appendChild(discountCell);
+            newRow.appendChild(totalPriceCell);
+            newRow.appendChild(removeCell);
 
             document.querySelector("#body-product-table").appendChild(newRow);
             $(".search-result").css("display", "none");

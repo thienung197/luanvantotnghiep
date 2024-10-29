@@ -35,4 +35,14 @@ class GoodsIssue extends Model
     {
         return $this->hasMany(GoodsIssueDetail::class);
     }
+
+    public function getCustomerName()
+    {
+        return $this->customer->name;
+    }
+
+    public function getWarehouseName()
+    {
+        return $this->warehouse->name;
+    }
 }

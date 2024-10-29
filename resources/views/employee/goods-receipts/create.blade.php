@@ -173,6 +173,7 @@
             idInput.value = id;
             idCell.appendChild(idInput);
 
+
             let codeCell = document.createElement("td");
             let codeInput = document.createElement("input");
             codeInput.setAttribute("type", "text");

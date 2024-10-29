@@ -47,7 +47,13 @@ class ApiController extends Controller
     {
         $key = $request->input('key');
         // Lấy sản phẩm và batches kèm theo quantity từ bảng inventory
-        $data = $this->product::select('products.*', 'batches.*', 'inventories.quantity_available')
+        $data = $this->product::select(
+            'products.*',
+            'batches.id as batch_id', // Select the batch ID explicitly
+            'batches.expiry_date',
+            'batches.manufacturing_date',
+            'inventories.quantity_available'
+        )
             ->join('batches', 'products.id', '=', 'batches.product_id') // Kết nối giữa bảng products và batches
             ->join('inventories', 'batches.id', '=', 'inventories.batch_id') // Kết nối giữa bảng batches và inventories
             ->where('products.name', 'like', '%' . $key . '%')
@@ -59,7 +65,8 @@ class ApiController extends Controller
         if ($data->count() > 0) {
             $html = '';
             foreach ($data as $item) {
-
+                $batch_id = $item->batch_id;
+                // dump($batch_id);
                 // Lấy các thông tin từ bảng batches (từ join) trực tiếp:
                 $expiryDate = $item->expiry_date; // Lấy ngày hết hạn từ lô hàng
                 $quantityAvailable = $item->quantity_available; // Lấy số lượng có sẵn từ inventory
@@ -81,7 +88,7 @@ class ApiController extends Controller
                 $html .= '<h4 style="display:none;" class="product_manufacturing_date" data-manufacturing="' . $manufacturing_date . '"></h4>';
                 $html .= '<h4 style="display:none;" class="product_expiry_date" data-expiry="' . $expiryDate . '"></h4>';
                 $html .= '<h4 style="display:none;" class="product_quantity_available" data-quantity="' . $quantityAvailable . '"></h4>';
-                $html .= '<h4 style="display:none;" class="product_batch_id" data-batch="' . $item->id . '"></h4>';
+                $html .= '<h4 style="display:none;" class="product_batch_id" data-batch="' . $item->batch_id . '"></h4>';
                 $html .= '</div>';
                 $html .= '</div>';
                 break;

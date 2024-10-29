@@ -195,7 +195,7 @@
                 </div>
 
         </div>
-        <div class="footer">
+        {{-- <div class="footer">
             <div class="footer-left">
                 Copyright &copy; 2024.All right reserved.
             </div>
@@ -204,7 +204,7 @@
                 <a href=""><span>License</span></a>
                 <span>Version 1.0.0</span>
             </div>
-        </div>
+        </div> --}}
         </main>
         {{-- Main end  --}}
     </div>
