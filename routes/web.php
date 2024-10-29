@@ -57,4 +57,5 @@ Route::resource('/products', ProductController::class);
 Route::resource('/goodsreceipts', GoodsReceiptController::class);
 Route::resource('/goodsissues', GoodsIssueController::class);
 Route::get('/ajax-search-product', [ApiController::class, 'ajaxSearchProduct'])->name('ajax-search-product');
+Route::get('/fetch-batches', [ApiController::class, 'getBatches'])->name('fetch-batches');
 Route::get('/ajax-search-batch', [ApiController::class, 'ajaxSearchBatch'])->name('ajax-search-batch');

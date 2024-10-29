@@ -44,6 +44,22 @@
         </div>
     </div>
 
+    <div class="content-10" class="table">
+        <h6>Chọn <span id="batch-product-name"></span> sản phẩm từ lô hàng </h6>
+        <table id="batch-table">
+            <thead>
+                <tr>
+                    <th>Số lô</th>
+                    <th>Ngày sản xuất</th>
+                    <th>Ngày hết hạn</th>
+                    <th>Số lượng có sẵn</th>
+                    <th>Số lượng chọn</th>
+                </tr>
+            </thead>
+            <tbody id="batch-tbody">
+            </tbody>
+        </table>
+    </div>
 
     <div class="content-10">
         @csrf
@@ -157,6 +173,101 @@
                 $(".search-result").css("display", "none");
             }
         });
+
+        $(document).on("blur", ".quantity", function(e) {
+            let rowIndex = $(this).closest("tr").index();
+            let productId = $(this).closest('tr').find('input[name^="inputs["][name$="[product_id]"]').val();
+            let quantity = $(this).val();
+            fetchBatches(productId, quantity, rowIndex)
+
+        })
+
+        function fetchBatches(productId, requiredQuantity, rowIndex) {
+            $.ajax({
+                url: "{{ route('fetch-batches') }}",
+                method: "get",
+                data: {
+                    product_id: productId,
+                    quantity: requiredQuantity
+                },
+                success: function(res) {
+                    let batchDetails = res.batches;
+                    console.log(batchDetails);
+
+                    let batchTbody = document.getElementById("batch-tbody");
+                    let totalQuantityRequired = requiredQuantity;
+
+                    // Clear the previous batch details
+                    batchTbody.innerHTML = ""; // Clear existing rows
+
+                    // Update product name if needed
+                    document.getElementById("batch-product-name").innerText = "ID " + productId;
+
+                    // Loop through batch details and insert them into the table
+                    batchDetails.forEach((batch, index) => {
+                        let availableQuantity = batch.quantity;
+                        let quantityToSelect = Math.min(availableQuantity, totalQuantityRequired);
+
+                        // Create a new row
+                        let newRow = document.createElement("tr");
+
+                        // Create and append cells for each data point
+                        let batchIdCell = document.createElement("td");
+                        batchIdCell.textContent = batch.batch_id;
+                        newRow.appendChild(batchIdCell);
+
+                        let manufacturingDateCell = document.createElement("td");
+                        manufacturingDateCell.textContent = batch.manufacturing_date ?? 'N/A';
+                        newRow.appendChild(manufacturingDateCell);
+
+                        let expiryDateCell = document.createElement("td");
+                        expiryDateCell.textContent = batch.expiry_date ?? 'N/A';
+                        newRow.appendChild(expiryDateCell);
+
+                        let availableQuantityCell = document.createElement("td");
+                        availableQuantityCell.textContent = availableQuantity;
+                        newRow.appendChild(availableQuantityCell);
+
+                        // Create the input for selecting quantity
+                        let quantityCell = document.createElement("td");
+                        let quantityInput = document.createElement("input");
+                        quantityInput.setAttribute("type", "number");
+                        quantityInput.setAttribute("class", "batch-quantity");
+                        quantityInput.setAttribute("name",
+                            `inputs[${rowIndex}][batches][${index}][quantity]`);
+                        quantityInput.setAttribute("value", quantityToSelect);
+                        quantityInput.setAttribute("min", 1);
+                        quantityInput.setAttribute("max", availableQuantity);
+                        quantityCell.appendChild(quantityInput);
+
+                        // Create a hidden input for batch ID
+                        let hiddenBatchIdInput = document.createElement("input");
+                        hiddenBatchIdInput.setAttribute("type", "hidden");
+                        hiddenBatchIdInput.setAttribute("name",
+                            `inputs[${rowIndex}][batches][${index}][batch_id]`);
+                        hiddenBatchIdInput.setAttribute("value", batch.batch_id);
+                        quantityCell.appendChild(hiddenBatchIdInput);
+
+                        newRow.appendChild(quantityCell);
+
+                        // Append the new row to the table body
+                        batchTbody.appendChild(newRow);
+
+                        // Decrement total required quantity by the quantity selected from the current batch
+                        totalQuantityRequired -= quantityToSelect;
+
+                        // If total required quantity is fulfilled, stop further additions
+                        if (totalQuantityRequired <= 0) {
+                            return false;
+                        }
+                    });
+                },
+                error: function(err) {
+                    // console.error("Error fetching batches: ", err);
+                    // alert("Failed to fetch batches.");
+                }
+            });
+        }
 
         let indexRow = 0;
         $(".search-result").on("click", ".search-result-item", function() {
@@ -282,6 +393,7 @@
             document.querySelector("#body-product-table").appendChild(newRow);
             $(".search-result").css("display", "none");
             indexRow++;
+
         });
         //Ham cap nhat gia tri total-price
         function updateTotalPrice(row) {
