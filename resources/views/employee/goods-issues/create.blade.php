@@ -175,96 +175,123 @@
         });
 
         $(document).on("blur", ".quantity", function(e) {
-            let rowIndex = $(this).closest("tr").index();
-            let productId = $(this).closest('tr').find('input[name^="inputs["][name$="[product_id]"]').val();
-            let quantity = $(this).val();
-            fetchBatches(productId, quantity, rowIndex)
+            let productsData = []; // Khởi tạo mảng cho dữ liệu sản phẩm
 
-        })
+            // Lấy dữ liệu từ tất cả các hàng liên quan
+            $('.quantity').each(function() {
+                let row = $(this).closest("tr");
+                let productId = row.find('input[name^="inputs["][name$="[product_id]"]').val();
+                let quantity = $(this).val();
 
-        function fetchBatches(productId, requiredQuantity, rowIndex) {
+                // Chỉ thêm nếu productId và quantity là hợp lệ
+                if (productId && quantity) {
+                    productsData.push({
+                        productId: productId,
+                        quantity: quantity
+                    });
+                }
+            });
+
+            // Gọi fetchBatches với mảng productsData nếu nó không rỗng
+            if (productsData.length > 0) {
+                fetchBatches(productsData); // Truyền mảng productsData
+            } else {
+                console.error("No valid product data found."); // Ghi lại lỗi nếu không có dữ liệu
+            }
+        });
+
+        // Hàm fetchBatches được điều chỉnh
+        function fetchBatches(productsData) {
             $.ajax({
                 url: "{{ route('fetch-batches') }}",
                 method: "get",
                 data: {
-                    product_id: productId,
-                    quantity: requiredQuantity
+                    productsData: JSON.stringify(productsData) // Gửi dưới dạng chuỗi JSON
                 },
                 success: function(res) {
-                    let batchDetails = res.batches;
-                    console.log(batchDetails);
-
                     let batchTbody = document.getElementById("batch-tbody");
-                    let totalQuantityRequired = requiredQuantity;
+                    batchTbody.innerHTML = ""; // Xóa các hàng cũ
 
-                    // Clear the previous batch details
-                    batchTbody.innerHTML = ""; // Clear existing rows
+                    // Lặp qua từng sản phẩm
+                    res.batches.forEach(productBatches => {
+                        let productId = productBatches.productId; // Lấy ID sản phẩm
+                        let totalQuantityRequired = productBatches.batches.reduce((total, batch) =>
+                            total + batch.quantity, 0); // Tính tổng số lượng cần
 
-                    // Update product name if needed
-                    document.getElementById("batch-product-name").innerText = "ID " + productId;
-
-                    // Loop through batch details and insert them into the table
-                    batchDetails.forEach((batch, index) => {
-                        let availableQuantity = batch.quantity;
-                        let quantityToSelect = Math.min(availableQuantity, totalQuantityRequired);
-
-                        // Create a new row
+                        // Thêm hàng cho sản phẩm
                         let newRow = document.createElement("tr");
 
-                        // Create and append cells for each data point
-                        let batchIdCell = document.createElement("td");
-                        batchIdCell.textContent = batch.batch_id;
-                        newRow.appendChild(batchIdCell);
+                        // Thêm ô cho ID sản phẩm
+                        let productCell = document.createElement("td");
+                        productCell.textContent =
+                        productId; // Có thể thay đổi để hiển thị tên sản phẩm nếu cần
+                        newRow.appendChild(productCell);
 
-                        let manufacturingDateCell = document.createElement("td");
-                        manufacturingDateCell.textContent = batch.manufacturing_date ?? 'N/A';
-                        newRow.appendChild(manufacturingDateCell);
+                        // Thêm ô cho tổng số lượng cần
+                        let totalRequiredCell = document.createElement("td");
+                        totalRequiredCell.textContent = totalQuantityRequired;
+                        newRow.appendChild(totalRequiredCell);
 
-                        let expiryDateCell = document.createElement("td");
-                        expiryDateCell.textContent = batch.expiry_date ?? 'N/A';
-                        newRow.appendChild(expiryDateCell);
-
-                        let availableQuantityCell = document.createElement("td");
-                        availableQuantityCell.textContent = availableQuantity;
-                        newRow.appendChild(availableQuantityCell);
-
-                        // Create the input for selecting quantity
-                        let quantityCell = document.createElement("td");
-                        let quantityInput = document.createElement("input");
-                        quantityInput.setAttribute("type", "number");
-                        quantityInput.setAttribute("class", "batch-quantity");
-                        quantityInput.setAttribute("name",
-                            `inputs[${rowIndex}][batches][${index}][quantity]`);
-                        quantityInput.setAttribute("value", quantityToSelect);
-                        quantityInput.setAttribute("min", 1);
-                        quantityInput.setAttribute("max", availableQuantity);
-                        quantityCell.appendChild(quantityInput);
-
-                        // Create a hidden input for batch ID
-                        let hiddenBatchIdInput = document.createElement("input");
-                        hiddenBatchIdInput.setAttribute("type", "hidden");
-                        hiddenBatchIdInput.setAttribute("name",
-                            `inputs[${rowIndex}][batches][${index}][batch_id]`);
-                        hiddenBatchIdInput.setAttribute("value", batch.batch_id);
-                        quantityCell.appendChild(hiddenBatchIdInput);
-
-                        newRow.appendChild(quantityCell);
-
-                        // Append the new row to the table body
+                        // Thêm hàng mới cho sản phẩm
                         batchTbody.appendChild(newRow);
 
-                        // Decrement total required quantity by the quantity selected from the current batch
-                        totalQuantityRequired -= quantityToSelect;
+                        // Thêm từng lô hàng cho sản phẩm
+                        productBatches.batches.forEach((batch, index) => {
+                            let batchRow = document.createElement("tr");
 
-                        // If total required quantity is fulfilled, stop further additions
-                        if (totalQuantityRequired <= 0) {
-                            return false;
-                        }
+                            // Thêm ô cho số lô
+                            let batchIdCell = document.createElement("td");
+                            batchIdCell.textContent = batch.batch_id;
+                            batchRow.appendChild(batchIdCell);
+
+                            // Thêm ô cho ngày sản xuất
+                            let manufacturingDateCell = document.createElement("td");
+                            manufacturingDateCell.textContent = batch.manufacturing_date ??
+                                'N/A';
+                            batchRow.appendChild(manufacturingDateCell);
+
+                            // Thêm ô cho ngày hết hạn
+                            let expiryDateCell = document.createElement("td");
+                            expiryDateCell.textContent = batch.expiry_date ?? 'N/A';
+                            batchRow.appendChild(expiryDateCell);
+
+                            // Thêm ô cho số lượng có sẵn
+                            let availableQuantityCell = document.createElement("td");
+                            availableQuantityCell.textContent = batch
+                            .quantity; // Số lượng trong kho
+                            batchRow.appendChild(availableQuantityCell);
+
+                            // Tạo ô cho số lượng chọn
+                            let quantityCell = document.createElement("td");
+                            let quantityInput = document.createElement("input");
+                            quantityInput.setAttribute("type", "number");
+                            quantityInput.setAttribute("class", "batch-quantity");
+                            quantityInput.setAttribute("name",
+                                `inputs[${productId}][batches][${index}][quantity]`);
+                            quantityInput.setAttribute("value", batch.quantity);
+                            quantityInput.setAttribute("min", 1);
+                            quantityInput.setAttribute("max", batch
+                            .quantity); // Giới hạn tối đa bằng số lượng có sẵn
+                            quantityCell.appendChild(quantityInput);
+
+                            // Tạo ô ẩn cho ID lô hàng
+                            let hiddenBatchIdInput = document.createElement("input");
+                            hiddenBatchIdInput.setAttribute("type", "hidden");
+                            hiddenBatchIdInput.setAttribute("name",
+                                `inputs[${productId}][batches][${index}][batch_id]`);
+                            hiddenBatchIdInput.setAttribute("value", batch.batch_id);
+                            quantityCell.appendChild(hiddenBatchIdInput);
+
+                            batchRow.appendChild(quantityCell);
+
+                            // Thêm hàng lô vào bảng
+                            batchTbody.appendChild(batchRow);
+                        });
                     });
                 },
                 error: function(err) {
-                    // console.error("Error fetching batches: ", err);
-                    // alert("Failed to fetch batches.");
+                    console.error("Error fetching batches: ", err);
+                    // Có thể thông báo cho người dùng nếu cần
                 }
             });
         }

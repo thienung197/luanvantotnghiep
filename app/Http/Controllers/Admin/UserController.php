@@ -47,6 +47,7 @@ class UserController extends Controller
      */
     public function store(CreateUserRequest $request)
     {
+        dd($request->all());
         $dataCreate = $request->all();
         $dataCreate['status'] = 'active';
         $dataCreate['password'] = Hash::make($request->password);

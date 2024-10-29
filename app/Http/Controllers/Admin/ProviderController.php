@@ -42,6 +42,7 @@ class ProviderController extends Controller
      */
     public function store(CreateProviderRequest $request)
     {
+        dd($request->all());
         $dataCreate = $request->all();
         $dataCreate['status'] = 'active';
         $this->provider->create($dataCreate);

@@ -39,20 +39,15 @@
                     <div class="error message">{{ $message }}</div>
                 @enderror
             </div>
-            {{-- <div class="form-group input-div">
-                <h4>Danh mục </h4>
-                <select name="category_id" id="" class="form-control">
+            <div class="form-group input-div">
+                <h4>Danh mục</h4>
+                <select name="category_id" id="category_id" class="form-control">
                     <option value="">---Chọn danh mục---</option>
                     @foreach ($categories as $category)
-                        <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                            {{ $category->name }}
-                        </option>
+                        <option value="{{ $category->id }}">{{ $category->name }}</option>
                     @endforeach
                 </select>
-                @error('category_id')
-                    <div class="error message">{{ $message }}</div>
-                @enderror
-            </div> --}}
+            </div>
             <div class="form-group input-div">
                 <h4>Địa chỉ </h4>
                 <input type="text" name="address" value="{{ old('address') }}" id="address" class="form-control">
@@ -88,6 +83,9 @@
                 @enderror
             </div>
             <h3>Các thuộc tính khác</h3>
+            <div id="attributes_container">
+                <!-- Nơi chứa các thuộc tính và giá trị được tải qua AJAX -->
+            </div>
             @foreach ($attributes as $attribute)
                 <div class="form-group">
                     <label for="">{{ $attribute->name }}</label>
@@ -106,3 +104,61 @@
     </div>
 
 @endsection
+
+@push('js')
+    <script>
+        document.getElementById('category_id').addEventListener('change', function() {
+            let categoryId = this.value;
+            let attributesContainer = document.getElementById('attributes_container');
+
+            if (!categoryId) {
+                attributesContainer.innerHTML = ''; // Xóa dữ liệu cũ nếu không có danh mục được chọn
+                return;
+            }
+
+            // Gửi yêu cầu AJAX đến server
+            fetch(`/categories/${categoryId}/attributes`)
+                .then(response => response.json())
+                .then(data => {
+                    attributesContainer.innerHTML = ''; // Xóa dữ liệu cũ
+
+                    // Kiểm tra nếu có lỗi
+                    if (data.error) {
+                        attributesContainer.innerHTML = `<p>${data.error}</p>`;
+                        return;
+                    }
+
+                    // Duyệt qua các thuộc tính và tạo các input phù hợp
+                    data.forEach(attribute => {
+                        let attributeDiv = document.createElement('div');
+                        attributeDiv.classList.add('form-group', 'input-div');
+
+                        // Tạo tiêu đề cho thuộc tính
+                        let label = document.createElement('label');
+                        label.innerText = attribute.name;
+                        attributeDiv.appendChild(label);
+
+                        // Tạo dropdown các giá trị của thuộc tính
+                        let select = document.createElement('select');
+                        select.name = 'attributes_values[]';
+                        select.classList.add('form-control');
+
+                        // Thêm các giá trị vào dropdown
+                        attribute.attribute_values.forEach(value => {
+                            let option = document.createElement('option');
+                            option.value = value.id;
+                            option.textContent = value.value;
+                            select.appendChild(option);
+                        });
+
+                        attributeDiv.appendChild(select);
+                        attributesContainer.appendChild(attributeDiv);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    attributesContainer.innerHTML = `<p>Không thể tải thuộc tính.</p>`;
+                });
+        });
+    </script>
+@endpush

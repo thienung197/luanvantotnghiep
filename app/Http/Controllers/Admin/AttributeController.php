@@ -73,9 +73,10 @@ class AttributeController extends Controller
         $search = $request->input('search');
         $attribute = $this->attribute->with('attributeValues')->findOrFail($id);
         $attributeValues = $attribute->attributeValues;
-        $attributeValues = AttributeValue::when($search, function ($query) use ($search) {
-            return $query->where('name', 'like', '%' . $search . '%');
-        })->latest('id')->paginate($entries);;
+        // dd($attributeValues);
+        // $attributeValues = AttributeValue::when($search, function ($query) use ($search) {
+        //     return $query->where('name', 'like', '%' . $search . '%');
+        // })->latest('id')->paginate($entries);;
         $attributeId = $attribute->id;
         return view('admin.attributes.edit', compact('attribute', 'attributeId', 'attributeValues'));
     }

@@ -69,59 +69,79 @@ class ApiController extends Controller
 
     public function getBatches(Request $request)
     {
-        // Fetch product ID and required quantity from the request
-        $productId = $request->input('product_id');
-        $requiredQuantity = $request->input('quantity');
+        // Fetch products data from the request
+        $productsData = json_decode($request->input('productsData'), true);
 
-        // Check if the necessary inputs are provided
-        if (!$productId || !$requiredQuantity) {
-            return response()->json(['error' => 'Product ID and quantity are required.'], 400);
-        }
+        // Initialize an array to hold the results for each product
+        $batchesByProduct = [];
 
-        // Fetch all batches for the specified product that have available quantity, ordered by expiry date
-        $batches = $this->product::select(
-            'products.id as product_id',
-            'products.name',
-            'batches.id as batch_id',
-            'batches.expiry_date',
-            'batches.manufacturing_date',
-            'inventories.quantity_available'
-        )
-            ->join('batches', 'products.id', '=', 'batches.product_id') // Join products and batches
-            ->join('inventories', 'batches.id', '=', 'inventories.batch_id') // Join batches and inventories
-            ->where('products.id', $productId)
-            ->where('inventories.quantity_available', '>', 0)
-            ->orderByRaw('CASE WHEN batches.expiry_date IS NOT NULL THEN batches.expiry_date ELSE batches.created_at END ASC')
-            ->get();
-        // Initialize variables for accumulating the selected batches
-        $selectedBatches = [];
-        $totalSelectedQuantity = 0;
+        // Loop through each product's data
+        foreach ($productsData as $productData) {
+            $productId = $productData['productId'];
+            $requiredQuantity = $productData['quantity'];
 
-        // Loop through the fetched batches until the required quantity is fulfilled
-        foreach ($batches as $batch) {
-            $availableQuantity = $batch->quantity_available;
-
-            // Calculate how much to take from this batch
-            $quantityToTake = min($availableQuantity, $requiredQuantity - $totalSelectedQuantity);
-
-            // Add this batch to the selected list with the amount to be taken
-            $selectedBatches[] = [
-                'batch_id' => $batch->batch_id,
-                'quantity' => $quantityToTake,
-                'expiry_date' => $batch->expiry_date,
-                'manufacturing_date' => $batch->manufacturing_date,
-            ];
-
-            // Increment the total selected quantity
-            $totalSelectedQuantity += $quantityToTake;
-
-            // Break out of the loop if we have met the required quantity
-            if ($totalSelectedQuantity >= $requiredQuantity) {
-                break;
+            // Check if the necessary inputs are provided
+            if (!$productId || !$requiredQuantity) {
+                return response()->json(['error' => 'Product ID and quantity are required for each product.'], 400);
             }
+
+            // Fetch all batches for the specified product that have available quantity, ordered by expiry date
+            $batches = $this->product::select(
+                'products.id as product_id',
+                'products.name',
+                'batches.id as batch_id',
+                'batches.expiry_date',
+                'batches.manufacturing_date',
+                'inventories.quantity_available'
+            )
+                ->join('batches', 'products.id', '=', 'batches.product_id') // Join products and batches
+                ->join('inventories', 'batches.id', '=', 'inventories.batch_id') // Join batches and inventories
+                ->where('products.id', $productId)
+                ->where('inventories.quantity_available', '>', 0)
+                ->orderByRaw('CASE WHEN batches.expiry_date IS NOT NULL THEN batches.expiry_date ELSE batches.created_at END ASC')
+                ->get();
+
+            // Initialize variables for accumulating the selected batches
+            $selectedBatches = [];
+            $totalSelectedQuantity = 0;
+
+            // Loop through the fetched batches until the required quantity is fulfilled
+            foreach ($batches as $batch) {
+                $availableQuantity = $batch->quantity_available;
+
+                // Calculate how much to take from this batch
+                $quantityToTake = min($availableQuantity, $requiredQuantity - $totalSelectedQuantity);
+
+                // If quantityToTake is 0, it means we have fulfilled the requirement for this product
+                if ($quantityToTake <= 0) {
+                    break; // Break out of the loop if the requirement is already met
+                }
+
+                // Add this batch to the selected list with the amount to be taken
+                $selectedBatches[] = [
+                    'batch_id' => $batch->batch_id,
+                    'quantity' => $quantityToTake,
+                    'expiry_date' => $batch->expiry_date,
+                    'manufacturing_date' => $batch->manufacturing_date,
+                ];
+
+                // Increment the total selected quantity
+                $totalSelectedQuantity += $quantityToTake;
+
+                // Break out of the loop if we have met the required quantity
+                if ($totalSelectedQuantity >= $requiredQuantity) {
+                    break;
+                }
+            }
+
+            // Store the selected batches for this product
+            $batchesByProduct[] = [
+                'productId' => $productId,
+                'batches' => $selectedBatches,
+            ];
         }
 
         // Return the selected batches as a JSON response
-        return response()->json(['batches' => $selectedBatches]);
+        return response()->json(['batches' => $batchesByProduct]);
     }
 }

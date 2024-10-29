@@ -80,6 +80,6 @@ class WarehouseController extends Controller
     {
         $warehouse = $this->warehouse->findOrFail($id);
         $warehouse->delete();
-        return to_route('providers.index')->with(['message' => 'Xóa nhà cung cấp thành công!']);
+        return to_route('warehouses.index')->with(['message' => 'Xóa nhà cung cấp thành công!']);
     }
 }

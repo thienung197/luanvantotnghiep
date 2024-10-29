@@ -8,7 +8,7 @@
         </div>
         <div class="content_header--path">
             <img src="{{ asset('img/home.png') }}" alt="">
-            <p><a href="">Home</a> > <a href="{{ route('categories.index') }}">Thuộc tính</a> > <a href="">Quản
+            <p><a href="">Home</a> > <a href="{{ route('attributes.index') }}">Thuộc tính</a> > <a href="">Quản
                     lý giá trị thuộc tính</a>
             </p>
         </div>
@@ -16,7 +16,7 @@
     <div class="content_header">
         <div class="content_header--title">
             Tên thuộc tính:
-            <span>fkd</span>
+            <span>{{ $attribute->name }}</span>
         </div>
     </div>
     <div>
@@ -57,7 +57,7 @@
                     <th>Thao tác</th>
                 </tr>
                 @php
-                    $stt = ($attributeValues->currentPage() - 1) * $attributeValues->perPage() + 1;
+                    // $stt = ($attributeValues->currentPage() - 1) * $attributeValues->perPage() + 1;
                 @endphp
                 @foreach ($attributeValues as $attributeValue)
                     <tr>
@@ -83,7 +83,7 @@
                 @endforeach
 
             </table>
-            {{ $attributeValues->links() }}
+            {{-- {{ $attributeValues->links() }} --}}
         </div>
 
     @endsection
