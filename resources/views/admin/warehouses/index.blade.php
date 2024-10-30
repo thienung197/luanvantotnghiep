@@ -56,7 +56,7 @@
             @foreach ($warehouses as $warehouse)
                 <tr>
                     <td>{{ $warehouse->name }}</td>
-                    <td>{{ $warehouse->address }}</td>
+                    <td>{{ $warehouse->getAddress() }}</td>
                     <td>{{ $warehouse->capacity }}</td>
                     <td>{{ $warehouse->size }}</td>
                     <td>{{ $warehouse->isRefrigerated == 1 ? 'Có' : 'Không' }}

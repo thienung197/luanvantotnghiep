@@ -14,6 +14,21 @@ class Location extends Model
         'district',
         'city',
         'latitude',
-        'longitude'
+        'longitude',
     ];
+
+    public function providers()
+    {
+        return $this->hasMany(Provider::class);
+    }
+
+    public function customers()
+    {
+        return $this->hasMany(Customer::class);
+    }
+
+    public function  warehouses()
+    {
+        return $this->hasMany(Warehouse::class);
+    }
 }

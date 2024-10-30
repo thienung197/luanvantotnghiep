@@ -3,10 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\Batch;
+use App\Models\Customer;
 use App\Models\Inventory;
+use App\Models\Location;
 use App\Models\Product;
+use App\Models\Warehouse;
+use Barryvdh\Debugbar\Facades\Debugbar as FacadesDebugbar;
+use Barryvdh\Debugbar\Twig\Extension\Debug;
 use Illuminate\Http\Request;
 use PhpParser\Node\Expr\AssignOp\Pow;
+use Debugbar;
+use DebugBar\DebugBar as DebugBarDebugBar;
+use GuzzleHttp\Client;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ApiController extends Controller
 {
@@ -58,6 +67,7 @@ class ApiController extends Controller
                 $html .= '<h6 data-id="' . $product->id . '" style="display:none"></h6>';
                 $html .= '<h4 data-name="' . $product->name . '">' . 'Tên sản phẩm: ' . $product->name . '</h4>';
                 $html .= '<p data-code="' . $product->code . '">' . 'Mã sản phẩm: ' . $product->code . '</p>';
+
                 $html .= '</div>';
                 $html .= '</div>';
             }
@@ -65,6 +75,75 @@ class ApiController extends Controller
         } else {
             return response('<p>Không tìm thấy sản phẩm</p>');
         }
+    }
+
+    private function fetchLocationById($locationId)
+    {
+        return Location::find($locationId);
+    }
+
+    private function fetchAllWarehouseWithLocation()
+    {
+        return Warehouse::all();
+    }
+
+    private function getClosestWarehouse($customerLocation, $warehouses)
+    {
+        $client = new Client();
+        $apiKey = env('OPENROUTESERVICE_API_KEY');
+        $closestWarehouse = null;
+        $shortestDistance = PHP_FLOAT_MAX;
+
+        foreach ($warehouses as $warehouse) {
+            $warehouseLocation = $warehouse->location;
+            try {
+                try {
+                    $response = $client->post('https://api.openrouteservice.org/v2/directions/driving-car', [
+                        'headers' => [
+                            'Authorization' => $apiKey,
+                            'Content-Type' => 'application/json',
+                        ],
+                        'json' => [
+                            'coordinates' => [
+                                [(float)$warehouseLocation->longitude, (float)$warehouseLocation->latitude],
+                                [(float)$customerLocation->longitude, (float)$customerLocation->latitude],
+                            ],
+                        ],
+                    ]);
+
+                    // Log raw response content for debugging
+                    $responseBody = $response->getBody()->getContents();
+                    // info("Response: " . $responseBody);
+
+                    // Parse the response body as JSON
+                    $data = json_decode($responseBody, true);
+                } catch (\GuzzleHttp\Exception\RequestException $e) {
+                    // Log the request exception error
+                    // info('RequestException: ' . $e->getMessage());
+                    return response()->json(['error' => 'API request failed'], 500);
+                } catch (\Exception $e) {
+                    // Log general errors
+                    // info('Exception: ' . $e->getMessage());
+                    return response()->json(['error' => 'An error occurred'], 500);
+                }
+                $data = json_decode($response->getBody(), true);
+                if (isset($data['routes'][0]['summary']['distance'])) {
+                    $distance = $data['routes'][0]['summary']['distance'] / 1000; // Convert meters to kilometers
+
+                    if ($distance < $shortestDistance) {
+                        $shortestDistance = $distance;
+                        $closestWarehouse = $warehouse;
+                    }
+                    info($shortestDistance);
+                    info($closestWarehouse);
+                }
+            } catch (\Exception $e) {
+                // Handle API call failure, log the error if needed
+                continue;
+            }
+        }
+
+        return $closestWarehouse;
     }
 
     public function getBatches(Request $request)
@@ -79,24 +158,39 @@ class ApiController extends Controller
         foreach ($productsData as $productData) {
             $productId = $productData['productId'];
             $requiredQuantity = $productData['quantity'];
+            $customerLocationId = $productData['locationId'];
 
             // Check if the necessary inputs are provided
             if (!$productId || !$requiredQuantity) {
                 return response()->json(['error' => 'Product ID and quantity are required for each product.'], 400);
             }
 
+            $customerLocation = $this->fetchLocationById($customerLocationId);
+            $warehouses = $this->fetchAllWarehouseWithLocation();
+
+            // Log customer location for debugging purposes
+
+            $closestWarehouse = $this->getClosestWarehouse($customerLocation, $warehouses);
+
+            if (!$closestWarehouse) {
+                return response()->json(['error' => 'No closest warehouse found.'], 404);
+            }
+
             // Fetch all batches for the specified product that have available quantity, ordered by expiry date
-            $batches = $this->product::select(
+            $batches = Product::select(
                 'products.id as product_id',
                 'products.name',
                 'batches.id as batch_id',
                 'batches.expiry_date',
                 'batches.manufacturing_date',
-                'inventories.quantity_available'
+                'inventories.quantity_available',
+                'warehouses.id as warehouse_id'
             )
-                ->join('batches', 'products.id', '=', 'batches.product_id') // Join products and batches
-                ->join('inventories', 'batches.id', '=', 'inventories.batch_id') // Join batches and inventories
+                ->join('batches', 'products.id', '=', 'batches.product_id')
+                ->join('inventories', 'batches.id', '=', 'inventories.batch_id')
+                ->join('warehouses', 'inventories.warehouse_id', '=', 'warehouses.id')
                 ->where('products.id', $productId)
+                ->where('warehouses.id', $closestWarehouse->id) // Sử dụng cú pháp đối tượng
                 ->where('inventories.quantity_available', '>', 0)
                 ->orderByRaw('CASE WHEN batches.expiry_date IS NOT NULL THEN batches.expiry_date ELSE batches.created_at END ASC')
                 ->get();
@@ -123,6 +217,7 @@ class ApiController extends Controller
                     'quantity' => $quantityToTake,
                     'expiry_date' => $batch->expiry_date,
                     'manufacturing_date' => $batch->manufacturing_date,
+                    'warehouse' => $batch->warehouse_id // Assigning the warehouse ID from the fetched batch
                 ];
 
                 // Increment the total selected quantity
@@ -140,7 +235,6 @@ class ApiController extends Controller
                 'batches' => $selectedBatches,
             ];
         }
-
         // Return the selected batches as a JSON response
         return response()->json(['batches' => $batchesByProduct]);
     }

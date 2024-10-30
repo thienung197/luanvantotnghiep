@@ -58,7 +58,7 @@
                     <td>{{ $provider->name }}</td>
                     <td>{{ $provider->phone }}</td>
                     <td>{{ $provider->email }}</td>
-                    <td>{{ $provider->address }}</td>
+                    <td>{{ $provider->getAddress() }}</td>
                     <td>{{ $provider->status == 'active' ? 'Đang hoạt động' : ($provider->status == 'inactive' ? 'Ngừng hoạt động' : 'Tạm ngưng hoạt động') }}
                     </td>
                     <td>{{ $provider->created_at }}</td>

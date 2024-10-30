@@ -29,8 +29,8 @@
                     <thead>
                         <th>Mã hàng</th>
                         <th>Tên hàng</th>
-                        <th>Ngày sản xuất</th>
-                        <th>Hạn sử dụng</th>
+                        {{-- <th>Ngày sản xuất</th>
+                        <th>Hạn sử dụng</th> --}}
                         <th>Số lượng</th>
                         <th>Giá bán</th>
                         <th>Giảm giá</th>
@@ -46,7 +46,7 @@
 
     <div class="content-10" class="table">
         <h6>Chọn <span id="batch-product-name"></span> sản phẩm từ lô hàng </h6>
-        <table id="batch-table">
+        <table id="batch-table" class="table">
             <thead>
                 <tr>
                     <th>Số lô</th>
@@ -54,6 +54,7 @@
                     <th>Ngày hết hạn</th>
                     <th>Số lượng có sẵn</th>
                     <th>Số lượng chọn</th>
+                    <th>Xuất từ kho</th>
                 </tr>
             </thead>
             <tbody id="batch-tbody">
@@ -182,12 +183,14 @@
                 let row = $(this).closest("tr");
                 let productId = row.find('input[name^="inputs["][name$="[product_id]"]').val();
                 let quantity = $(this).val();
+                let locationId = 10;
 
                 // Chỉ thêm nếu productId và quantity là hợp lệ
                 if (productId && quantity) {
                     productsData.push({
                         productId: productId,
-                        quantity: quantity
+                        quantity: quantity,
+                        locationId: locationId
                     });
                 }
             });
@@ -195,6 +198,8 @@
             // Gọi fetchBatches với mảng productsData nếu nó không rỗng
             if (productsData.length > 0) {
                 fetchBatches(productsData); // Truyền mảng productsData
+                console.log(productsData);
+
             } else {
                 console.error("No valid product data found."); // Ghi lại lỗi nếu không có dữ liệu
             }
@@ -209,11 +214,14 @@
                     productsData: JSON.stringify(productsData) // Gửi dưới dạng chuỗi JSON
                 },
                 success: function(res) {
+                    console.log(res.batches);
+                    // let productBatches = res.batches;
                     let batchTbody = document.getElementById("batch-tbody");
                     batchTbody.innerHTML = ""; // Xóa các hàng cũ
 
                     // Lặp qua từng sản phẩm
                     res.batches.forEach(productBatches => {
+
                         let productId = productBatches.productId; // Lấy ID sản phẩm
                         let totalQuantityRequired = productBatches.batches.reduce((total, batch) =>
                             total + batch.quantity, 0); // Tính tổng số lượng cần
@@ -224,7 +232,7 @@
                         // Thêm ô cho ID sản phẩm
                         let productCell = document.createElement("td");
                         productCell.textContent =
-                        productId; // Có thể thay đổi để hiển thị tên sản phẩm nếu cần
+                            productId; // Có thể thay đổi để hiển thị tên sản phẩm nếu cần
                         newRow.appendChild(productCell);
 
                         // Thêm ô cho tổng số lượng cần
@@ -258,7 +266,7 @@
                             // Thêm ô cho số lượng có sẵn
                             let availableQuantityCell = document.createElement("td");
                             availableQuantityCell.textContent = batch
-                            .quantity; // Số lượng trong kho
+                                .quantity; // Số lượng trong kho
                             batchRow.appendChild(availableQuantityCell);
 
                             // Tạo ô cho số lượng chọn
@@ -271,7 +279,7 @@
                             quantityInput.setAttribute("value", batch.quantity);
                             quantityInput.setAttribute("min", 1);
                             quantityInput.setAttribute("max", batch
-                            .quantity); // Giới hạn tối đa bằng số lượng có sẵn
+                                .quantity); // Giới hạn tối đa bằng số lượng có sẵn
                             quantityCell.appendChild(quantityInput);
 
                             // Tạo ô ẩn cho ID lô hàng
@@ -281,6 +289,10 @@
                                 `inputs[${productId}][batches][${index}][batch_id]`);
                             hiddenBatchIdInput.setAttribute("value", batch.batch_id);
                             quantityCell.appendChild(hiddenBatchIdInput);
+
+                            let warehouseCell = document.createElement("td");
+                            warehouseCell.textContent = batch.warehouse;
+                            batchRow.appendChild(warehouseCell);
 
                             batchRow.appendChild(quantityCell);
 
@@ -341,21 +353,21 @@
             nameInput.style.width = "200px";
             nameCell.appendChild(nameInput);
 
-            let manufacturingDateCell = document.createElement("td");
-            let manufacturingDateInput = document.createElement("input");
-            manufacturingDateInput.setAttribute("type", "text");
-            manufacturingDateInput.setAttribute("name", `inputs[${indexRow}][manufacturing_date]`);
-            manufacturingDateInput.value = manufacturingDate;
-            manufacturingDateInput.style.width = "160px";
-            manufacturingDateCell.appendChild(manufacturingDateInput);
+            // let manufacturingDateCell = document.createElement("td");
+            // let manufacturingDateInput = document.createElement("input");
+            // manufacturingDateInput.setAttribute("type", "text");
+            // manufacturingDateInput.setAttribute("name", `inputs[${indexRow}][manufacturing_date]`);
+            // manufacturingDateInput.value = manufacturingDate;
+            // manufacturingDateInput.style.width = "160px";
+            // manufacturingDateCell.appendChild(manufacturingDateInput);
 
-            let expiryDateCell = document.createElement("td");
-            let expiryDateInput = document.createElement("input");
-            expiryDateInput.setAttribute("type", "text");
-            expiryDateInput.setAttribute("name", `inputs[${indexRow}][expiry_date]`);
-            expiryDateInput.value = expiryDate;
-            expiryDateInput.style.width = "160px";
-            expiryDateCell.appendChild(expiryDateInput);
+            // let expiryDateCell = document.createElement("td");
+            // let expiryDateInput = document.createElement("input");
+            // expiryDateInput.setAttribute("type", "text");
+            // expiryDateInput.setAttribute("name", `inputs[${indexRow}][expiry_date]`);
+            // expiryDateInput.value = expiryDate;
+            // expiryDateInput.style.width = "160px";
+            // expiryDateCell.appendChild(expiryDateInput);
 
             let quantityCell = document.createElement("td");
             let quantityControlDiv = document.createElement("div");
@@ -409,8 +421,8 @@
             newRow.appendChild(batchIdCell);
             newRow.appendChild(codeCell);
             newRow.appendChild(nameCell);
-            newRow.appendChild(manufacturingDateCell);
-            newRow.appendChild(expiryDateCell);
+            // newRow.appendChild(manufacturingDateCell);
+            // newRow.appendChild(expiryDateCell);
             newRow.appendChild(quantityCell);
             newRow.appendChild(unitPriceCell);
             newRow.appendChild(discountCell);

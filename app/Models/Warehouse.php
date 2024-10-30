@@ -10,10 +10,10 @@ class Warehouse extends Model
     use HasFactory;
     protected $fillable = [
         'name',
-        'address',
         'capacity',
         'size',
-        'isRefrigerated'
+        'isRefrigerated',
+        'location_id'
     ];
 
     public function inventories()
@@ -29,5 +29,15 @@ class Warehouse extends Model
     public function goodsReceipts()
     {
         return $this->hasMany(GoodsReceipt::class);
+    }
+
+    public function location()
+    {
+        return $this->belongsTo(Location::class);
+    }
+
+    public function getAddress()
+    {
+        return $this->location->ward . ' , ' . $this->location->district . ' . ' . $this->location->city;
     }
 }

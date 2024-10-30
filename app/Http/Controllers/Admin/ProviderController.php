@@ -5,15 +5,18 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Providers\CreateProviderRequest;
 use App\Http\Requests\Providers\UpdateProviderRequest;
+use App\Models\Location;
 use App\Models\Provider;
 use Illuminate\Http\Request;
 
 class ProviderController extends Controller
 {
     protected $provider;
-    public function __construct(Provider $provider)
+    protected $location;
+    public function __construct(Provider $provider, Location $location)
     {
         $this->provider = $provider;
+        $this->location = $location;
     }
     /**
      * Display a listing of the resource.
@@ -40,13 +43,29 @@ class ProviderController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CreateProviderRequest $request)
+    public function store(Request $request)
     {
-        dd($request->all());
-        $dataCreate = $request->all();
-        $dataCreate['status'] = 'active';
-        $this->provider->create($dataCreate);
-        return to_route('providers.index')->with(['message' => 'Thêm nhà cung cấp thành công!']);
+
+        $location = $this->location->create([
+            'street_address' => $request->street_address || null,
+            'ward' => $request->ward,
+            'district' => $request->district,
+            'city' => $request->province,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude
+        ]);
+        $locationId = $location->id;
+
+        $this->provider->create([
+            'name' => $request->name,
+            'phone' => $request->phone,
+            'email' => $request->email,
+            'status' => 'active',
+            'location_id' => $locationId
+        ]);
+
+
+        return redirect()->route('providers.index')->with(['message' => 'Thêm nhà cung cấp thành công!']);
     }
 
     /**

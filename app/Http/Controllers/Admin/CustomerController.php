@@ -5,14 +5,17 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Customers\CreateCustomerRequest;
 use App\Models\Customer;
+use App\Models\Location;
 use Illuminate\Http\Request;
 
 class CustomerController extends Controller
 {
     protected $customer;
-    public function __construct(Customer $customer)
+    protected $location;
+    public function __construct(Customer $customer, Location $location)
     {
         $this->customer = $customer;
+        $this->location = $location;
     }
     /**
      * Display a listing of the resource.
@@ -40,8 +43,22 @@ class CustomerController extends Controller
      */
     public function store(CreateCustomerRequest $request)
     {
-        $dataCreate = $request->all();
-        $this->customer->create($dataCreate);
+        $location = $this->location->create([
+            'street_address' => $request->street_address || null,
+            'ward' => $request->ward,
+            'district' => $request->district,
+            'city' => $request->province,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude
+        ]);
+        $locationId = $location->id;
+
+        $this->customer->create([
+            'name' => $request->name,
+            'gender' => $request->gender,
+            'phone' => $request->phone,
+            'location_id' => $locationId
+        ]);
         return to_route('customers.index')->with(['message' => 'Thêm khách hàng thành công!']);
     }
 

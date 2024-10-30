@@ -52,7 +52,7 @@
                     <td>{{ $customer->name }}</td>
                     <td>{{ $customer->gender }}</td>
                     <td>{{ $customer->phone }}</td>
-                    <td>{{ $customer->address }}</td>
+                    <td>{{ $customer->getAddress() }}</td>
                     <td>{{ $customer->created_at }}</td>
                     <td class="btn-cell">
                         <a href="{{ route('customers.edit', $customer->id) }}"><img src="{{ asset('img/edit.png') }}"
