@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
@@ -60,3 +61,5 @@ Route::get('/ajax-search-product', [ApiController::class, 'ajaxSearchProduct'])-
 Route::get('/fetch-batches', [ApiController::class, 'getBatches'])->name('fetch-batches');
 Route::get('/ajax-search-batch', [ApiController::class, 'ajaxSearchBatch'])->name('ajax-search-batch');
 Route::get('/categories/{id}/attributes', [ProductController::class, 'getAttributesByCategory'])->name('categories.attributes');
+Route::get('/inventory', [InventoryController::class, 'index'])->name('inventories.index');
+Route::get('warehouse/details/{id}', [InventoryController::class, 'showDetails']);

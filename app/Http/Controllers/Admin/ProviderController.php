@@ -88,7 +88,7 @@ class ProviderController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateProviderRequest $request, string $id)
+    public function update(Request $request, string $id)
     {
         $dataUpdate = $request->all();
         $provider = $this->provider->findOrFail($id);

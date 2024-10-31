@@ -11,19 +11,7 @@
         </div>
     </div>
     <div class="btn-cs btn-add">
-        <div class="select-category">
-            <h4>Chọn loại hàng hóa</h4>
-            <form action="{{ route('products.create') }}" method="GET">
-                <select name="category_id" id="category" class="form-control">
-                    <option value="">Chọn loại hàng hóa</option>
-                    @foreach ($categories as $category)
-                        <option value="{{ $category->id }}">{{ $category->name }}</option>
-                    @endforeach
-                </select>
-                <button type="submit">Thêm hàng hóa</button>
-
-            </form>
-        </div>
+        <a href="{{ route('products.create') }}">Thêm hàng hóa</a>
     </div>
     <div class="table_container">
         <div class="table_title">

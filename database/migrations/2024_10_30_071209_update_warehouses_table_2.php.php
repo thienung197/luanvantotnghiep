@@ -12,14 +12,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Kiểm tra và thêm cột location_id
         Schema::table('warehouses', function (Blueprint $table) {
             if (!Schema::hasColumn('warehouses', 'location_id')) {
                 $table->foreignIdFor(Location::class)->constrained()->cascadeOnDelete();
             }
         });
 
-        // Kiểm tra và xóa cột address nếu tồn tại
         Schema::table('warehouses', function (Blueprint $table) {
             if (Schema::hasColumn('warehouses', 'address')) {
                 $table->dropColumn('address');
@@ -33,16 +31,13 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('warehouses', function (Blueprint $table) {
-            // Xóa khóa ngoại location_id
             $table->dropForeign(['location_id']);
-            // Xóa cột location_id
             $table->dropColumn('location_id');
         });
 
         Schema::table('warehouses', function (Blueprint $table) {
-            // Thêm lại cột address nếu cần
             if (!Schema::hasColumn('warehouses', 'address')) {
-                $table->string('address', 255)->nullable(); // hoặc bất kỳ độ dài nào bạn muốn
+                $table->string('address', 255)->nullable();
             }
         });
     }

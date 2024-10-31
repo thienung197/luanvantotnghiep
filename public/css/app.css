@@ -368,8 +368,17 @@ img.avatar {
     background-color: var(--color-green);
 }
 
-.btn-cs.btn-delete a {
+.btn-cs.btn-delete a,
+.btn-cs.btn-back a {
     background-color: var(--color-red);
+}
+
+.modal-footer .btn-primary {
+    background: var(--color-green);
+}
+
+.modal-footer .btn-secondary {
+    background: var(--color-red);
 }
 
 /* End of custom btn  */
@@ -421,6 +430,16 @@ img.avatar {
 }
 
 #table-list tr td {
+    color: var(--color-default-light);
+}
+.table-list tr th,
+.table-list tr td {
+    text-align: center;
+    vertical-align: middle;
+    padding: 20px 0;
+}
+
+.table-list tr td {
     color: var(--color-default-light);
 }
 
@@ -480,6 +499,10 @@ img.avatar {
 }
 
 /* css cho input  */
+.input-div {
+    margin: 20px 0;
+}
+
 .input-div input {
     margin: 10px 0;
     padding: 12px;
@@ -493,6 +516,28 @@ img.avatar {
     box-shadow: none;
 }
 
+.input-div select {
+    padding: 10px 15px;
+    margin-right: 20px;
+}
+
+.input-div .checkbox-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+}
+
+.input-div .lst-group-content input,
+.input-div .lst-group-header input {
+    border: 1px solid var(--color-default);
+    margin-right: 10px;
+}
+
+.input-div .lst-group-content,
+.input-div .lst-group-header {
+    display: flex;
+    align-items: center;
+}
 /* css cho message  */
 .error.message {
     margin: 10px 0;

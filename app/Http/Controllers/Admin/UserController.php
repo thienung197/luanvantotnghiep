@@ -47,7 +47,6 @@ class UserController extends Controller
      */
     public function store(CreateUserRequest $request)
     {
-        dd($request->all());
         $dataCreate = $request->all();
         $dataCreate['status'] = 'active';
         $dataCreate['password'] = Hash::make($request->password);
@@ -96,7 +95,7 @@ class UserController extends Controller
         if ($request->has('role_ids')) {
             $user->roles()->sync($dataUpdate['role_ids']);
         }
-        return to_route('users.index')->with(['<mes></mes>sage' => 'Cập nhật người dùng thành công!']);
+        return to_route('users.index')->with(['message' => 'Cập nhật người dùng thành công!']);
     }
 
     /**

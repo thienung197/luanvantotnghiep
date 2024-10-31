@@ -22,7 +22,7 @@
                     <div class="error-message">{{ $message }}</div>
                 @enderror
             </div>
-            <div class="form-group">
+            <div class="form-group input-div">
                 <h4 for="">Quyền hạn</h4>
                 <div class="row">
                     @foreach ($permissions as $groupName => $permission)
@@ -45,7 +45,7 @@
             </div>
             <div class="btn-controls">
                 <div class="btn-cs btn-save"><button type="submit">Lưu thay đổi</button></div>
-                <div class="btn-cs btn-delete"><a href="{{ route('roles.index') }}">Quay lại </a></div>
+                <div class="btn-cs btn-back"><a href="{{ route('roles.index') }}">Quay lại </a></div>
             </div>
         </form>
     </div>

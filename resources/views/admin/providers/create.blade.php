@@ -38,15 +38,26 @@
                     <div class="error message">{{ $message }}</div>
                 @enderror
             </div>
-            <select id='provinces' onchange='getProvinces(event)'>
-                <option value=''>-- Chọn tỉnh / thành phố --</option>
-            </select>
-            <select id='districts' onchange='getDistricts(event)'>
-                <option value=''>-- Chọn quận / huyện --</option>
-            </select>
-            <select id='wards'>
-                <option value=''>-- Chọn phường / xã --</option>
-            </select>
+            <div class="form-group input-div">
+                <h4>Chọn địa chỉ</h4>
+                <select id='provinces' onchange='getProvinces(event)'>
+                    <option value=''>-- Chọn tỉnh / thành phố --</option>
+                </select>
+                <select id='districts' onchange='getDistricts(event)'>
+                    <option value=''>-- Chọn quận / huyện --</option>
+                </select>
+                <select id='wards'>
+                    <option value=''>-- Chọn phường / xã --</option>
+                </select>
+            </div>
+            <div class="form-group input-div">
+                <h4>Địa chỉ cụ thể</h4>
+                <input type="text" name="street_address" value="{{ old('street_address') }}" id="street_address"
+                    class="form-control">
+                @error('street_address')
+                    <div class="error message">{{ $message }}</div>
+                @enderror
+            </div>
             <input type="hidden" name="province" id="province_name">
             <input type="hidden" name="district" id="district_name">
             <input type="hidden" name="ward" id="ward_name">

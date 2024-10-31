@@ -15,7 +15,6 @@
     <div class="content-10">
         <form action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
-            <input type="hidden" name="category_id" value="{{ $category->id }}">
             <div class="form-group input-div">
                 <input type="file" accept="image/*" class="form-control" name="image">
                 <div class="show-image">
@@ -49,7 +48,7 @@
                 </select>
             </div>
             <div class="form-group input-div">
-                <h4>Địa chỉ </h4>
+                <h4>Mô tả </h4>
                 <input type="text" name="address" value="{{ old('address') }}" id="address" class="form-control">
                 @error('address')
                     <div class="error message">{{ $message }}</div>
@@ -82,11 +81,9 @@
                     <div class="error message">{{ $message }}</div>
                 @enderror
             </div>
-            <h3>Các thuộc tính khác</h3>
             <div id="attributes_container">
-                <!-- Nơi chứa các thuộc tính và giá trị được tải qua AJAX -->
             </div>
-            @foreach ($attributes as $attribute)
+            {{-- @foreach ($attributes as $attribute)
                 <div class="form-group">
                     <label for="">{{ $attribute->name }}</label>
                     <select name="attributes_values[]" id="" class="form-control">
@@ -95,7 +92,7 @@
                         @endforeach
                     </select>
                 </div>
-            @endforeach
+            @endforeach --}}
             <div class="btn-controls">
                 <div class="btn-cs btn-save"><button type="submit">Lưu thay đổi</button></div>
                 <div class="btn-cs btn-delete"><a href="{{ route('products.index') }}">Quay lại </a></div>
@@ -112,38 +109,32 @@
             let attributesContainer = document.getElementById('attributes_container');
 
             if (!categoryId) {
-                attributesContainer.innerHTML = ''; // Xóa dữ liệu cũ nếu không có danh mục được chọn
+                attributesContainer.innerHTML = '';
                 return;
             }
 
-            // Gửi yêu cầu AJAX đến server
             fetch(`/categories/${categoryId}/attributes`)
                 .then(response => response.json())
                 .then(data => {
-                    attributesContainer.innerHTML = ''; // Xóa dữ liệu cũ
+                    attributesContainer.innerHTML = '';
 
-                    // Kiểm tra nếu có lỗi
                     if (data.error) {
                         attributesContainer.innerHTML = `<p>${data.error}</p>`;
                         return;
                     }
 
-                    // Duyệt qua các thuộc tính và tạo các input phù hợp
                     data.forEach(attribute => {
                         let attributeDiv = document.createElement('div');
                         attributeDiv.classList.add('form-group', 'input-div');
 
-                        // Tạo tiêu đề cho thuộc tính
-                        let label = document.createElement('label');
+                        let label = document.createElement('h4');
                         label.innerText = attribute.name;
                         attributeDiv.appendChild(label);
 
-                        // Tạo dropdown các giá trị của thuộc tính
                         let select = document.createElement('select');
                         select.name = 'attributes_values[]';
                         select.classList.add('form-control');
 
-                        // Thêm các giá trị vào dropdown
                         attribute.attribute_values.forEach(value => {
                             let option = document.createElement('option');
                             option.value = value.id;

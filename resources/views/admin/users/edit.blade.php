@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Chỉnh sửa người dùng' . $user->name)
+@section('title', 'Chỉnh sửa người dùng')
 @section('content')
     <div class="content_header">
         <div class="content_header--title">
@@ -19,7 +19,7 @@
             <div class="form-group input-div">
                 <input type="file" accept="image/*" class="form-control" name="image">
                 <div class="show-image">
-                    <img src="{{ $user->images->count() > 0 ? asset('upload/users/' . $user->images->first()->url) : asset('upload/users/man.png') }}"
+                    <img src="{{ $user->images->count() > 0 ? asset('upload/' . $user->images->first()->url) : asset('upload/users/man.png') }}"
                         alt="">
                 </div>
                 @error('image')
@@ -84,10 +84,10 @@
                     <div class="error-message">{{ $message }}</div>
                 @enderror
             </div>
-            <div class="form-group">
-                <h4 for="">Vai trò</h4>
+            <div class="form-group input-div">
+                <h4>Vai trò</h4>
                 <div class="row">
-                    <div class="display:flex;flex-wrap:wrap;gap:10px">
+                    <div class="checkbox-container">
                         @foreach ($roles as $role)
                             <label for="">
                                 <input type="checkbox" name="role_ids[]" class="form-check-input"
@@ -102,7 +102,7 @@
             </div>
             <div class="btn-controls">
                 <div class="btn-cs btn-save"><button type="submit">Lưu thay đổi</button></div>
-                <div class="btn-cs btn-delete"><a href="{{ route('roles.index') }}">Quay lại </a></div>
+                <div class="btn-cs btn-back"><a href="{{ route('users.index') }}">Quay lại </a></div>
             </div>
         </form>
     </div>

@@ -19,6 +19,8 @@
             </button>
         </div>
         @include('admin.attributes.createAttributeModal')
+        @include('admin.attributes.editAttributeModal')
+
         <div class="table_container">
             <div class="table_title">
                 Danh sách thuộc tính
@@ -62,7 +64,6 @@
                             </a>
                             <a data-bs-toggle="modal" data-bs-target="#editAttributeModal" class="btn-edit"
                                 data-id="{{ $attribute->id }}"><img src="{{ asset('img/edit.png') }}" alt=""></a>
-                            @include('admin.attributes.editAttributeModal')
 
                             <form action="{{ route('attributes.destroy', $attribute->id) }}"
                                 id="form-delete{{ $attribute->id }}" method="POST">

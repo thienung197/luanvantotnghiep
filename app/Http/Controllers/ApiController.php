@@ -111,34 +111,26 @@ class ApiController extends Controller
                         ],
                     ]);
 
-                    // Log raw response content for debugging
                     $responseBody = $response->getBody()->getContents();
-                    // info("Response: " . $responseBody);
 
-                    // Parse the response body as JSON
                     $data = json_decode($responseBody, true);
                 } catch (\GuzzleHttp\Exception\RequestException $e) {
-                    // Log the request exception error
-                    // info('RequestException: ' . $e->getMessage());
                     return response()->json(['error' => 'API request failed'], 500);
                 } catch (\Exception $e) {
-                    // Log general errors
-                    // info('Exception: ' . $e->getMessage());
                     return response()->json(['error' => 'An error occurred'], 500);
                 }
                 $data = json_decode($response->getBody(), true);
                 if (isset($data['routes'][0]['summary']['distance'])) {
-                    $distance = $data['routes'][0]['summary']['distance'] / 1000; // Convert meters to kilometers
+                    $distance = $data['routes'][0]['summary']['distance'] / 1000;
 
                     if ($distance < $shortestDistance) {
                         $shortestDistance = $distance;
                         $closestWarehouse = $warehouse;
                     }
-                    info($shortestDistance);
-                    info($closestWarehouse);
+                    // info($shortestDistance);
+                    // info($closestWarehouse);
                 }
             } catch (\Exception $e) {
-                // Handle API call failure, log the error if needed
                 continue;
             }
         }
@@ -148,35 +140,18 @@ class ApiController extends Controller
 
     public function getBatches(Request $request)
     {
-        // Fetch products data from the request
         $productsData = json_decode($request->input('productsData'), true);
-
-        // Initialize an array to hold the results for each product
         $batchesByProduct = [];
 
-        // Loop through each product's data
         foreach ($productsData as $productData) {
             $productId = $productData['productId'];
             $requiredQuantity = $productData['quantity'];
             $customerLocationId = $productData['locationId'];
 
-            // Check if the necessary inputs are provided
-            if (!$productId || !$requiredQuantity) {
-                return response()->json(['error' => 'Product ID and quantity are required for each product.'], 400);
-            }
-
             $customerLocation = $this->fetchLocationById($customerLocationId);
             $warehouses = $this->fetchAllWarehouseWithLocation();
 
-            // Log customer location for debugging purposes
-
             $closestWarehouse = $this->getClosestWarehouse($customerLocation, $warehouses);
-
-            if (!$closestWarehouse) {
-                return response()->json(['error' => 'No closest warehouse found.'], 404);
-            }
-
-            // Fetch all batches for the specified product that have available quantity, ordered by expiry date
             $batches = Product::select(
                 'products.id as product_id',
                 'products.name',
@@ -190,52 +165,44 @@ class ApiController extends Controller
                 ->join('inventories', 'batches.id', '=', 'inventories.batch_id')
                 ->join('warehouses', 'inventories.warehouse_id', '=', 'warehouses.id')
                 ->where('products.id', $productId)
-                ->where('warehouses.id', $closestWarehouse->id) // Sử dụng cú pháp đối tượng
+                ->where('warehouses.id', $closestWarehouse->id)
                 ->where('inventories.quantity_available', '>', 0)
-                ->orderByRaw('CASE WHEN batches.expiry_date IS NOT NULL THEN batches.expiry_date ELSE batches.created_at END ASC')
+                ->orderBy('batches.expiry_date', 'asc')
                 ->get();
-
-            // Initialize variables for accumulating the selected batches
+            info($batches);
+            //LOG.info: [{"product_id":6,"name":"Mi Hao Hao","batch_id":28,"expiry_date":"2024-10-26","manufacturing_date":"2024-10-04","quantity_available":200,"warehouse_id":7}]
             $selectedBatches = [];
             $totalSelectedQuantity = 0;
 
-            // Loop through the fetched batches until the required quantity is fulfilled
             foreach ($batches as $batch) {
                 $availableQuantity = $batch->quantity_available;
-
-                // Calculate how much to take from this batch
                 $quantityToTake = min($availableQuantity, $requiredQuantity - $totalSelectedQuantity);
 
-                // If quantityToTake is 0, it means we have fulfilled the requirement for this product
                 if ($quantityToTake <= 0) {
-                    break; // Break out of the loop if the requirement is already met
+                    break;
                 }
 
-                // Add this batch to the selected list with the amount to be taken
                 $selectedBatches[] = [
                     'batch_id' => $batch->batch_id,
                     'quantity' => $quantityToTake,
                     'expiry_date' => $batch->expiry_date,
                     'manufacturing_date' => $batch->manufacturing_date,
-                    'warehouse' => $batch->warehouse_id // Assigning the warehouse ID from the fetched batch
+                    'warehouse' => $batch->warehouse_id
                 ];
 
-                // Increment the total selected quantity
                 $totalSelectedQuantity += $quantityToTake;
 
-                // Break out of the loop if we have met the required quantity
                 if ($totalSelectedQuantity >= $requiredQuantity) {
                     break;
                 }
             }
 
-            // Store the selected batches for this product
             $batchesByProduct[] = [
                 'productId' => $productId,
                 'batches' => $selectedBatches,
             ];
         }
-        // Return the selected batches as a JSON response
+
         return response()->json(['batches' => $batchesByProduct]);
     }
 }

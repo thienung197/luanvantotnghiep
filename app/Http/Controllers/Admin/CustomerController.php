@@ -41,7 +41,7 @@ class CustomerController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CreateCustomerRequest $request)
+    public function store(Request $request)
     {
         $location = $this->location->create([
             'street_address' => $request->street_address || null,

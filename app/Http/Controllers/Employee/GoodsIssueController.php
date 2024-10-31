@@ -9,6 +9,7 @@ use App\Models\GoodsIssue;
 use App\Models\GoodsIssueDetail;
 use App\Models\Inventory;
 use App\Models\Provider;
+use App\Models\User;
 use App\Models\Warehouse;
 use Illuminate\Http\Request;
 
@@ -20,13 +21,15 @@ class GoodsIssueController extends Controller
     protected $warehouse;
     protected $customer;
     protected $inventory;
+    protected $user;
     public function __construct(
         GoodsIssue $goodsIssue,
         Warehouse $warehouse,
         Customer $customer,
         GoodsIssueDetail $goodsIssueDetail,
         Batch $batch,
-        Inventory $inventory
+        Inventory $inventory,
+        User $user
     ) {
         $this->goodsIssue = $goodsIssue;
         $this->goodsIssueDetail = $goodsIssueDetail;
@@ -34,6 +37,7 @@ class GoodsIssueController extends Controller
         $this->warehouse = $warehouse;
         $this->customer = $customer;
         $this->inventory = $inventory;
+        $this->user = $user;
     }
     /**
      * Display a listing of the resource.
@@ -51,7 +55,8 @@ class GoodsIssueController extends Controller
     {
         $warehouses = $this->warehouse->all();
         $customers = $this->customer->all();
-        return view('employee.goods-issues.create', compact('warehouses', 'customers'));
+        $creators = $this->user->all();
+        return view('employee.goods-issues.create', compact('warehouses', 'customers', 'creators'));
     }
 
     /**

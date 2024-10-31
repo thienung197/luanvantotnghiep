@@ -35,11 +35,11 @@ class ProductController extends Controller
      */
     public function create(Request $request)
     {
-        $category = $this->category->findOrFail($request->category_id);
-        $attributes = $category->attributes()->with('attributeValues')->get();
+        // $category = $this->category->findOrFail($request->category_id);
+        // $attributes = $category->attributes()->with('attributeValues')->get();
         $categories = $this->category->all();
         $units = $this->unit->all();
-        return view('admin.products.create', compact('units', 'attributes', 'category', 'categories'));
+        return view('admin.products.create', compact('units',  'categories'));
     }
 
     /**
@@ -47,20 +47,7 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        // Validate dữ liệu đầu vào
-        $request->validate([
-            'code' => 'required|string|unique:products,code',
-            'name' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-            'unit_id' => 'required|exists:units,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'address' => 'nullable|string',
-            'refrigerated' => 'required|boolean',
-            'attributes_values' => 'nullable|array',
-            'attributes_values.*' => 'exists:attribute_values,id', // Kiểm tra các giá trị thuộc tính
-        ]);
 
-        // Lấy tất cả dữ liệu đã validate
         $dataCreate = $request->only([
             'code',
             'name',
@@ -71,20 +58,15 @@ class ProductController extends Controller
         ]);
         $dataCreate["status"] = "active";
 
-        // Xử lý ảnh nếu có tải lên
         if ($request->hasFile('image')) {
             $dataCreate["image"] = $this->product->saveImage($request);
         }
 
-        // Tạo sản phẩm mới
         $product = $this->product->create($dataCreate);
 
-        // Lưu thông tin hình ảnh vào bảng liên kết (nếu có)
         if (isset($dataCreate["image"])) {
             $product->images()->create(["url" => $dataCreate["image"]]);
         }
-
-        // Lưu các giá trị thuộc tính (nếu có)
         if ($request->has('attributes_values') && is_array($request->attributes_values)) {
             foreach ($request->attributes_values as $attributeValueId) {
                 ProductValue::create([
@@ -98,14 +80,12 @@ class ProductController extends Controller
     }
     public function getAttributesByCategory($id)
     {
-        // Tìm danh mục theo ID
         $category = $this->category->with('attributes.attributeValues')->find($id);
 
         if (!$category) {
             return response()->json(['error' => 'Danh mục không tồn tại.'], 404);
         }
 
-        // Lấy các thuộc tính và giá trị của danh mục
         $attributes = $category->attributes()->with('attributeValues')->get();
 
         return response()->json($attributes);

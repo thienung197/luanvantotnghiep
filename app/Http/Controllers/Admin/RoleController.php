@@ -38,6 +38,7 @@ class RoleController extends Controller
      */
     public function store(CreateRoleRequest $request)
     {
+        // dd($request->all());
         $dataCreate = $request->all();
         $dataCreate['guard_name'] = 'web';
         $role = Role::create($dataCreate);

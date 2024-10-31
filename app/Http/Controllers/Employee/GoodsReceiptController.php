@@ -8,6 +8,7 @@ use App\Models\GoodsReceipt;
 use App\Models\GoodsReceiptDetail;
 use App\Models\Inventory;
 use App\Models\Provider;
+use App\Models\User;
 use App\Models\Warehouse;
 use Illuminate\Http\Request;
 
@@ -19,13 +20,15 @@ class GoodsReceiptController extends Controller
     protected $warehouse;
     protected $provider;
     protected $inventory;
+    protected $user;
     public function __construct(
         GoodsReceipt $goodsReceipt,
         Warehouse $warehouse,
         Provider $provider,
         GoodsReceiptDetail $goodsReceiptDetail,
         Batch $batch,
-        Inventory $inventory
+        Inventory $inventory,
+        User $user
     ) {
         $this->goodsReceipt = $goodsReceipt;
         $this->goodsReceiptDetail = $goodsReceiptDetail;
@@ -33,6 +36,7 @@ class GoodsReceiptController extends Controller
         $this->warehouse = $warehouse;
         $this->provider = $provider;
         $this->inventory = $inventory;
+        $this->user = $user;
     }
     /**
      * Display a listing of the resource.
@@ -50,7 +54,8 @@ class GoodsReceiptController extends Controller
     {
         $warehouses = $this->warehouse->all();
         $providers = $this->provider->all();
-        return view('employee.goods-receipts.create', compact('warehouses', 'providers'));
+        $creators = $this->user->all();
+        return view('employee.goods-receipts.create', compact('warehouses', 'providers', 'creators'));
     }
 
     /**
@@ -62,7 +67,7 @@ class GoodsReceiptController extends Controller
         $goodsReceipt = $this->goodsReceipt->create([
             'code' => $request->code,
             'warehouse_id' => $request->warehouse_id,
-            'creator_id' => 1,
+            'creator_id' => $request->creator_id,
             'provider_id' => $request->provider_id,
             'total_discount' => $request->total_discount
         ]);

@@ -33,16 +33,13 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('warehouses', function (Blueprint $table) {
-            // Xóa khóa ngoại location_id
             $table->dropForeign(['location_id']);
-            // Xóa cột location_id
             $table->dropColumn('location_id');
         });
 
         Schema::table('warehouses', function (Blueprint $table) {
-            // Thêm lại cột address nếu cần
             if (!Schema::hasColumn('warehouses', 'address')) {
-                $table->string('address', 255)->nullable(); // hoặc bất kỳ độ dài nào bạn muốn
+                $table->string('address', 255)->nullable();
             }
         });
     }

@@ -52,11 +52,13 @@
                     <td class="btn-cell">
                         <a href="{{ route('roles.edit', $role->id) }}"><img src="{{ asset('img/edit.png') }}"
                                 alt=""></a>
-                        <form action="{{ route('roles.destroy', $role->id) }}" method="POST">
+                        <form action="{{ route('roles.destroy', $role->id) }}" method="POST"
+                            id="form-delete{{ $role->id }}">
                             @csrf
                             @method('delete')
-                            <button type="submit"><img src="{{ asset('img/delete.png') }}" alt=""></button>
                         </form>
+                        <button type="submit" class="btn-delete" data-id="{{ $role->id }}"><img
+                                src="{{ asset('img/delete.png') }}" alt=""></button>
                     </td>
                 </tr>
             @endforeach

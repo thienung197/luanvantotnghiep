@@ -49,10 +49,16 @@
         @csrf
 
         <div class="form-group input-div">
-            <h4>Người tạo </h4>
-            <input type="text" name="name" value="{{ old('name') }}" id="name" class="form-control">
-            @error('name')
-                <div class="error message">{{ $creator_id }}</div>
+            <h4>Người tạo</h4>
+            <select name="creator_id" id="" class="form-control">
+                <option value="">---Chọn người tạo ---</option>
+                @foreach ($creators as $creator)
+                    <option value="{{ $creator->id }}" {{ old('creator') == $creator->id ? 'selected' : '' }}>
+                        {{ $creator->name }}</option>
+                @endforeach
+            </select>
+            @error('creator_id')
+                <div class="error message">{{ $message }}</div>
             @enderror
         </div>
         <div class="form-group input-div">

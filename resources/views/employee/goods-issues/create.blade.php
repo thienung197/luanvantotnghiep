@@ -66,10 +66,16 @@
         @csrf
 
         <div class="form-group input-div">
-            <h4>Người tạo </h4>
-            <input type="text" name="name" value="{{ old('name') }}" id="name" class="form-control">
-            @error('name')
-                <div class="error message">{{ $creator_id }}</div>
+            <h4>Người tạo</h4>
+            <select name="creator_id" id="" class="form-control">
+                <option value="">---Chọn người tạo ---</option>
+                @foreach ($creators as $creator)
+                    <option value="{{ $creator->id }}" {{ old('creator') == $creator->id ? 'selected' : '' }}>
+                        {{ $creator->name }}</option>
+                @endforeach
+            </select>
+            @error('creator_id')
+                <div class="error message">{{ $message }}</div>
             @enderror
         </div>
         <div class="form-group input-div">
@@ -142,7 +148,6 @@
 
 @push('js')
     <script>
-        //hien KQ tim kiem
         $(document).ready(function() {
             $(document).on("click", ".search-input", function(e) {
                 let _text = $(this).val();
@@ -176,16 +181,14 @@
         });
 
         $(document).on("blur", ".quantity", function(e) {
-            let productsData = []; // Khởi tạo mảng cho dữ liệu sản phẩm
+            let productsData = [];
 
-            // Lấy dữ liệu từ tất cả các hàng liên quan
             $('.quantity').each(function() {
                 let row = $(this).closest("tr");
                 let productId = row.find('input[name^="inputs["][name$="[product_id]"]').val();
                 let quantity = $(this).val();
-                let locationId = 10;
+                let locationId = 21;
 
-                // Chỉ thêm nếu productId và quantity là hợp lệ
                 if (productId && quantity) {
                     productsData.push({
                         productId: productId,
@@ -195,81 +198,62 @@
                 }
             });
 
-            // Gọi fetchBatches với mảng productsData nếu nó không rỗng
             if (productsData.length > 0) {
-                fetchBatches(productsData); // Truyền mảng productsData
+                fetchBatches(productsData);
                 console.log(productsData);
 
             } else {
-                console.error("No valid product data found."); // Ghi lại lỗi nếu không có dữ liệu
+                console.error("No valid product data found.");
             }
         });
 
-        // Hàm fetchBatches được điều chỉnh
         function fetchBatches(productsData) {
             $.ajax({
                 url: "{{ route('fetch-batches') }}",
                 method: "get",
                 data: {
-                    productsData: JSON.stringify(productsData) // Gửi dưới dạng chuỗi JSON
+                    productsData: JSON.stringify(productsData)
                 },
                 success: function(res) {
-                    console.log(res.batches);
-                    // let productBatches = res.batches;
                     let batchTbody = document.getElementById("batch-tbody");
-                    batchTbody.innerHTML = ""; // Xóa các hàng cũ
+                    batchTbody.innerHTML = "";
 
-                    // Lặp qua từng sản phẩm
                     res.batches.forEach(productBatches => {
+                        console.log(productBatches);
 
-                        let productId = productBatches.productId; // Lấy ID sản phẩm
+                        let productId = productBatches.productId;
                         let totalQuantityRequired = productBatches.batches.reduce((total, batch) =>
-                            total + batch.quantity, 0); // Tính tổng số lượng cần
+                            total + batch.quantity, 0);
 
-                        // Thêm hàng cho sản phẩm
                         let newRow = document.createElement("tr");
-
-                        // Thêm ô cho ID sản phẩm
                         let productCell = document.createElement("td");
-                        productCell.textContent =
-                            productId; // Có thể thay đổi để hiển thị tên sản phẩm nếu cần
+                        productCell.textContent = productId;
                         newRow.appendChild(productCell);
 
-                        // Thêm ô cho tổng số lượng cần
                         let totalRequiredCell = document.createElement("td");
                         totalRequiredCell.textContent = totalQuantityRequired;
                         newRow.appendChild(totalRequiredCell);
-
-                        // Thêm hàng mới cho sản phẩm
                         batchTbody.appendChild(newRow);
 
-                        // Thêm từng lô hàng cho sản phẩm
                         productBatches.batches.forEach((batch, index) => {
                             let batchRow = document.createElement("tr");
-
-                            // Thêm ô cho số lô
                             let batchIdCell = document.createElement("td");
                             batchIdCell.textContent = batch.batch_id;
                             batchRow.appendChild(batchIdCell);
 
-                            // Thêm ô cho ngày sản xuất
                             let manufacturingDateCell = document.createElement("td");
                             manufacturingDateCell.textContent = batch.manufacturing_date ??
                                 'N/A';
                             batchRow.appendChild(manufacturingDateCell);
 
-                            // Thêm ô cho ngày hết hạn
                             let expiryDateCell = document.createElement("td");
                             expiryDateCell.textContent = batch.expiry_date ?? 'N/A';
                             batchRow.appendChild(expiryDateCell);
 
-                            // Thêm ô cho số lượng có sẵn
                             let availableQuantityCell = document.createElement("td");
-                            availableQuantityCell.textContent = batch
-                                .quantity; // Số lượng trong kho
+                            availableQuantityCell.textContent = batch.quantity;
                             batchRow.appendChild(availableQuantityCell);
 
-                            // Tạo ô cho số lượng chọn
                             let quantityCell = document.createElement("td");
                             let quantityInput = document.createElement("input");
                             quantityInput.setAttribute("type", "number");
@@ -278,11 +262,9 @@
                                 `inputs[${productId}][batches][${index}][quantity]`);
                             quantityInput.setAttribute("value", batch.quantity);
                             quantityInput.setAttribute("min", 1);
-                            quantityInput.setAttribute("max", batch
-                                .quantity); // Giới hạn tối đa bằng số lượng có sẵn
+                            quantityInput.setAttribute("max", batch.quantity);
                             quantityCell.appendChild(quantityInput);
 
-                            // Tạo ô ẩn cho ID lô hàng
                             let hiddenBatchIdInput = document.createElement("input");
                             hiddenBatchIdInput.setAttribute("type", "hidden");
                             hiddenBatchIdInput.setAttribute("name",
@@ -292,18 +274,14 @@
 
                             let warehouseCell = document.createElement("td");
                             warehouseCell.textContent = batch.warehouse;
-                            batchRow.appendChild(warehouseCell);
-
                             batchRow.appendChild(quantityCell);
-
-                            // Thêm hàng lô vào bảng
+                            batchRow.appendChild(warehouseCell);
                             batchTbody.appendChild(batchRow);
                         });
                     });
                 },
                 error: function(err) {
                     console.error("Error fetching batches: ", err);
-                    // Có thể thông báo cho người dùng nếu cần
                 }
             });
         }

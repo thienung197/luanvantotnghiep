@@ -23,14 +23,7 @@
                     <div class="error message">{{ $message }}</div>
                 @enderror
             </div>
-            <div class="form-group input-div">
-                <h4>Địa chỉ cụ thể</h4>
-                <input type="text" name="street_address" value="{{ old('street_address') }}" id="street_address"
-                    class="form-control">
-                @error('street_address')
-                    <div class="error message">{{ $message }}</div>
-                @enderror
-            </div>
+
             <div class="form-group input-div">
                 <h4>Sức chứa</h4>
                 <input type="number" name="capacity" value="{{ old('capacity') }}" id="capacity" class="form-control">
@@ -48,7 +41,7 @@
             <div class="form-group input-div">
                 <h4>Bảo quản lạnh</h4>
                 <select name="isRefrigerated" id="" class="form-control">
-                    <option value="">--- Chọn ---</option>
+                    <option value="">--- Chọn điều kiện bảo quản lạnh---</option>
                     <option value="1" {{ old('isRefrigerated') == '1' ? 'selected' : '' }}>Có</option>
                     <option value="0" {{ old('isRefrigerated') == '0' ? 'selected' : '' }}>Không</option>
                 </select>
@@ -56,15 +49,26 @@
                     <div class="error message">{{ $message }}</div>
                 @enderror
             </div>
-            <select id='provinces' onchange='getProvinces(event)'>
-                <option value=''>-- Chọn tỉnh / thành phố --</option>
-            </select>
-            <select id='districts' onchange='getDistricts(event)'>
-                <option value=''>-- Chọn quận / huyện --</option>
-            </select>
-            <select id='wards'>
-                <option value=''>-- Chọn phường / xã --</option>
-            </select>
+            <div class="form-group input-div">
+                <h4>Chọn địa chỉ</h4>
+                <select id='provinces' onchange='getProvinces(event)'>
+                    <option value=''>-- Chọn tỉnh / thành phố --</option>
+                </select>
+                <select id='districts' onchange='getDistricts(event)'>
+                    <option value=''>-- Chọn quận / huyện --</option>
+                </select>
+                <select id='wards'>
+                    <option value=''>-- Chọn phường / xã --</option>
+                </select>
+            </div>
+            <div class="form-group input-div">
+                <h4>Địa chỉ cụ thể</h4>
+                <input type="text" name="street_address" value="{{ old('street_address') }}" id="street_address"
+                    class="form-control">
+                @error('street_address')
+                    <div class="error message">{{ $message }}</div>
+                @enderror
+            </div>
             <input type="hidden" name="province" id="province_name">
             <input type="hidden" name="district" id="district_name">
             <input type="hidden" name="ward" id="ward_name">
@@ -72,12 +76,13 @@
             <input type="hidden" name="longitude" id="longitude">
             <div class="btn-controls">
                 <div class="btn-cs btn-save"><button type="submit">Lưu thay đổi</button></div>
-                <div class="btn-cs btn-delete"><a href="{{ route('warehouses.index') }}">Quay lại </a></div>
+                <div class="btn-cs btn-back"><a href="{{ route('warehouses.index') }}">Quay lại </a></div>
             </div>
         </form>
     </div>
 
 @endsection
+
 
 @push('js')
     <script>

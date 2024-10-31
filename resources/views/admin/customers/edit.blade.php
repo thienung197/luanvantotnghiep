@@ -28,7 +28,8 @@
                 <h4>Giới tính</h4>
                 <select name="gender" id="" class="form-control">
                     <option value="">---Chọn giới tính---</option>
-                    <option value="male" {{ (old('gender') ?? $customer->gender) == 'male' ? 'selected' : '' }}>Nam</option>
+                    <option value="male" {{ (old('gender') ?? $customer->gender) == 'male' ? 'selected' : '' }}>Nam
+                    </option>
                     <option value="female" {{ (old('gender') ?? $customer->gender) == 'female' ? 'selected' : '' }}>Nữ
                     </option>
                 </select>
@@ -45,10 +46,23 @@
                 @enderror
             </div>
             <div class="form-group input-div">
-                <h4>Địa chỉ </h4>
-                <input type="text" name="address" value="{{ old('address') ?? $customer->address }}" id="address"
+                <h4>Chọn địa chỉ</h4>
+                <select id='provinces' onchange='getProvinces(event)'>
+                    <option value=''>-- Chọn tỉnh / thành phố --</option>
+                </select>
+                <select id='districts' onchange='getDistricts(event)'>
+                    <option value=''>-- Chọn quận / huyện --</option>
+                </select>
+                <select id='wards'>
+                    <option value=''>-- Chọn phường / xã --</option>
+                </select>
+            </div>
+            <div class="form-group input-div">
+                <h4>Địa chỉ cụ thể</h4>
+                <input type="text" name="street_address"
+                    value="{{ old('street_address') ?? $customer->location->street_address }}" id="street_address"
                     class="form-control">
-                @error('address')
+                @error('street_address')
                     <div class="error message">{{ $message }}</div>
                 @enderror
             </div>

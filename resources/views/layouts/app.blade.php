@@ -72,18 +72,26 @@
                                 </div>
                             </a>
                         </li>
+                        <li class="{{ request()->routeIs('inventories.*') ? 'bg-blue' : '' }}">
+                            <a href="{{ route('inventories.index') }}">
+                                <div class="flex-left-content">
+                                    <img src="{{ asset('img/warehouse.png') }}" alt="">
+                                    <span>Hàng tồn kho</span>
+                                </div>
+                            </a>
+                        </li>
                         <li class="{{ request()->routeIs('providers.*') ? 'bg-blue' : '' }}">
-                            <a href="">
+                            <a href="{{ route('providers.index') }}">
                                 <div class="flex-left-content">
                                     <img src="{{ asset('img/partner.png') }}" alt="">
-                                    <span>Đối tác</span>
+                                    <span>Nhà cung cấp</span>
                                 </div>
-                                <img class="angle-down" src="{{ asset('img/angle-down.png') }}" alt="">
+                                {{-- <img class="angle-down" src="{{ asset('img/angle-down.png') }}" alt=""> --}}
                             </a>
-                            <ul class="sub-menu">
+                            {{-- <ul class="sub-menu">
                                 <li><a href="{{ route('providers.index') }}">Nhà cung cấp</a></li>
                                 <li><a href="{{ route('customers.index') }}">Khách hàng</a></li>
-                            </ul>
+                            </ul> --}}
                         </li>
                         <li class="{{ request()->routeIs('customers.*') ? 'bg-blue' : '' }}">
                             <a href="{{ route('customers.index') }}">
@@ -138,7 +146,7 @@
                                 </div>
                             </a>
                         </li>
-                        <li>
+                        {{-- <li>
                             <a href="">
                                 <div class="flex-left-content">
                                     <img src="{{ asset('img/task.png') }}" alt="">
@@ -151,7 +159,7 @@
                                 <li><a href="">Xuất hàng</a></li>
                                 <li><a href="">Kiểm kho</a></li>
                             </ul>
-                        </li>
+                        </li> --}}
 
                         <li>
                             <a href="">

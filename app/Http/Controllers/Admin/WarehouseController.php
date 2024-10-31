@@ -83,7 +83,7 @@ class WarehouseController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(CreateWarehouseRequest $request, string $id)
+    public function update(Request $request, string $id)
     {
         $warehouse = $this->warehouse->findOrFail($id);
         $dataUpdate = $request->all();

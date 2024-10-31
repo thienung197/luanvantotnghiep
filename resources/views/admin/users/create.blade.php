@@ -78,10 +78,10 @@
                     <div class="error message">{{ $message }}</div>
                 @enderror
             </div>
-            <div class="form-group">
+            <div class="form-group input-div">
                 <h4 for="">Vai trò</h4>
                 <div class="row">
-                    <div class="display:flex;flex-wrap:wrap;gap:10px">
+                    <div class="checkbox-container">
                         @foreach ($roles as $role)
                             <label for="">
                                 <input type="checkbox" name="role_ids[]" value="{{ $role->id }}">
@@ -94,7 +94,7 @@
             </div>
             <div class="btn-controls">
                 <div class="btn-cs btn-save"><button type="submit">Lưu thay đổi</button></div>
-                <div class="btn-cs btn-delete"><a href="{{ route('roles.index') }}">Quay lại </a></div>
+                <div class="btn-cs btn-back"><a href="{{ route('users.index') }}">Quay lại </a></div>
             </div>
         </form>
     </div>

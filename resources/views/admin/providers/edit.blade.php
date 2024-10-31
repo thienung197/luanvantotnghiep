@@ -33,14 +33,6 @@
                 @enderror
             </div>
             <div class="form-group input-div">
-                <h4>Địa chỉ </h4>
-                <input type="text" name="address" value="{{ old('address') ?? $provider->address }}" id="address"
-                    class="form-control">
-                @error('address')
-                    <div class="error-message">{{ $message }}</div>
-                @enderror
-            </div>
-            <div class="form-group input-div">
                 <h4>Email</h4>
                 <input type="email" name="email" value="{{ old('email') ?? $provider->email }}" id="email"
                     class="form-control">
@@ -48,11 +40,33 @@
                     <div class="error-message">{{ $message }}</div>
                 @enderror
             </div>
-            <div class="btn-controls">
-
-                <div class="btn-cs btn-delete"><a href="{{ route('providers.index') }}">Quay lại </a></div>
+            <div class="form-group input-div">
+                <h4>Chọn địa chỉ</h4>
+                <select id='provinces' onchange='getProvinces(event)'>
+                    <option value=''>-- Chọn tỉnh / thành phố --</option>
+                </select>
+                <select id='districts' onchange='getDistricts(event)'>
+                    <option value=''>-- Chọn quận / huyện --</option>
+                </select>
+                <select id='wards'>
+                    <option value=''>-- Chọn phường / xã --</option>
+                </select>
             </div>
-            <div class="btn-cs btn-save"><button type="submit" data-id="{{ $provider->id }}">Lưu thay đổi</button>
+            <div class="form-group input-div">
+                <h4>Địa chỉ cụ thể</h4>
+                <input type="text" name="street_address"
+                    value="{{ old('street_address') ?? $provider->location->street_address }}" id="street_address"
+                    class="form-control">
+                @error('street_address')
+                    <div class="error message">{{ $message }}</div>
+                @enderror
+            </div>
+            <div class="btn-controls">
+                <div class="btn-cs btn-save"><button type="submit" data-id="{{ $provider->id }}">Lưu thay đổi</button>
+
+                </div>
+                <div class="btn-cs btn-delete"><a href="{{ route('providers.index') }}">Quay lại </a></div>
+
             </div>
         </form>
     </div>
