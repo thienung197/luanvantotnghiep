@@ -48,27 +48,31 @@
                                 </div>
                             </a>
                         </li>
-                        <li class="{{ request()->routeIs('users.*') ? 'bg-blue' : '' }}">
-                            <a href="{{ route('users.index') }}">
-                                <div class="flex-left-content">
-                                    <img src="{{ asset('img/user.png') }}" alt="">
-                                    <span>Người dùng</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="{{ request()->routeIs('roles.*') ? 'bg-blue' : '' }}">
-                            <a href="{{ route('roles.index') }}">
-                                <div class="flex-left-content">
-                                    <img src="{{ asset('img/user.png') }}" alt="">
-                                    <span>Nhóm vai trò </span>
-                                </div>
-                            </a>
-                        </li>
+                        @can('is-admin')
+                            <li class="{{ request()->routeIs('users.*') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('users.index') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/user.png') }}" alt="">
+                                        <span>Người dùng</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('is-admin')
+                            <li class="{{ request()->routeIs('roles.*') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('roles.index') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/user.png') }}" alt="">
+                                        <span>Nhóm vai trò </span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endcan
                         <li class="{{ request()->routeIs('warehouses.*') ? 'bg-blue' : '' }}">
                             <a href="{{ route('warehouses.index') }}">
                                 <div class="flex-left-content">
                                     <img src="{{ asset('img/warehouse.png') }}" alt="">
-                                    <span>Nhà kho</span>
+                                    <span>Danh sách nhà kho</span>
                                 </div>
                             </a>
                         </li>
@@ -93,56 +97,71 @@
                                 <li><a href="{{ route('customers.index') }}">Khách hàng</a></li>
                             </ul> --}}
                         </li>
-                        <li class="{{ request()->routeIs('customers.*') ? 'bg-blue' : '' }}">
-                            <a href="{{ route('customers.index') }}">
-                                <div class="flex-left-content">
-                                    <img src="{{ asset('img/category.png') }}" alt="">
-                                    <span>Khách hàng</span>
-                                </div>
-                            </a>
+                        @can('is-admin')
+                            <li class="{{ request()->routeIs('customers.*') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('customers.index') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/category.png') }}" alt="">
+                                        <span>Khách hàng</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('is-admin')
+                            <li class="{{ request()->routeIs('categories.*') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('categories.index') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/category.png') }}" alt="">
+                                        <span>Danh mục</span>
+                                    </div>
+                                </a>
 
-                        </li>
-                        <li class="{{ request()->routeIs('categories.*') ? 'bg-blue' : '' }}">
-                            <a href="{{ route('categories.index') }}">
-                                <div class="flex-left-content">
-                                    <img src="{{ asset('img/category.png') }}" alt="">
-                                    <span>Danh mục</span>
-                                </div>
-                            </a>
+                            </li>
+                        @endcan
+                        @can('is-admin')
+                            <li class="{{ request()->routeIs('attributes.*') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('attributes.index') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/category.png') }}" alt="">
+                                        <span>Thuộc tính</span>
+                                    </div>
+                                </a>
 
-                        </li>
-                        <li class="{{ request()->routeIs('attributes.*') ? 'bg-blue' : '' }}">
-                            <a href="{{ route('attributes.index') }}">
-                                <div class="flex-left-content">
-                                    <img src="{{ asset('img/category.png') }}" alt="">
-                                    <span>Thuộc tính</span>
-                                </div>
-                            </a>
-
-                        </li>
+                            </li>
+                        @endcan
                         <li class="{{ request()->routeIs('products.*') ? 'bg-blue' : '' }}">
                             <a href="{{ route('products.index') }}">
                                 <div class="flex-left-content">
                                     <img src="{{ asset('img/product.png') }}" alt="">
                                     <span>Hàng hóa</span>
-
                                 </div>
                             </a>
                         </li>
-                        <li class="{{ request()->routeIs('goodsreceipts.*') ? 'bg-blue' : '' }}">
-                            <a href="{{ route('goodsreceipts.index') }}">
-                                <div class="flex-left-content">
-                                    <img src="{{ asset('img/product.png') }}" alt="">
-                                    <span>Nhập hàng</span>
 
-                                </div>
-                            </a>
-                        </li>
+                        @can('admin')
+                            <li class="{{ request()->routeIs('goodsreceipts.*') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('goodsreceipts.index') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/product.png') }}" alt="">
+                                        <span>Nhập hàng</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endcan
                         <li class="{{ request()->routeIs('goodsissues.*') ? 'bg-blue' : '' }}">
                             <a href="{{ route('goodsissues.index') }}">
                                 <div class="flex-left-content">
                                     <img src="{{ asset('img/product.png') }}" alt="">
                                     <span>Xuất hàng</span>
+                                </div>
+                            </a>
+                        </li>
+
+                        <li class="{{ request()->routeIs('stocktakes.*') ? 'bg-blue' : '' }}">
+                            <a href="{{ route('stocktakes.index') }}">
+                                <div class="flex-left-content">
+                                    <img src="{{ asset('img/product.png') }}" alt="">
+                                    <span> Kiểm kho</span>
                                 </div>
                             </a>
                         </li>
@@ -161,22 +180,28 @@
                             </ul>
                         </li> --}}
 
-                        <li>
-                            <a href="">
-                                <div class="flex-left-content">
-                                    <img src="{{ asset('img/setting.png') }}" alt="">
-                                    <span>Cài đặt</span>
-                                </div>
-                            </a>
-                        </li>
+                        {{-- <li>
+                                <a href="">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/setting.png') }}" alt="">
+                                        <span>Cài đặt</span>
+                                    </div>
+                                </a>
+                            </li> --}}
                         <li class="log-out">
-                            <a href="">
+                            <form id="logout-form" action="{{ route('logout') }}" method="POST"
+                                style="display: none;">
+                                @csrf
+                            </form>
+                            <a href="{{ route('logout') }}"
+                                onclick="event.preventDefault();document.getElementById('logout-form').submit();">
                                 <div class="flex-left-content">
                                     <img src="{{ asset('img/log-out.png') }}" alt="">
                                     <span>Log out</span>
                                 </div>
                             </a>
                         </li>
+
                     </ul>
 
                 </div>
@@ -193,8 +218,14 @@
                     <div id="navbar-right">
                         <div class="notification">
                             <img src="{{ asset('img/bell.png') }}" alt="">
+
                         </div>
                         <img class="avatar" src="{{ asset('img/example-avatar.png') }}" alt="">
+                        @if (Auth::check())
+                            <span class="username">{{ Auth::user()->name }}</span>
+                        @else
+                            <span class="username">Khách</span>
+                        @endif
                     </div>
 
                 </div>

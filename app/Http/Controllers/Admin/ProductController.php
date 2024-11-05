@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductValue;
 use App\Models\Unit;
+use Barryvdh\Debugbar\Facades\Debugbar;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -99,6 +100,42 @@ class ProductController extends Controller
         //
     }
 
+    public function setPrice()
+    {
+        $products = $this->product->latest("id")->paginate(5);
+        $categories = $this->category->all();
+        return view('admin.products.set-price', compact('products', 'categories'));
+    }
+
+    public function filterByCategory(Request $request)
+    {
+        $categoryId = $request->category_id;
+        if ($categoryId == 0) {
+            $products = Product::paginate(5);
+        } else {
+            $products = Product::where('category_id', $categoryId)->paginate(5);
+        }
+        $productData = [];
+        foreach ($products as $product) {
+            info($products);
+
+            $productData[] = [
+                'image' => $product->images->count() > 0 ? asset('upload/' . $product->images->first()->url) : asset('upload/no-image.png'),
+                'name' => $product->name,
+                'code' => $product->code,
+                'unit' => $product->getUnitName(),
+                'status' => $product->status == 'active' ? 'Còn hàng' : ($product->status == 'out_of_stock' ? 'Ngừng hoạt động' : 'Ngừng kinh doanh'),
+                'refrigerated' => $product->refrigerated === 1 ? 'Bảo quản lạnh' : 'Điều kiện thường',
+                'created_at' => $product->created_at,
+                'id' => $product->id
+            ];
+        }
+
+
+        return response()->json([
+            'products' => $productData
+        ]);
+    }
     /**
      * Show the form for editing the specified resource.
      */

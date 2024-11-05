@@ -279,7 +279,7 @@ img.avatar {
 
 .content {
     width: 100%;
-    padding: 0 40px;
+    padding: 0 5px;
 }
 
 .content-path {
@@ -608,4 +608,10 @@ img.avatar {
 .modal-cs .modal-footer button,
 .modal-cs .modal-footer a {
     padding: 10px;
+}
+
+/* ajax blade  */
+.search-result {
+    max-height: 425px;
+    overflow-y: auto;
 }

@@ -10,8 +10,13 @@
             <p><a href="">Home</a> > <a href="">Người dùng</a></p>
         </div>
     </div>
-    <div class="btn-cs btn-add">
-        <a href="{{ route('products.create') }}">Thêm hàng hóa</a>
+    <div class="d-flex">
+        <div class="btn-cs btn-add">
+            <a href="{{ route('products.create') }}">Thêm hàng hóa</a>
+        </div>
+        <div class="btn-cs btn-add">
+            <a href="{{ route('products.setPrice') }}">Thiết lập giá</a>
+        </div>
     </div>
     <div class="table_container">
         <div class="table_title">

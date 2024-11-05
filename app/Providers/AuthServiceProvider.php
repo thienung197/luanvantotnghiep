@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Gate;
 // use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
@@ -21,6 +22,16 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        $this->registerPolicies();
+
+        // Định nghĩa một Gate cho role "manager"
+        Gate::define('is-manager', function ($user) {
+            return $user->hasRole('Manager');
+        });
+
+        // Định nghĩa một Gate cho role "admin"
+        Gate::define('is-admin', function ($user) {
+            return $user->hasRole('Admin');
+        });
     }
 }

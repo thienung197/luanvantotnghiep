@@ -59,4 +59,9 @@ class Product extends Model
     {
         return $this->hasMany(Batch::class, 'product_id', 'id');
     }
+
+    public function stockTakeDetails()
+    {
+        return $this->hasMany(StockTakeDetail::class);
+    }
 }

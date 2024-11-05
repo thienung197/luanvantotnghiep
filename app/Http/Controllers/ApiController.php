@@ -54,28 +54,68 @@ class ApiController extends Controller
 
     public function ajaxSearchBatch(Request $request)
     {
-        $key = $request->input('key');
-        $products = $this->product::where('name', 'like', '%' . $key . '%')->get();
-
-        if ($products->count() > 0) {
+        $key = $request->key;
+        $product_id = $this->product::where('name', 'like', '%' . $key . '%')->get()->pluck('id');
+        $batches = $this->batch::whereIn('product_id', $product_id)->get();
+        if ($batches->count() > 0) {
             $html = '';
-            foreach ($products as $product) {
+            $product_id = $batches->first()->product_id;
+            $product = Product::where('id', $product_id)->first();
+            $price = $product ? $product->selling_price : '0';
+            info($price);
+            foreach ($batches as $batch) {
                 $imageUrl = $product->images->isNotEmpty() ? asset('upload/' . $product->images->first()->url) : asset('upload/no-image.png');
+                $inventory = $batch->inventories->first();
+                $batch_quantity = $inventory ? $inventory->quantity_available : 0;
                 $html .= '<div class="search-result-item">';
                 $html .= '<img src="' . $imageUrl . '" alt="">';
                 $html .= '<div>';
-                $html .= '<h6 data-id="' . $product->id . '" style="display:none"></h6>';
-                $html .= '<h4 data-name="' . $product->name . '">' . 'Tên sản phẩm: ' . $product->name . '</h4>';
-                $html .= '<p data-code="' . $product->code . '">' . 'Mã sản phẩm: ' . $product->code . '</p>';
-
+                $html .= '<h6 class="product-id" data-id ="' . $product->id . '" style="display:none"></h6>';
+                $html .= '<h6 class="product-unit" data-unit ="' . $product->getUnitName() . '" style="display:none"></h6>';
+                $html .= '<h6 class="product-price" data-price ="' . $price . '" style="display:none"></h6>';
+                $html .= '<h6 class="product-batch-quantity" data-batch-quantity ="' . $batch_quantity . '" style="display:none"></h6>';
+                $html .= '<h4 data-name="' . $product->name . '">' . 'Tên SP: ' . $product->name . '</h4>';
+                $html .= '<div class="d-flex align-items-center justify-content-between">';
+                $html .= '<p class="product-code" data-product-code="' . $product->code . '">' . 'Mã SP: ' . $product->code . '</p>';
+                $html .= '<p class="batch-code" data-batch-code="' . $batch->code . '">' . 'Mã Lô: ' . $batch->code . '</p>';
+                $html .= '</div>';
+                $html .= '<div class="d-flex align-items-center justify-content-between">';
+                $html .= '<p  style="margin-right:90px" data-manufacturing-data="' . $batch->manufacturing_date . '">NSX: ' . $batch->manufacturing_date . '</p>';
+                $html .= '<p data-expiry-data="' . $batch->expiry_date . '">HSD: ' . $batch->expiry_date . '</p>';
+                $html .= '</div>';
                 $html .= '</div>';
                 $html .= '</div>';
             }
             return response($html);
         } else {
-            return response('<p>Không tìm thấy sản phẩm</p>');
+            return response(`<p>Không tìm thấy sản phẩm!</p >`);
         }
     }
+
+    // public function ajaxSearchBatch(Request $request)
+    // {
+    //     $key = $request->input('key');
+    //     $products = $this->product::where('name', 'like', '%' . $key . '%')->get();
+
+    //     if ($products->count() > 0) {
+    //         $html = '';
+    //         foreach ($products as $product) {
+    //             $imageUrl = $product->images->isNotEmpty() ? asset('upload/' . $product->images->first()->url) : asset('upload/no-image.png');
+    //             $html .= '<div class="search-result-item">';
+    //             $html .= '<img src="' . $imageUrl . '" alt="">';
+    //             $html .= '<div>';
+    //             $html .= '<h6 data-id="' . $product->id . '" style="display:none"></h6>';
+    //             $html .= '<h4 data-name="' . $product->name . '">' . 'Tên sản phẩm: ' . $product->name . '</h4>';
+    //             $html .= '<p data-code="' . $product->code . '">' . 'Mã sản phẩm: ' . $product->code . '</p>';
+
+    //             $html .= '</div>';
+    //             $html .= '</div>';
+    //         }
+    //         return response($html);
+    //     } else {
+    //         return response('<p>Không tìm thấy sản phẩm</p>');
+    //     }
+    // }
 
     private function fetchLocationById($locationId)
     {

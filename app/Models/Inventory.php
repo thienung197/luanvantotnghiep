@@ -26,4 +26,9 @@ class Inventory extends Model
     {
         return $this->belongsTo(Warehouse::class);
     }
+
+    public function batch()
+    {
+        return $this->belongsTo(Batch::class);
+    }
 }

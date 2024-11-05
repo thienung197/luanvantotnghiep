@@ -40,4 +40,9 @@ class Warehouse extends Model
     {
         return $this->location->ward . ' , ' . $this->location->district . ' . ' . $this->location->city;
     }
+
+    public function stockTakes()
+    {
+        return $this->hasMany(StockTake::class);
+    }
 }
