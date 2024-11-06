@@ -1,14 +1,13 @@
 @extends('layouts.app')
-@section('title', 'Phiếu xuất hàng')
+@section('title', 'Đặt hàng')
 @section('content')
     <div class="content_header">
         <div class="content_header--title">
-            Thêm phiếu xuất hàng
+            Đặt hàng
         </div>
         <div class="content_header--path">
             <img src="{{ asset('img/home.png') }}" alt="">
-            <p><a href="">Home</a> > <a href="{{ route('goodsissues.index') }}">Phiếu xuất hàng</a> > <a
-                    href="">Thêm phiếu xuất hàng</a>
+            <p><a href="">Home</a> > <a href="{{ route('goodsissues.create') }}">Đặt hàng</a>
             </p>
         </div>
     </div>
@@ -18,13 +17,30 @@
             <form action="" role="search">
                 <div class="form-group input-div">
                     <input type="text" name="key" class="form-control search-input" placeholder="Nhập tên sản phẩm">
-                    <div class="search-result" style="z-index:1">
+                    <div class="search-result" style="z-index:1;display:none">
 
                     </div>
                 </div>
             </form>
             <form action="{{ route('goodsissues.store') }}" method="POST">
-
+                <div class="content-10" class="table">
+                    <h6>Chọn <span id="batch-product-name"></span> sản phẩm từ lô hàng </h6>
+                    <table id="batch-table" class="table">
+                        <thead>
+                            <tr>
+                                <th>Số lô</th>
+                                <th>Ngày sản xuất</th>
+                                <th>Ngày hết hạn</th>
+                                <th>Số lượng có sẵn</th>
+                                <th>Số lượng chọn</th>
+                                <th>Xuất từ kho</th>
+                            </tr>
+                        </thead>
+                        <tbody id="batch-tbody">
+                        </tbody>
+                    </table>
+                </div>
+                <input type="hidden" value="{{ $locationId }}" class="user_location">
                 <table id="product-table" class="table ">
                     <thead>
                         <th>Mã hàng</th>
@@ -44,61 +60,59 @@
         </div>
     </div>
 
-    <div class="content-10" class="table">
-        <h6>Chọn <span id="batch-product-name"></span> sản phẩm từ lô hàng </h6>
-        <table id="batch-table" class="table">
-            <thead>
-                <tr>
-                    <th>Số lô</th>
-                    <th>Ngày sản xuất</th>
-                    <th>Ngày hết hạn</th>
-                    <th>Số lượng có sẵn</th>
-                    <th>Số lượng chọn</th>
-                    <th>Xuất từ kho</th>
-                </tr>
-            </thead>
-            <tbody id="batch-tbody">
-            </tbody>
-        </table>
-    </div>
+
 
     <div class="content-10">
         @csrf
 
-        <div class="form-group input-div">
+        {{-- <div class="form-group input-div">
             <h4>Người tạo</h4>
-            <select name="creator_id" id="" class="form-control">
-                <option value="">---Chọn người tạo ---</option>
-                @foreach ($creators as $creator)
-                    <option value="{{ $creator->id }}" {{ old('creator') == $creator->id ? 'selected' : '' }}>
-                        {{ $creator->name }}</option>
-                @endforeach
-            </select>
+            <input type="hidden" name="creator_id" value="{{ old('creator_id') ?? $user->id }}" id="creator_id"
+                class="form-control" readonly>
+            {{ $user->name }}
             @error('creator_id')
                 <div class="error message">{{ $message }}</div>
             @enderror
-        </div>
+        </div> --}}
         <div class="form-group input-div">
             <h4>Mã phiếu xuất </h4>
-            <input type="text" name="code" value="{{ old('code') }}" id="code" class="form-control">
+            <input type="text" name="code" value="{{ old('code') ?? $newCode }}" id="code" class="form-control"
+                readonly>
             @error('code')
                 <div class="error message">{{ $message }}</div>
             @enderror
         </div>
         <div class="form-group input-div">
-            <h4>Khách hàng</h4>
-            <select name="customer_id" id="" class="form-control">
-                <option value="">---Chọn khách hàng---</option>
-                @foreach ($customers as $customer)
-                    <option value="{{ $customer->id }}" {{ old('customer') == $customer->id ? 'selected' : '' }}>
-                        {{ $customer->name }}</option>
-                @endforeach
-            </select>
+            <h4> Tên Khách hàng</h4>
+            <input type="hidden" name="customer_id" value="{{ old('customer_id') ?? $user->id }}" id="customer_id"
+                class="form-control" readonly>
+            {{ $user->name }}
             @error('customer_id')
                 <div class="error message">{{ $message }}</div>
             @enderror
         </div>
         <div class="form-group input-div">
+            <h4> Số điện thoại </h4>
+            <input type="hidden" name="customer_phone" value="{{ old('customer_phone') ?? $user->phone }}"
+                id="customer_phone" class="form-control" readonly>
+            {{ $user->phone }}
+            @error('customer_phone')
+                <div class="error message">{{ $message }}</div>
+            @enderror
+        </div>
+        <div class="form-group input-div">
+            <h4> Địa chỉ</h4>
+            <input type="hidden" name="customer_address" value="{{ old('customer_address') ?? $user->id }}"
+                id="customer_address" class="form-control" readonly>
+            @if ($user->location->street_addres)
+                {{ $user->location->street_addres }}-
+            @endif
+            {{ $user->location->ward }}-{{ $user->location->district }}-{{ $user->location->city }}
+            @error('customer_address')
+                <div class="error message">{{ $message }}</div>
+            @enderror
+        </div>
+        {{-- <div class="form-group input-div">
             <h4>Nhà kho</h4>
             <select name="warehouse_id" id="" class="form-control">
                 <option value="">---Chọn nhà kho---</option>
@@ -110,7 +124,7 @@
             @error('warehouse_id')
                 <div class="error message">{{ $message }}</div>
             @enderror
-        </div>
+        </div> --}}
     </div>
     <div class="content-10">
         <div class="form-group input-div">
@@ -121,7 +135,7 @@
                 <div class="error message">{{ $message }}</div>
             @enderror
         </div>
-        <div class="form-group input-div">
+        {{-- <div class="form-group input-div">
             <h4>Giảm giá </h4>
             <input type="number" name="total_discount" value="{{ old('total_discount') }}" class="total_discount"
                 class="form-control">
@@ -136,7 +150,7 @@
             @error('amount_due')
                 <div class="error message">{{ $message }}</div>
             @enderror
-        </div>
+        </div> --}}
         <div class="btn-controls">
             <div class="btn-cs btn-save"><button type="submit">Lưu thay đổi</button></div>
             <div class="btn-cs btn-delete"><a href="{{ route('goodsissues.index') }}">Quay lại </a></div>
@@ -160,7 +174,7 @@
             var _text = $(this).val();
             if (_text.length > 0) {
                 $.ajax({
-                    url: "{{ route('ajax-search-batch') }}",
+                    url: "{{ route('ajax-search-product') }}",
                     type: "GET",
                     data: {
                         key: _text
@@ -187,7 +201,7 @@
                 let row = $(this).closest("tr");
                 let productId = row.find('input[name^="inputs["][name$="[product_id]"]').val();
                 let quantity = $(this).val();
-                let locationId = 21;
+                let locationId = $(".user_location").val();
 
                 if (productId && quantity) {
                     productsData.push({
@@ -200,7 +214,6 @@
 
             if (productsData.length > 0) {
                 fetchBatches(productsData);
-                console.log(productsData);
 
             } else {
                 console.error("No valid product data found.");
@@ -215,6 +228,8 @@
                     productsData: JSON.stringify(productsData)
                 },
                 success: function(res) {
+                    console.log(res);
+
                     let batchTbody = document.getElementById("batch-tbody");
                     batchTbody.innerHTML = "";
 
@@ -226,56 +241,105 @@
                             total + batch.quantity, 0);
 
                         let newRow = document.createElement("tr");
+
+                        // Product ID Cell with Input
                         let productCell = document.createElement("td");
-                        productCell.textContent = productId;
+                        let productInput = document.createElement("input");
+                        productInput.setAttribute("type", "text");
+                        productInput.setAttribute("readonly", true); // Read-only input for product ID
+                        productInput.setAttribute("name", `batchData[${productId}][product_id]`);
+                        productInput.setAttribute("value", productId);
+                        productCell.appendChild(productInput);
                         newRow.appendChild(productCell);
 
+                        // Total Required Cell with Input
                         let totalRequiredCell = document.createElement("td");
-                        totalRequiredCell.textContent = totalQuantityRequired;
+                        let totalRequiredInput = document.createElement("input");
+                        totalRequiredInput.setAttribute("type", "text");
+                        totalRequiredInput.setAttribute("readonly", true);
+                        totalRequiredInput.setAttribute("name",
+                            `batchData[${productId}][total_quantity_required]`);
+                        totalRequiredInput.setAttribute("value", totalQuantityRequired);
+                        totalRequiredCell.appendChild(totalRequiredInput);
                         newRow.appendChild(totalRequiredCell);
+
                         batchTbody.appendChild(newRow);
 
+                        // Create Rows for Each Batch
                         productBatches.batches.forEach((batch, index) => {
                             let batchRow = document.createElement("tr");
+
+                            // Batch ID Cell with Input
                             let batchIdCell = document.createElement("td");
-                            batchIdCell.textContent = batch.batch_id;
+                            let batchIdInput = document.createElement("input");
+                            batchIdInput.setAttribute("type", "text");
+                            batchIdInput.setAttribute("readonly", true);
+                            batchIdInput.setAttribute("name",
+                                `batchData[${productId}][batches][${index}][batch_id]`);
+                            batchIdInput.setAttribute("value", batch.batch_id);
+                            batchIdCell.appendChild(batchIdInput);
                             batchRow.appendChild(batchIdCell);
 
+                            // Manufacturing Date Cell with Input
                             let manufacturingDateCell = document.createElement("td");
-                            manufacturingDateCell.textContent = batch.manufacturing_date ??
-                                'N/A';
+                            let manufacturingDateInput = document.createElement("input");
+                            manufacturingDateInput.setAttribute("type", "text");
+                            manufacturingDateInput.setAttribute("readonly", true);
+                            manufacturingDateInput.setAttribute("name",
+                                `batchData[${productId}][batches][${index}][manufacturing_date]`
+                            );
+                            manufacturingDateInput.setAttribute("value", batch
+                                .manufacturing_date ?? 'N/A');
+                            manufacturingDateCell.appendChild(manufacturingDateInput);
                             batchRow.appendChild(manufacturingDateCell);
 
+                            // Expiry Date Cell with Input
                             let expiryDateCell = document.createElement("td");
-                            expiryDateCell.textContent = batch.expiry_date ?? 'N/A';
+                            let expiryDateInput = document.createElement("input");
+                            expiryDateInput.setAttribute("type", "text");
+                            expiryDateInput.setAttribute("readonly", true);
+                            expiryDateInput.setAttribute("name",
+                                `batchData[${productId}][batches][${index}][expiry_date]`);
+                            expiryDateInput.setAttribute("value", batch.expiry_date ?? 'N/A');
+                            expiryDateCell.appendChild(expiryDateInput);
                             batchRow.appendChild(expiryDateCell);
 
+                            // Available Quantity Cell with Input
                             let availableQuantityCell = document.createElement("td");
-                            availableQuantityCell.textContent = batch.quantity;
+                            let availableQuantityInput = document.createElement("input");
+                            availableQuantityInput.setAttribute("type", "text");
+                            availableQuantityInput.setAttribute("readonly", true);
+                            availableQuantityInput.setAttribute("name",
+                                `batchData[${productId}][batches][${index}][quantity_available]`
+                            );
+                            availableQuantityInput.setAttribute("value", batch.quantity);
+                            availableQuantityCell.appendChild(availableQuantityInput);
                             batchRow.appendChild(availableQuantityCell);
 
+                            // Quantity to Take Cell with Editable Input
                             let quantityCell = document.createElement("td");
                             let quantityInput = document.createElement("input");
                             quantityInput.setAttribute("type", "number");
                             quantityInput.setAttribute("class", "batch-quantity");
                             quantityInput.setAttribute("name",
-                                `inputs[${productId}][batches][${index}][quantity]`);
+                                `batchData[${productId}][batches][${index}][quantity]`);
                             quantityInput.setAttribute("value", batch.quantity);
                             quantityInput.setAttribute("min", 1);
                             quantityInput.setAttribute("max", batch.quantity);
                             quantityCell.appendChild(quantityInput);
-
-                            let hiddenBatchIdInput = document.createElement("input");
-                            hiddenBatchIdInput.setAttribute("type", "hidden");
-                            hiddenBatchIdInput.setAttribute("name",
-                                `inputs[${productId}][batches][${index}][batch_id]`);
-                            hiddenBatchIdInput.setAttribute("value", batch.batch_id);
-                            quantityCell.appendChild(hiddenBatchIdInput);
-
-                            let warehouseCell = document.createElement("td");
-                            warehouseCell.textContent = batch.warehouse;
                             batchRow.appendChild(quantityCell);
+
+                            // Warehouse ID Cell with Input
+                            let warehouseCell = document.createElement("td");
+                            let warehouseInput = document.createElement("input");
+                            warehouseInput.setAttribute("type", "text");
+                            warehouseInput.setAttribute("readonly", true);
+                            warehouseInput.setAttribute("name",
+                                `batchData[${productId}][batches][${index}][warehouse_id]`);
+                            warehouseInput.setAttribute("value", batch.warehouse);
+                            warehouseCell.appendChild(warehouseInput);
                             batchRow.appendChild(warehouseCell);
+
                             batchTbody.appendChild(batchRow);
                         });
                     });
@@ -295,6 +359,7 @@
             let quantityAvailable = $(this).find(".product_quantity_available").data('quantity');
             let batchId = $(this).find(".product_batch_id").data('batch');
             let id = $(this).find("h6").data('id');
+            let locationId = $(".user_location").val();
 
             let newRow = document.createElement("tr");
 
@@ -314,6 +379,13 @@
             batchIdInput.value = batchId;
             batchIdCell.appendChild(batchIdInput);
 
+            let userLocationIdCell = document.createElement("td");
+            userLocationIdCell.style.display = "none";
+            userLocationInput = document.createElement("input");
+            userLocationInput.setAttribute("type", "hidden");
+            userLocationInput.setAttribute("name", `inputs[${indexRow}][user_location_id]`);
+            userLocationInput.value = locationId;
+            userLocationIdCell.appendChild(userLocationInput);
 
             let codeCell = document.createElement("td");
             let codeInput = document.createElement("input");
@@ -331,21 +403,6 @@
             nameInput.style.width = "200px";
             nameCell.appendChild(nameInput);
 
-            // let manufacturingDateCell = document.createElement("td");
-            // let manufacturingDateInput = document.createElement("input");
-            // manufacturingDateInput.setAttribute("type", "text");
-            // manufacturingDateInput.setAttribute("name", `inputs[${indexRow}][manufacturing_date]`);
-            // manufacturingDateInput.value = manufacturingDate;
-            // manufacturingDateInput.style.width = "160px";
-            // manufacturingDateCell.appendChild(manufacturingDateInput);
-
-            // let expiryDateCell = document.createElement("td");
-            // let expiryDateInput = document.createElement("input");
-            // expiryDateInput.setAttribute("type", "text");
-            // expiryDateInput.setAttribute("name", `inputs[${indexRow}][expiry_date]`);
-            // expiryDateInput.value = expiryDate;
-            // expiryDateInput.style.width = "160px";
-            // expiryDateCell.appendChild(expiryDateInput);
 
             let quantityCell = document.createElement("td");
             let quantityControlDiv = document.createElement("div");
@@ -397,6 +454,7 @@
 
             newRow.appendChild(idCell);
             newRow.appendChild(batchIdCell);
+            newRow.appendChild(userLocationIdCell);
             newRow.appendChild(codeCell);
             newRow.appendChild(nameCell);
             // newRow.appendChild(manufacturingDateCell);

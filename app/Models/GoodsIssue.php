@@ -18,7 +18,29 @@ class GoodsIssue extends Model
 
     public function customer()
     {
-        return $this->belongsTo(Customer::class);
+        return $this->belongsTo(User::class, 'customer_id');
+    }
+
+    public function getCustomerName()
+    {
+        return $this->customer ? $this->customer->name : '';
+    }
+
+    public function getCustomerPhone()
+    {
+        return $this->customer ? $this->customer->phone : '';
+    }
+
+    public function getCustomerAddress()
+    {
+        $customer = $this->customer;
+        if ($customer->location->street_address) {
+            $street_address = $customer->location->street_address . ',';
+        } else {
+            $street_address = '';
+        }
+        return  $customer->location->ward
+            . ',' . $customer->location->district . ',' . $customer->location->city;
     }
 
     public function warehouse()
@@ -36,13 +58,13 @@ class GoodsIssue extends Model
         return $this->hasMany(GoodsIssueDetail::class);
     }
 
-    public function getCustomerName()
+    public function getTotalAmount()
     {
-        return $this->customer->name;
-    }
-
-    public function getWarehouseName()
-    {
-        return $this->warehouse->name;
+        $details = $this->goodsIssueDetails;
+        $sum = 0;
+        foreach ($details as $detail) {
+            $sum += $detail->quantity * $detail->unit_price - $detail->discount;
+        }
+        return $sum;
     }
 }

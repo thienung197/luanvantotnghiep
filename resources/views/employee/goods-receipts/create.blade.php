@@ -50,20 +50,16 @@
 
         <div class="form-group input-div">
             <h4>Người tạo</h4>
-            <select name="creator_id" id="" class="form-control">
-                <option value="">---Chọn người tạo ---</option>
-                @foreach ($creators as $creator)
-                    <option value="{{ $creator->id }}" {{ old('creator') == $creator->id ? 'selected' : '' }}>
-                        {{ $creator->name }}</option>
-                @endforeach
-            </select>
+            <input type="hidden" name="creator_id" value="{{ Auth::user()->id }}" id="creator_id">
+            <input type="text" value="{{ Auth::user()->name }}" readonly class="form-control">
             @error('creator_id')
                 <div class="error message">{{ $message }}</div>
             @enderror
         </div>
         <div class="form-group input-div">
             <h4>Mã phiếu nhập </h4>
-            <input type="text" name="code" value="{{ old('code') }}" id="code" class="form-control">
+            <input type="text" name="code" value="{{ old('code', $newCode) }}" id="code" class="form-control"
+                readonly>
             @error('code')
                 <div class="error message">{{ $message }}</div>
             @enderror
@@ -83,13 +79,8 @@
         </div>
         <div class="form-group input-div">
             <h4>Nhà kho</h4>
-            <select name="warehouse_id" id="" class="form-control">
-                <option value="">---Chọn nhà kho---</option>
-                @foreach ($warehouses as $warehouse)
-                    <option value="{{ $warehouse->id }}" {{ old('warehouse') == $warehouse->id ? 'selected' : '' }}>
-                        {{ $warehouse->name }}</option>
-                @endforeach
-            </select>
+            <input type="hidden" name="warehouse_id" value="{{ Auth::user()->warehouse_id }}" id="warehouse_id">
+            <input type="text" value="{{ $warehouseName }}" readonly class="form-control">
             @error('warehouse_id')
                 <div class="error message">{{ $message }}</div>
             @enderror
@@ -104,7 +95,7 @@
                 <div class="error message">{{ $message }}</div>
             @enderror
         </div>
-        <div class="form-group input-div">
+        {{-- <div class="form-group input-div">
             <h4>Giảm giá </h4>
             <input type="number" name="total_discount" value="{{ old('total_discount') }}" class="total_discount"
                 class="form-control">
@@ -119,7 +110,7 @@
             @error('amount_due')
                 <div class="error message">{{ $message }}</div>
             @enderror
-        </div>
+        </div> --}}
         <div class="btn-controls">
             <div class="btn-cs btn-save"><button type="submit">Lưu thay đổi</button></div>
             <div class="btn-cs btn-delete"><a href="{{ route('goodsreceipts.index') }}">Quay lại </a></div>

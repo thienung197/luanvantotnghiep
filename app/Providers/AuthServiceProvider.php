@@ -29,6 +29,10 @@ class AuthServiceProvider extends ServiceProvider
             return $user->hasRole('Manager');
         });
 
+        Gate::define('is-customer', function ($user) {
+            return $user->hasRole('Customer');
+        });
+
         // Định nghĩa một Gate cho role "admin"
         Gate::define('is-admin', function ($user) {
             return $user->hasRole('Admin');

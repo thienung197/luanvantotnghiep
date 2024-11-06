@@ -29,7 +29,7 @@ a:focus {
 
 /* body  */
 #aside {
-    width: 20%;
+    width: 21%;
     background-color: var(--color-white);
     height: auto;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -186,7 +186,7 @@ ul.sub-menu li {
 
 /* begin of main  */
 #main {
-    width: 80%;
+    width: 79%;
     height: 100vh;
 }
 /* end of main  */
@@ -420,6 +420,9 @@ img.avatar {
 .table_filter-controls select {
     margin: 0 5px;
     padding: 7px;
+}
+#table-list tr {
+    cursor: pointer;
 }
 
 #table-list tr th,

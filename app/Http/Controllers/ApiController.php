@@ -32,10 +32,10 @@ class ApiController extends Controller
     public function ajaxSearchProduct(Request $request)
     {
         $key = $request->input('key');
-        $data = $this->product::where('name', 'like', '%' . $key . '%')->get();
-        if ($data->count() > 0) {
+        $products = $this->product->where('name', 'like', '%' . $key . '%')->get();
+        if ($products->count() > 0) {
             $html = '';
-            foreach ($data as $item) {
+            foreach ($products as $item) {
                 $imageUrl = $item->images->isNotEmpty() ? asset('upload/' . $item->images->first()->url) : asset('upload/no-image.png');
                 $html .= '<div class="search-result-item">';
                 $html .= '<img src="' . $imageUrl . '" alt="">';
@@ -43,6 +43,19 @@ class ApiController extends Controller
                 $html .= '<h6 data-id ="' . $item->id . '" style="display:none"></h6>';
                 $html .= '<h4 data-name="' . $item->name . '">' . 'Tên sản phẩm: ' . $item->name . '</h4>'; // Sử dụng e() để escape các ký tự đặc biệt
                 $html .= '<p data-code="' . $item->code . '">' . 'Mã sản phẩm: ' . $item->code . '</p>';
+                // if ($item->batches->isNotEmpty()) {
+                //     $html .= '<div class="batch-info" style="display:none">';
+                //     foreach ($item->batches as $batch) {
+                //         $html .= '<p>Batch ID: ' . e($batch->id) . '</p>';
+                //         $html .= '<p>Số lượng: ' . e($batch->quantity) . '</p>';
+                //         $html .= '<p>Ngày hết hạn: ' . e($batch->expiry_date) . '</p>';
+                //         $html .= '<hr>'; 
+                //     }
+                //     $html .= '</div>';
+                // } else {
+                //     $html .= '<p>Không có lô hàng cho sản phẩm này.</p>';
+                // }
+
                 $html .= '</div>';
                 $html .= '</div>';
             }
@@ -51,18 +64,23 @@ class ApiController extends Controller
             return response(`<p>Không tìm thấy sản phẩm!</p>`);
         }
     }
-
+    //thiet ke cua kiem kho
     public function ajaxSearchBatch(Request $request)
     {
         $key = $request->key;
-        $product_id = $this->product::where('name', 'like', '%' . $key . '%')->get()->pluck('id');
-        $batches = $this->batch::whereIn('product_id', $product_id)->get();
+        $warehouseId = $request->warehouse_id;
+        $product_ids = $this->product::where('name', 'like', '%' . $key . '%')->get()->pluck('id');
+        $batches = $this->batch::join('inventories', 'batches.id', '=', 'inventories.batch_id')
+            ->whereIn('batches.product_id', $product_ids)
+            ->where('inventories.warehouse_id', $warehouseId)
+            ->get();
+        info($batches);
+        info($batches->count());
         if ($batches->count() > 0) {
             $html = '';
             $product_id = $batches->first()->product_id;
             $product = Product::where('id', $product_id)->first();
             $price = $product ? $product->selling_price : '0';
-            info($price);
             foreach ($batches as $batch) {
                 $imageUrl = $product->images->isNotEmpty() ? asset('upload/' . $product->images->first()->url) : asset('upload/no-image.png');
                 $inventory = $batch->inventories->first();
@@ -77,11 +95,11 @@ class ApiController extends Controller
                 $html .= '<h4 data-name="' . $product->name . '">' . 'Tên SP: ' . $product->name . '</h4>';
                 $html .= '<div class="d-flex align-items-center justify-content-between">';
                 $html .= '<p class="product-code" data-product-code="' . $product->code . '">' . 'Mã SP: ' . $product->code . '</p>';
-                $html .= '<p class="batch-code" data-batch-code="' . $batch->code . '">' . 'Mã Lô: ' . $batch->code . '</p>';
+                $html .= '<p style="margin-left:10px" class="batch-code" data-batch-code="' . $batch->code . '">' . 'Mã Lô: ' . $batch->code . '</p>';
                 $html .= '</div>';
-                $html .= '<div class="d-flex align-items-center justify-content-between">';
-                $html .= '<p  style="margin-right:90px" data-manufacturing-data="' . $batch->manufacturing_date . '">NSX: ' . $batch->manufacturing_date . '</p>';
-                $html .= '<p data-expiry-data="' . $batch->expiry_date . '">HSD: ' . $batch->expiry_date . '</p>';
+                $html .= '<div class="d-flex align-items-center justify-content-between" >';
+                $html .= '<p  style="display:none" style="margin-right:90px" data-manufacturing-data="' . $batch->manufacturing_date . '">NSX: ' . $batch->manufacturing_date . '</p>';
+                $html .= '<p style="display:none" data-expiry-data="' . $batch->expiry_date . '">HSD: ' . $batch->expiry_date . '</p>';
                 $html .= '</div>';
                 $html .= '</div>';
                 $html .= '</div>';
@@ -91,6 +109,53 @@ class ApiController extends Controller
             return response(`<p>Không tìm thấy sản phẩm!</p >`);
         }
     }
+
+    // k biet cua cai nao?
+    // public function ajaxSearchBatch(Request $request)
+    // {
+    //     $key = $request->key;
+    //     $warehouseId = $request->warehouse_id;
+    //     $product_ids = $this->product::where('name', 'like', '%' . $key . '%')->get()->pluck('id');
+    //     $batches = $this->batch::join('inventories', 'batches.id', '=', 'inventories.batch_id')
+    //         ->whereIn('batches.product_id', $product_ids)
+    //         ->where('inventories.warehouse_id', $warehouseId)
+    //         ->get();
+    //     info($batches);
+    //     info($batches->count());
+    //     if ($batches->count() > 0) {
+    //         $html = '';
+    //         $product_id = $batches->first()->product_id;
+    //         $product = Product::where('id', $product_id)->first();
+    //         $price = $product ? $product->selling_price : '0';
+    //         foreach ($batches as $batch) {
+    //             $imageUrl = $product->images->isNotEmpty() ? asset('upload/' . $product->images->first()->url) : asset('upload/no-image.png');
+    //             $inventory = $batch->inventories->first();
+    //             $batch_quantity = $inventory ? $inventory->quantity_available : 0;
+    //             $html .= '<div class="search-result-item">';
+    //             $html .= '<img src="' . $imageUrl . '" alt="">';
+    //             $html .= '<div>';
+    //             $html .= '<h6 class="product-id" data-id ="' . $product->id . '" style="display:none"></h6>';
+    //             $html .= '<h6 class="product-unit" data-unit ="' . $product->getUnitName() . '" style="display:none"></h6>';
+    //             $html .= '<h6 class="product-price" data-price ="' . $price . '" style="display:none"></h6>';
+    //             $html .= '<h6 class="product-batch-quantity" data-batch-quantity ="' . $batch_quantity . '" style="display:none"></h6>';
+    //             $html .= '<h4 data-name="' . $product->name . '">' . 'Tên SP: ' . $product->name . '</h4>';
+    //             $html .= '<div class="d-flex align-items-center justify-content-between">';
+    //             $html .= '<p class="product-code" data-product-code="' . $product->code . '">' . 'Mã SP: ' . $product->code . '</p>';
+    //             $html .= '<p style="margin-left:10px" class="batch-code" data-batch-code="' . $batch->code . '">' . 'Mã Lô: ' . $batch->code . '</p>';
+    //             $html .= '</div>';
+    //             $html .= '<div class="d-flex align-items-center justify-content-between" >';
+    //             $html .= '<p  style="display:none" style="margin-right:90px" data-manufacturing-data="' . $batch->manufacturing_date . '">NSX: ' . $batch->manufacturing_date . '</p>';
+    //             $html .= '<p style="display:none" data-expiry-data="' . $batch->expiry_date . '">HSD: ' . $batch->expiry_date . '</p>';
+    //             $html .= '</div>';
+    //             $html .= '</div>';
+    //             $html .= '</div>';
+    //         }
+    //         return response($html);
+    //     } else {
+    //         return response(`<p>Không tìm thấy sản phẩm!</p >`);
+    //     }
+    // }
+
 
     // public function ajaxSearchBatch(Request $request)
     // {
@@ -127,55 +192,103 @@ class ApiController extends Controller
         return Warehouse::all();
     }
 
-    private function getClosestWarehouse($customerLocation, $warehouses)
+    // private function getClosestWarehouse($customerLocation, $warehouses)
+    // {
+    //     $client = new Client();
+    //     $apiKey = env('OPENROUTESERVICE_API_KEY');
+    //     $closestWarehouse = null;
+    //     $shortestDistance = PHP_FLOAT_MAX;
+
+    //     foreach ($warehouses as $warehouse) {
+    //         $warehouseLocation = $warehouse->location;
+    //         try {
+    //             try {
+    //                 $response = $client->post('https://api.openrouteservice.org/v2/directions/driving-car', [
+    //                     'headers' => [
+    //                         'Authorization' => $apiKey,
+    //                         'Content-Type' => 'application/json',
+    //                     ],
+    //                     'json' => [
+    //                         'coordinates' => [
+    //                             [(float)$warehouseLocation->longitude, (float)$warehouseLocation->latitude],
+    //                             [(float)$customerLocation->longitude, (float)$customerLocation->latitude],
+    //                         ],
+    //                     ],
+    //                 ]);
+
+    //                 $responseBody = $response->getBody()->getContents();
+
+    //                 $data = json_decode($responseBody, true);
+    //             } catch (\GuzzleHttp\Exception\RequestException $e) {
+    //                 return response()->json(['error' => 'API request failed'], 500);
+    //             } catch (\Exception $e) {
+    //                 return response()->json(['error' => 'An error occurred'], 500);
+    //             }
+    //             $data = json_decode($response->getBody(), true);
+    //             if (isset($data['routes'][0]['summary']['distance'])) {
+    //                 $distance = $data['routes'][0]['summary']['distance'] / 1000;
+
+    //                 if ($distance < $shortestDistance) {
+    //                     $shortestDistance = $distance;
+    //                     $closestWarehouse = $warehouse;
+    //                 }
+    //             }
+    //         } catch (\Exception $e) {
+    //             continue;
+    //         }
+    //     }
+
+    //     return $closestWarehouse;
+    // }
+
+    private function getClosestWarehouses($customerLocation, $warehouses)
     {
         $client = new Client();
         $apiKey = env('OPENROUTESERVICE_API_KEY');
-        $closestWarehouse = null;
-        $shortestDistance = PHP_FLOAT_MAX;
+        $warehousesWithDistance = [];
 
         foreach ($warehouses as $warehouse) {
             $warehouseLocation = $warehouse->location;
             try {
-                try {
-                    $response = $client->post('https://api.openrouteservice.org/v2/directions/driving-car', [
-                        'headers' => [
-                            'Authorization' => $apiKey,
-                            'Content-Type' => 'application/json',
+                $response = $client->post('https://api.openrouteservice.org/v2/directions/driving-car', [
+                    'headers' => [
+                        'Authorization' => $apiKey,
+                        'Content-Type' => 'application/json',
+                    ],
+                    'json' => [
+                        'coordinates' => [
+                            [(float)$warehouseLocation->longitude, (float)$warehouseLocation->latitude],
+                            [(float)$customerLocation->longitude, (float)$customerLocation->latitude],
                         ],
-                        'json' => [
-                            'coordinates' => [
-                                [(float)$warehouseLocation->longitude, (float)$warehouseLocation->latitude],
-                                [(float)$customerLocation->longitude, (float)$customerLocation->latitude],
-                            ],
-                        ],
-                    ]);
+                    ],
+                ]);
 
-                    $responseBody = $response->getBody()->getContents();
+                $data = json_decode($response->getBody()->getContents(), true);
 
-                    $data = json_decode($responseBody, true);
-                } catch (\GuzzleHttp\Exception\RequestException $e) {
-                    return response()->json(['error' => 'API request failed'], 500);
-                } catch (\Exception $e) {
-                    return response()->json(['error' => 'An error occurred'], 500);
-                }
-                $data = json_decode($response->getBody(), true);
+                // Check if distance data is available
                 if (isset($data['routes'][0]['summary']['distance'])) {
-                    $distance = $data['routes'][0]['summary']['distance'] / 1000;
+                    $distance = $data['routes'][0]['summary']['distance'] / 1000; // Distance in km
 
-                    if ($distance < $shortestDistance) {
-                        $shortestDistance = $distance;
-                        $closestWarehouse = $warehouse;
-                    }
-                    // info($shortestDistance);
-                    // info($closestWarehouse);
+                    // Add warehouse and distance to array
+                    $warehousesWithDistance[] = [
+                        'warehouse' => $warehouse,
+                        'distance' => $distance
+                    ];
                 }
+            } catch (\GuzzleHttp\Exception\RequestException $e) {
+                // Log the error for debugging, continue to the next warehouse
+                info('OpenRouteService API request failed: ' . $e->getMessage());
             } catch (\Exception $e) {
-                continue;
+                info('Error calculating distance: ' . $e->getMessage());
             }
         }
 
-        return $closestWarehouse;
+        // Sort warehouses by distance in ascending order (closest first)
+        usort($warehousesWithDistance, function ($a, $b) {
+            return $a['distance'] <=> $b['distance'];
+        });
+        info($warehousesWithDistance);
+        return $warehousesWithDistance;
     }
 
     public function getBatches(Request $request)
@@ -188,52 +301,59 @@ class ApiController extends Controller
             $requiredQuantity = $productData['quantity'];
             $customerLocationId = $productData['locationId'];
 
+            // Fetch customer location and all warehouses
             $customerLocation = $this->fetchLocationById($customerLocationId);
-            $warehouses = $this->fetchAllWarehouseWithLocation();
+            $warehouses = $this->fetchAllWarehouseWithLocation(); // Fetch all warehouses from the database
 
-            $closestWarehouse = $this->getClosestWarehouse($customerLocation, $warehouses);
-            $batches = Product::select(
-                'products.id as product_id',
-                'products.name',
-                'batches.id as batch_id',
-                'batches.expiry_date',
-                'batches.manufacturing_date',
-                'inventories.quantity_available',
-                'warehouses.id as warehouse_id'
-            )
-                ->join('batches', 'products.id', '=', 'batches.product_id')
-                ->join('inventories', 'batches.id', '=', 'inventories.batch_id')
-                ->join('warehouses', 'inventories.warehouse_id', '=', 'warehouses.id')
-                ->where('products.id', $productId)
-                ->where('warehouses.id', $closestWarehouse->id)
-                ->where('inventories.quantity_available', '>', 0)
-                ->orderBy('batches.expiry_date', 'asc')
-                ->get();
-            info($batches);
-            //LOG.info: [{"product_id":6,"name":"Mi Hao Hao","batch_id":28,"expiry_date":"2024-10-26","manufacturing_date":"2024-10-04","quantity_available":200,"warehouse_id":7}]
+            // Sort warehouses by proximity
+            $warehousesByProximity = $this->getClosestWarehouses($customerLocation, $warehouses); // Pass both arguments
+
             $selectedBatches = [];
             $totalSelectedQuantity = 0;
 
-            foreach ($batches as $batch) {
-                $availableQuantity = $batch->quantity_available;
-                $quantityToTake = min($availableQuantity, $requiredQuantity - $totalSelectedQuantity);
+            // Loop through each warehouse by proximity to find batches
+            foreach ($warehousesByProximity as $warehouseData) {
+                $warehouse = $warehouseData['warehouse'];
+                $batches = Product::select(
+                    'products.id as product_id',
+                    'products.name',
+                    'batches.id as batch_id',
+                    'batches.expiry_date',
+                    'batches.manufacturing_date',
+                    'inventories.quantity_available',
+                    'warehouses.id as warehouse_id'
+                )
+                    ->join('batches', 'products.id', '=', 'batches.product_id')
+                    ->join('inventories', 'batches.id', '=', 'inventories.batch_id')
+                    ->join('warehouses', 'inventories.warehouse_id', '=', 'warehouses.id')
+                    ->where('products.id', $productId)
+                    ->where('warehouses.id', $warehouse->id)
+                    ->where('inventories.quantity_available', '>', 0)
+                    ->orderBy('batches.expiry_date', 'asc')
+                    ->get();
 
-                if ($quantityToTake <= 0) {
-                    break;
-                }
+                foreach ($batches as $batch) {
+                    $availableQuantity = $batch->quantity_available;
+                    $quantityToTake = min($availableQuantity, $requiredQuantity - $totalSelectedQuantity);
 
-                $selectedBatches[] = [
-                    'batch_id' => $batch->batch_id,
-                    'quantity' => $quantityToTake,
-                    'expiry_date' => $batch->expiry_date,
-                    'manufacturing_date' => $batch->manufacturing_date,
-                    'warehouse' => $batch->warehouse_id
-                ];
+                    if ($quantityToTake <= 0) {
+                        break;
+                    }
 
-                $totalSelectedQuantity += $quantityToTake;
+                    $selectedBatches[] = [
+                        'batch_id' => $batch->batch_id,
+                        'quantity' => $quantityToTake,
+                        'expiry_date' => $batch->expiry_date,
+                        'manufacturing_date' => $batch->manufacturing_date,
+                        'warehouse' => $batch->warehouse_id
+                    ];
 
-                if ($totalSelectedQuantity >= $requiredQuantity) {
-                    break;
+                    $totalSelectedQuantity += $quantityToTake;
+
+                    // Stop if required quantity has been met
+                    if ($totalSelectedQuantity >= $requiredQuantity) {
+                        break 2; // Exit both loops
+                    }
                 }
             }
 

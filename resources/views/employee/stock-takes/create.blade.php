@@ -50,6 +50,7 @@
             @csrf
             <div class="form-group input-div">
                 <h4>Người tạo </h4>
+                <input type="hidden" name="warehouse_id" value="{{ Auth::user()->warehouse_id }}" id="warehouse_id">
                 <input type="hidden" name="creator_id" value="{{ Auth::user()->id }}" id="creator_id">
                 <input type="text" value="{{ Auth::user()->name }}" readonly class="form-control">
                 @error('creator_id')
@@ -69,7 +70,8 @@
                 <input type="date" name="date" class="form-control"
                     value="{{ old('date', \Carbon\Carbon::now()->format('Y-m-d')) }}">
             </div>
-            <div class="form-group input-div">
+
+            {{-- <div class="form-group input-div">
                 <h4>Nhà kho</h4>
                 <select name="warehouse_id" id="" class="form-control">
                     <option value="">---Chọn nhà kho---</option>
@@ -81,7 +83,7 @@
                 @error('warehouse_id')
                     <div class="error message">{{ $message }}</div>
                 @enderror
-            </div>
+            </div> --}}
             <div class="form-group input-div">
                 <h4>Ghi chú</h4>
                 <input type="text" name="notes" value="{{ old('notes') }}" id="notes" class="form-control">
@@ -163,12 +165,16 @@
 
             $(document).on("input", ".search-input", function() {
                 var _text = $(this).val();
+                var warehouseId = $("#warehouse_id").val();
+                console.log(warehouseId);
+
                 if (_text.length > 0) {
                     $.ajax({
                         url: "{{ route('ajax-search-batch') }}",
                         type: "GET",
                         data: {
-                            key: _text
+                            key: _text,
+                            warehouse_id: 5
                         },
                         success: function(res) {
                             $(".search-result").html(res).css("display", "block");
@@ -223,7 +229,6 @@
                 codeInput.setAttribute("type", "text");
                 codeInput.setAttribute("name", `inputs[${indexRow}][code]`);
                 codeInput.value = code;
-                codeInput.style.width = "130px";
                 codeCell.appendChild(codeInput);
 
                 //ten hang
@@ -232,7 +237,6 @@
                 nameInput.setAttribute("type", "text");
                 nameInput.setAttribute("name", `inputs[${indexRow}][name]`);
                 nameInput.value = name;
-                nameInput.style.width = "200px";
                 nameCell.appendChild(nameInput);
 
                 //lo hang
@@ -253,7 +257,6 @@
                 batchQuantityInput.classList.add("batch-quantity");
                 batchQuantityInput.setAttribute("type", "number");
                 batchQuantityInput.setAttribute("name", `inputs[${indexRow}][batch-quantity]`);
-                batchQuantityInput.style.width = "140px";
                 batchQuantityInput.value = batchQuantity;
                 batchQuantityCell.appendChild(batchQuantityInput);
 
@@ -263,7 +266,6 @@
                 actualQuantityInput.classList.add("actual-quantity");
                 actualQuantityInput.setAttribute("type", "number");
                 actualQuantityInput.setAttribute("name", `inputs[${indexRow}][actual-quantity]`);
-                actualQuantityInput.style.width = "140px";
                 actualQuantityCell.appendChild(actualQuantityInput);
 
                 //so luong lech
@@ -272,7 +274,6 @@
                 quantityDifferenceInput.classList.add("quantity-difference");
                 quantityDifferenceInput.setAttribute("type", "number");
                 quantityDifferenceInput.setAttribute("name", `inputs[${indexRow}][quantity-difference]`);
-                quantityDifferenceInput.style.width = "140px";
                 quantityDifferenceCell.appendChild(quantityDifferenceInput);
 
                 //gia tri lech
@@ -281,14 +282,12 @@
                 valueDifferenceInput.classList.add("value-difference");
                 valueDifferenceInput.setAttribute("type", "number");
                 valueDifferenceInput.setAttribute("readonly", true);
-                valueDifferenceInput.style.width = "140px";
                 valueDifferenceCell.appendChild(valueDifferenceInput);
 
                 let removeCell = document.createElement("td");
                 let removeBtn = document.createElement("button");
                 removeBtn.classList.add("remove-product");
                 removeBtn.textContent = "Xóa";
-                removeBtn.style.width = "100px";
                 removeCell.appendChild(removeBtn);
 
                 newRow.appendChild(idCell);
@@ -374,18 +373,18 @@
 
 
 
-            //Ham cap nhat amount_due
-            function updateAmountDue() {
-                let totalAmount = parseFloat($(".total_amount").val()) || 0;
-                let totalDiscount = parseFloat($(".total_discount").val()) || 0;
-                let amountDue = totalAmount - totalDiscount;
-                $(".amount_due").val(amountDue.toFixed(2));
-            }
+            // //Ham cap nhat amount_due
+            // function updateAmountDue() {
+            //     let totalAmount = parseFloat($(".total_amount").val()) || 0;
+            //     let totalDiscount = parseFloat($(".total_discount").val()) || 0;
+            //     let amountDue = totalAmount - totalDiscount;
+            //     $(".amount_due").val(amountDue.toFixed(2));
+            // }
 
-            //Cap nhat amount_due
-            $(document).on("input", ".total_amount,.total_discount", function() {
-                updateAmountDue();
-            })
+            // //Cap nhat amount_due
+            // $(document).on("input", ".total_amount,.total_discount", function() {
+            //     updateAmountDue();
+            // })
 
             $("#product-table").on("click", ".remove-product", function() {
                 $(this).closest("tr").remove();

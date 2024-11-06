@@ -68,35 +68,51 @@
                                 </a>
                             </li>
                         @endcan
-                        <li class="{{ request()->routeIs('warehouses.*') ? 'bg-blue' : '' }}">
-                            <a href="{{ route('warehouses.index') }}">
-                                <div class="flex-left-content">
-                                    <img src="{{ asset('img/warehouse.png') }}" alt="">
-                                    <span>Danh sách nhà kho</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="{{ request()->routeIs('inventories.*') ? 'bg-blue' : '' }}">
-                            <a href="{{ route('inventories.index') }}">
-                                <div class="flex-left-content">
-                                    <img src="{{ asset('img/warehouse.png') }}" alt="">
-                                    <span>Hàng tồn kho</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="{{ request()->routeIs('providers.*') ? 'bg-blue' : '' }}">
-                            <a href="{{ route('providers.index') }}">
-                                <div class="flex-left-content">
-                                    <img src="{{ asset('img/partner.png') }}" alt="">
-                                    <span>Nhà cung cấp</span>
-                                </div>
-                                {{-- <img class="angle-down" src="{{ asset('img/angle-down.png') }}" alt=""> --}}
-                            </a>
-                            {{-- <ul class="sub-menu">
+                        @can('is-admin')
+                            <li class="{{ request()->routeIs('warehouses.*') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('warehouses.index') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/warehouse.png') }}" alt="">
+                                        <span>Danh sách nhà kho</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('is-admin')
+                            <li class="{{ request()->routeIs('inventories.*') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('inventories.index') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/warehouse.png') }}" alt="">
+                                        <span>Hàng tồn kho</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('is-manager')
+                            <li class="{{ request()->routeIs('employee.inventory') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('employee.inventory') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/warehouse.png') }}" alt="">
+                                        <span>Hàng tồn kho</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('is-admin')
+                            <li class="{{ request()->routeIs('providers.*') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('providers.index') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/partner.png') }}" alt="">
+                                        <span>Nhà cung cấp</span>
+                                    </div>
+                                    {{-- <img class="angle-down" src="{{ asset('img/angle-down.png') }}" alt=""> --}}
+                                </a>
+                                {{-- <ul class="sub-menu">
                                 <li><a href="{{ route('providers.index') }}">Nhà cung cấp</a></li>
                                 <li><a href="{{ route('customers.index') }}">Khách hàng</a></li>
                             </ul> --}}
-                        </li>
+                            </li>
+                        @endcan
                         @can('is-admin')
                             <li class="{{ request()->routeIs('customers.*') ? 'bg-blue' : '' }}">
                                 <a href="{{ route('customers.index') }}">
@@ -129,16 +145,18 @@
 
                             </li>
                         @endcan
-                        <li class="{{ request()->routeIs('products.*') ? 'bg-blue' : '' }}">
-                            <a href="{{ route('products.index') }}">
-                                <div class="flex-left-content">
-                                    <img src="{{ asset('img/product.png') }}" alt="">
-                                    <span>Hàng hóa</span>
-                                </div>
-                            </a>
-                        </li>
+                        @can('is-admin')
+                            <li class="{{ request()->routeIs('products.*') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('products.index') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/product.png') }}" alt="">
+                                        <span>Hàng hóa</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endcan
 
-                        @can('admin')
+                        @can('is-manager')
                             <li class="{{ request()->routeIs('goodsreceipts.*') ? 'bg-blue' : '' }}">
                                 <a href="{{ route('goodsreceipts.index') }}">
                                     <div class="flex-left-content">
@@ -148,23 +166,61 @@
                                 </a>
                             </li>
                         @endcan
-                        <li class="{{ request()->routeIs('goodsissues.*') ? 'bg-blue' : '' }}">
-                            <a href="{{ route('goodsissues.index') }}">
-                                <div class="flex-left-content">
-                                    <img src="{{ asset('img/product.png') }}" alt="">
-                                    <span>Xuất hàng</span>
-                                </div>
-                            </a>
-                        </li>
 
-                        <li class="{{ request()->routeIs('stocktakes.*') ? 'bg-blue' : '' }}">
-                            <a href="{{ route('stocktakes.index') }}">
-                                <div class="flex-left-content">
-                                    <img src="{{ asset('img/product.png') }}" alt="">
-                                    <span> Kiểm kho</span>
-                                </div>
-                            </a>
-                        </li>
+                        @can('is-customer')
+                            <li class="{{ request()->routeIs('customers.update.*') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('customers.update.index') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/product.png') }}" alt="">
+                                        <span>Cập nhật thông tin</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endcan
+
+                        @can('is-customer')
+                            <li class="{{ request()->routeIs('goodsissues.index') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('goodsissues.index') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/product.png') }}" alt="">
+                                        <span>Quản lý đơn hàng</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endcan
+
+                        @can('is-manager')
+                            <li class="{{ request()->routeIs('manager.goodsissues.order') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('manager.goodsissues.order') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/product.png') }}" alt="">
+                                        <span>Yêu cầu xuất kho</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endcan
+
+                        @can('is-customer')
+                            <li class="{{ request()->routeIs('goodsissues.create') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('goodsissues.create') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/product.png') }}" alt="">
+                                        <span>Đặt hàng</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endcan
+
+                        @can('is-manager')
+                            <li class="{{ request()->routeIs('stocktakes.*') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('stocktakes.index') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/product.png') }}" alt="">
+                                        <span> Kiểm kho</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endcan
                         {{-- <li>
                             <a href="">
                                 <div class="flex-left-content">

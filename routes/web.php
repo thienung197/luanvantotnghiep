@@ -11,6 +11,9 @@ use App\Http\Controllers\Admin\ProviderController;
 use App\Http\Controllers\Admin\WarehouseController;
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Customer\UpdateInformationController;
+use App\Http\Controllers\Employee\EmployeeController;
 use App\Http\Controllers\Employee\GoodsIssueController;
 use App\Http\Controllers\Employee\GoodsReceiptController;
 use App\Http\Controllers\Employee\StockTakeController;
@@ -57,7 +60,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/attributes/{attribute}', [AttributeController::class, 'storeValue'])->name('attributes.storeValue');
     Route::get('/attribute/{attribute}/edit/{attributeValue}', [AttributeController::class, 'editAttributeValue']);
     Route::post('/attribute/{attribute}/update/{attributeValue}', [AttributeController::class, 'updateAttributeValue']);
-    Route::resource('/products', ProductController::class)->middleware('role:Manager');
+    Route::resource('/products', ProductController::class);
     Route::get('product/set-price', [ProductController::class, 'setPrice'])->name('products.setPrice');
     Route::resource('/goodsreceipts', GoodsReceiptController::class);
     Route::resource('/goodsissues', GoodsIssueController::class);
@@ -70,11 +73,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/categories/{id}/attributes', [ProductController::class, 'getAttributesByCategory'])->name('categories.attributes');
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventories.index');
     Route::get('warehouse/details/{id}', [InventoryController::class, 'showDetails']);
+    Route::get('/customer/update', [UpdateInformationController::class, 'index'])->name('customers.update.index');
+    Route::post('/customer/update', [UpdateInformationController::class, 'update'])->name('customers.update.update');
+    Route::get('/warehouse/orders', [EmployeeController::class, 'showOrders'])->name('manager.goodsissues.order');
+    Route::get('/warehouse/inventory', [EmployeeController::class, 'showInventory'])->name('employee.inventory');
 });
 
 Route::post('/logout', [App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');
-// Route for showing the login form
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 
-// Route for handling the login request
 Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
+
+Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+Route::post('register', [RegisterController::class, 'register']);

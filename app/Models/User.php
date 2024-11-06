@@ -25,10 +25,12 @@ class User extends Authenticatable
         'gender',
         'birth_date',
         'phone',
-        'address',
+        'location_id',
+        'warehouse_id',
         'email',
         'password',
-        'status'
+        'status',
+        'type'
     ];
 
     public function images()
@@ -49,6 +51,11 @@ class User extends Authenticatable
     public function stockTakes()
     {
         return $this->hasMany(StockTake::class);
+    }
+
+    public function location()
+    {
+        return $this->belongsTo(Location::class);
     }
 
     /**

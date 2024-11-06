@@ -6,17 +6,20 @@ use App\Http\Controllers\Controller;
 use App\Models\Batch;
 use App\Models\Customer;
 use App\Models\GoodsIssue;
+use App\Models\GoodsIssueBatch;
 use App\Models\GoodsIssueDetail;
 use App\Models\Inventory;
 use App\Models\Provider;
 use App\Models\User;
 use App\Models\Warehouse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class GoodsIssueController extends Controller
 {
     protected $goodsIssue;
     protected $goodsIssueDetail;
+    protected $goodsIssueBatch;
     protected $batch;
     protected $warehouse;
     protected $customer;
@@ -29,7 +32,8 @@ class GoodsIssueController extends Controller
         GoodsIssueDetail $goodsIssueDetail,
         Batch $batch,
         Inventory $inventory,
-        User $user
+        User $user,
+        GoodsIssueBatch $goodsIssueBatch
     ) {
         $this->goodsIssue = $goodsIssue;
         $this->goodsIssueDetail = $goodsIssueDetail;
@@ -38,13 +42,14 @@ class GoodsIssueController extends Controller
         $this->customer = $customer;
         $this->inventory = $inventory;
         $this->user = $user;
+        $this->goodsIssueBatch = $goodsIssueBatch;
     }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $goodsIssues = $this->goodsIssue->all();
+        $goodsIssues = $this->goodsIssue::with('user')->get();
         return view('employee.goods-issues.index', compact('goodsIssues'));
     }
 
@@ -56,7 +61,24 @@ class GoodsIssueController extends Controller
         $warehouses = $this->warehouse->all();
         $customers = $this->customer->all();
         $creators = $this->user->all();
-        return view('employee.goods-issues.create', compact('warehouses', 'customers', 'creators'));
+        $user = Auth::user();
+        $locationId = $user->location ? $user->location->id : null;
+        $lastestCode = GoodsIssue::latest('code')->first();
+        if ($lastestCode) {
+            $lastNumber = (int)substr($lastestCode->code, 2);
+            $newNumber = $lastNumber + 1;
+        } else {
+            $newNumber = 1;
+        }
+        $newCode = 'XK' . str_pad($newNumber, 5, '0', STR_PAD_LEFT);
+        return view('employee.goods-issues.create', compact(
+            'warehouses',
+            'customers',
+            'creators',
+            'locationId',
+            'newCode',
+            'user'
+        ));
     }
 
     /**
@@ -64,35 +86,42 @@ class GoodsIssueController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
+        // Step 1: Create the main goods issue record
         $goodsIssue = $this->goodsIssue->create([
             'code' => $request->code,
-            'warehouse_id' => $request->warehouse_id,
-            'creator_id' => 1,
             'customer_id' => $request->customer_id,
-            'total_discount' => $request->total_discount
         ]);
-        foreach ($request->inputs as $input) {
-            $this->goodsIssueDetail->create([
+
+        // Step 2: Save each product in `goods_issue_details`
+        foreach ($request->input('inputs', []) as $input) {
+            // Create the detail entry for each product
+            $goodsIssueDetail = $this->goodsIssueDetail->create([
                 'goods_issue_id' => $goodsIssue->id,
                 'product_id' => $input['product_id'],
                 'quantity' => $input['quantity'],
-                'unit_price' => $input['unit-price'],
+                'unit_price' => $input['<unit-></unit->price'],
                 'discount' => $input['discount'],
-                'manufacturing_date' => $input['manufacturing_date'] ?? null,
-                'expiry_date' => $input['expiry_date'] ?? null
             ]);
-            $batchId = $input['batch_id'];
-            $inventoryId = $this->inventory->where('batch_id', $batchId)->first();
-            if ($inventoryId && $inventoryId->quantity_available >= $input['quantity']) {
-                $inventoryId->quantity_available -= $input['quantity'];
-                $inventoryId->save();
+
+            // Step 3: Check if batches are provided for this product in `batchData`
+            if (isset($request->batchData[$input['product_id']])) {
+                $batchData = $request->batchData[$input['product_id']];
+
+                // Save each batch to `goods_issue_batches`
+                foreach ($batchData['batches'] as $batch) {
+                    $this->goodsIssueBatch->create([
+                        'goods_issue_detail_id' => $goodsIssueDetail->id,
+                        'batch_id' => $batch['batch_id'],
+                        'quantity' => $batch['quantity'],
+                        'warehouse_id' => $batch['warehouse_id'],
+                    ]);
+                }
             }
         }
 
-        return to_route("goodsissues.index")->with(["message", "Tạo phiếu nhập hàng thành công!"]);
+        // Redirect with a success message
+        return to_route("goodsissues.index")->with("message", "Goods issue created successfully!");
     }
-
     /**
      * Display the specified resource.
      */

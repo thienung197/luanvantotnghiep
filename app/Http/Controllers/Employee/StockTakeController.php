@@ -43,6 +43,7 @@ class StockTakeController extends Controller
     {
         $warehouses = $this->warehouse->all();
         $creators = $this->user->all();
+        $user = auth()->user();
         $lastestCode = StockTake::latest('code')->first();
         if ($lastestCode) {
             $lastNumber = (int)substr($lastestCode->code, 2);
@@ -51,8 +52,12 @@ class StockTakeController extends Controller
             $newNumber = 1;
         }
         $newCode = 'KK' . str_pad($newNumber, 5, '0', STR_PAD_LEFT);
-        info($newCode);
-        return view('employee.stock-takes.create', compact('warehouses', 'creators', 'newCode'));
+        return view('employee.stock-takes.create', compact(
+            'warehouses',
+            'creators',
+            'newCode',
+            'user'
+        ));
     }
 
     /**

@@ -21,8 +21,18 @@ class GoodsIssueDetail extends Model
         return $this->belongsTo(GoodsIssue::class);
     }
 
+    public function goodsIssueBatches()
+    {
+        return $this->hasMany(GoodsIssueBatch::class);
+    }
+
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function filteredGoodsIssueBatches()
+    {
+        return $this->hasMany(GoodsIssueBatch::class, 'goods_issue_detail_id');
     }
 }

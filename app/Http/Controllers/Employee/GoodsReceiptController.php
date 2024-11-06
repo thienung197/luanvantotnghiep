@@ -55,7 +55,26 @@ class GoodsReceiptController extends Controller
         $warehouses = $this->warehouse->all();
         $providers = $this->provider->all();
         $creators = $this->user->all();
-        return view('employee.goods-receipts.create', compact('warehouses', 'providers', 'creators'));
+        $user = auth()->user();
+        $warehouseId = auth()->user()->warehouse_id;
+        $warehouse = $this->warehouse->findOrFail($warehouseId);
+        $warehouseName = $warehouse->name;
+        $lastestCode = $this->goodsReceipt::latest('code')->first();
+        if ($lastestCode) {
+            $lastNumber = (int)substr($lastestCode->code, 2);
+            $newNumber = $lastNumber + 1;
+        } else {
+            $newNumber = 1;
+        }
+        $newCode = 'NH' . str_pad($newNumber, 5, '0', STR_PAD_LEFT);
+        return view('employee.goods-receipts.create', compact(
+            'warehouses',
+            'providers',
+            'creators',
+            'newCode',
+            'user',
+            'warehouseName'
+        ));
     }
 
     /**

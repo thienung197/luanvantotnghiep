@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Users\CreateUserRequest;
 use App\Http\Requests\Users\UpdateUserRequest;
+use App\Models\Location;
 use App\Models\Role;
 use App\Models\User;
+use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -14,11 +16,15 @@ class UserController extends Controller
 {
     protected $user;
     protected $role;
+    protected $location;
+    protected $warehouse;
 
-    public function __construct(User $user, Role $role)
+    public function __construct(User $user, Role $role, Location $location, Warehouse $warehouse)
     {
         $this->user = $user;
         $this->role = $role;
+        $this->location = $location;
+        $this->warehouse = $warehouse;
     }
     /**
      * Display a listing of the resource.
@@ -39,23 +45,50 @@ class UserController extends Controller
     public function create()
     {
         $roles = $this->role->all();
-        return view('admin.users.create', compact('roles'));
+        $warehouses = $this->warehouse->all();
+        return view('admin.users.create', compact('roles', 'warehouses'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CreateUserRequest $request)
+    public function store(Request $request)
     {
-        $dataCreate = $request->all();
-        $dataCreate['status'] = 'active';
-        $dataCreate['password'] = Hash::make($request->password);
-        $dataCreate['image'] = $this->user->saveImage($request);
+
+        $location = $this->location->create([
+            'street_address' => $request->street_address ?? null,
+            'ward' => $request->ward,
+            'district' => $request->district,
+            'city' => $request->province,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude
+        ]);
+
+        $locationId = $location->id;
+
+        $dataCreate = [
+            'name' => $request->name,
+            'gender' => $request->gender,
+            'birth_date' => $request->birth_date,
+            'phone' => $request->phone,
+            'email' => $request->email,
+            'status' => 'active',
+            'location_id' => $locationId,
+            'warehouse_id' => $request->warehouse_id,
+            'password' => Hash::make($request->password),
+            'image' => $this->user->saveImage($request)
+        ];
+
         $user = $this->user->create($dataCreate);
-        $user->images()->create(['url' => $dataCreate['image']]);
-        if ($request->has('role_ids')) {
-            $user->roles()->attach($dataCreate['role_ids']);
+
+        if ($dataCreate['image']) {
+            $user->images()->create(['url' => $dataCreate['image']]);
         }
+
+        if ($request->has('role_ids') && is_array($request->role_ids)) {
+            $user->roles()->attach($request->role_ids);
+        }
+
         return to_route('users.index')->with(['message' => 'Tạo người dùng thành công!']);
     }
 
@@ -82,6 +115,15 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, string $id)
     {
+        $location = $this->location->create([
+            'street_address' => $request->street_address || null,
+            'ward' => $request->ward,
+            'district' => $request->district,
+            'city' => $request->province,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude
+        ]);
+        $locationId = $location->id;
         $dataUpdate = $request->except('password');
         if ($request->has('password')) {
             $dataUpdate['password'] = Hash::make($request->password);
