@@ -67,6 +67,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('/stocktakes', StockTakeController::class);
     Route::get('/products-filter-by-category', [ProductController::class, 'filterByCategory'])->name('products.filterByCategory');
     Route::get('/ajax-search-product', [ApiController::class, 'ajaxSearchProduct'])->name('ajax-search-product');
+    Route::get('/ajax-search-product-by-warehouse', [ApiController::class, 'ajaxSearchProductByWarehouse'])->name('ajax-search-product-by-warehouse');
+    Route::get('/get-inventory-quantity', [ApiController::class, 'getInventoryQuantity'])->name('ajax-batch-inventory');
     Route::get('/ajax-search-batch', [ApiController::class, 'ajaxSearchBatch'])->name('ajax-search-batch');
     Route::get('/fetch-batches', [ApiController::class, 'getBatches'])->name('fetch-batches');
     Route::get('/ajax-search-batch', [ApiController::class, 'ajaxSearchBatch'])->name('ajax-search-batch');

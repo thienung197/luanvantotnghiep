@@ -43,18 +43,8 @@ class ApiController extends Controller
                 $html .= '<h6 data-id ="' . $item->id . '" style="display:none"></h6>';
                 $html .= '<h4 data-name="' . $item->name . '">' . 'Tên sản phẩm: ' . $item->name . '</h4>'; // Sử dụng e() để escape các ký tự đặc biệt
                 $html .= '<p data-code="' . $item->code . '">' . 'Mã sản phẩm: ' . $item->code . '</p>';
-                // if ($item->batches->isNotEmpty()) {
-                //     $html .= '<div class="batch-info" style="display:none">';
-                //     foreach ($item->batches as $batch) {
-                //         $html .= '<p>Batch ID: ' . e($batch->id) . '</p>';
-                //         $html .= '<p>Số lượng: ' . e($batch->quantity) . '</p>';
-                //         $html .= '<p>Ngày hết hạn: ' . e($batch->expiry_date) . '</p>';
-                //         $html .= '<hr>'; 
-                //     }
-                //     $html .= '</div>';
-                // } else {
-                //     $html .= '<p>Không có lô hàng cho sản phẩm này.</p>';
-                // }
+                $html .= '<p class="ajax-product-unit" style="display:none" data-unit="' . $item->getUnitName() . '">' . 'Đơn vị tính: ' . $item->getUnitName() . '</p>';
+                $html .= '<p class="ajax-product-price" style="display:none" data-price="' . $item->selling_price . '">' . 'Giá sản phẩm : ' . $item->selling_price . '</p>';
 
                 $html .= '</div>';
                 $html .= '</div>';
@@ -64,6 +54,78 @@ class ApiController extends Controller
             return response(`<p>Không tìm thấy sản phẩm!</p>`);
         }
     }
+
+    public function ajaxSearchProductByWarehouse(Request $request)
+    {
+        $key = $request->input('key');
+        $warehouseId = $request->input('warehouse_id');
+
+        // Lấy danh sách sản phẩm dựa vào tên
+        $products = $this->product
+            ->where('name', 'like', '%' . $key . '%')
+            ->with(['batches' => function ($query) use ($warehouseId) {
+                $query->whereHas('inventories', function ($inventoryQuery) use ($warehouseId) {
+                    $inventoryQuery->where('warehouse_id', $warehouseId);
+                });
+            }])
+            ->get();
+
+        if ($products->count() > 0) {
+            $html = '';
+            foreach ($products as $item) {
+                $imageUrl = $item->images->isNotEmpty() ? asset('upload/' . $item->images->first()->url) : asset('upload/no-image.png');
+                $html .= '<div class="search-result-item">';
+                $html .= '<img src="' . $imageUrl . '" alt="">';
+                $html .= '<div>';
+                $html .= '<h6 class="product-id" data-id ="' . $item->id . '" style="display:none"></h6>';
+                $html .= '<h4 data-name="' . $item->name . '">' . 'Tên sản phẩm: ' . e($item->name) . '</h4>';
+                $html .= '<p class="product-code" data-code="' . $item->code . '">' . 'Mã sản phẩm: ' . e($item->code) . '</p>';
+                $html .= '<p class="ajax-product-unit" style="display:none" data-unit="' . $item->getUnitName() . '">' . 'Đơn vị tính: ' . e($item->getUnitName()) . '</p>';
+                $html .= '<p class="ajax-product-price" style="display:none" data-price="' . $item->selling_price . '">' . 'Giá sản phẩm : ' . e($item->selling_price) . '</p>';
+
+                if ($item->batches->isNotEmpty()) {
+                    $html .= '<div class="batch-list">';
+                    $html .= '<h5>Các lô hàng:</h5>';
+                    foreach ($item->batches as $batch) {
+                        $html .= '<p data-batch-id="' . $batch->id . '" data-batch-code="' . $batch->code . '">';
+                        $html .= 'Mã lô: ' . e($batch->code);
+                        $html .= '</p>';
+                    }
+                    $html .= '</div>';
+                } else {
+                    $html .= '<p>Không có lô hàng khả dụng trong kho.</p>';
+                }
+
+                $html .= '</div>';
+                $html .= '</div>';
+            }
+            info($html);
+
+            return response($html);
+        } else {
+            return response('<p>Không tìm thấy sản phẩm!</p>');
+        }
+    }
+
+    public function getInventoryQuantity(Request $request)
+    {
+        $batchId = $request->input('batch_id');
+        $warehouseId = $request->input('warehouse_id');
+        $inventory = Inventory::where('batch_id', $batchId)
+            ->where('warehouse_id', $warehouseId)
+            ->first();
+
+        if ($inventory) {
+            return response()->json([
+                'quantity_available' => $inventory->quantity_available
+            ]);
+        } else {
+            return response()->json([
+                'quantity_available' => 0
+            ]);
+        }
+    }
+
     //thiet ke cua kiem kho
     public function ajaxSearchBatch(Request $request)
     {

@@ -49,7 +49,7 @@ class GoodsIssueController extends Controller
      */
     public function index()
     {
-        $goodsIssues = $this->goodsIssue::with('user')->get();
+        $goodsIssues = $this->goodsIssue::with('user')->latest('id')->get();
         return view('employee.goods-issues.index', compact('goodsIssues'));
     }
 
@@ -63,14 +63,16 @@ class GoodsIssueController extends Controller
         $creators = $this->user->all();
         $user = Auth::user();
         $locationId = $user->location ? $user->location->id : null;
-        $lastestCode = GoodsIssue::latest('code')->first();
-        if ($lastestCode) {
-            $lastNumber = (int)substr($lastestCode->code, 2);
+        $latestCode = GoodsIssue::orderByDesc('id')->first();
+        info($latestCode);
+        if ($latestCode) {
+            $lastNumber = (int)substr($latestCode->code, 2);
+            info($lastNumber);
             $newNumber = $lastNumber + 1;
         } else {
             $newNumber = 1;
         }
-        $newCode = 'XK' . str_pad($newNumber, 5, '0', STR_PAD_LEFT);
+        $newCode = 'DH' . str_pad($newNumber, 5, '0', STR_PAD_LEFT);
         return view('employee.goods-issues.create', compact(
             'warehouses',
             'customers',
@@ -86,28 +88,28 @@ class GoodsIssueController extends Controller
      */
     public function store(Request $request)
     {
-        // Step 1: Create the main goods issue record
+        // Tạo mới Goods Issue
         $goodsIssue = $this->goodsIssue->create([
             'code' => $request->code,
             'customer_id' => $request->customer_id,
         ]);
 
-        // Step 2: Save each product in `goods_issue_details`
-        foreach ($request->input('inputs', []) as $input) {
-            // Create the detail entry for each product
-            $goodsIssueDetail = $this->goodsIssueDetail->create([
-                'goods_issue_id' => $goodsIssue->id,
-                'product_id' => $input['product_id'],
-                'quantity' => $input['quantity'],
-                'unit_price' => $input['<unit-></unit->price'],
-                'discount' => $input['discount'],
-            ]);
+        // Duyệt qua từng product_id trong batchData
+        foreach ($request->batchData as $productId => $batchData) {
+            // Tìm input cho product_id này trong inputs
+            $input = collect($request->inputs)->firstWhere('product_id', $productId);
 
-            // Step 3: Check if batches are provided for this product in `batchData`
-            if (isset($request->batchData[$input['product_id']])) {
-                $batchData = $request->batchData[$input['product_id']];
+            if ($input) {
+                // Tạo Goods Issue Detail cho từng product_id
+                $goodsIssueDetail = $this->goodsIssueDetail->create([
+                    'goods_issue_id' => $goodsIssue->id,
+                    'product_id' => $productId,
+                    'quantity' => $batchData['total_quantity_required'],
+                    'unit_price' => $input['unit-price'] ?? 0, // Lấy giá từ inputs
+                    'discount' => $input['discount'] ?? 0, // Lấy discount từ inputs nếu có
+                ]);
 
-                // Save each batch to `goods_issue_batches`
+                // Duyệt qua các batches của product_id để tạo Goods Issue Batch
                 foreach ($batchData['batches'] as $batch) {
                     $this->goodsIssueBatch->create([
                         'goods_issue_detail_id' => $goodsIssueDetail->id,
@@ -119,8 +121,7 @@ class GoodsIssueController extends Controller
             }
         }
 
-        // Redirect with a success message
-        return to_route("goodsissues.index")->with("message", "Goods issue created successfully!");
+        return to_route("goodsissues.index")->with("message", "Đơn hàng được đặt thành công!");
     }
     /**
      * Display the specified resource.

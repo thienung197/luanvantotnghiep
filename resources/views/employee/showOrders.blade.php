@@ -71,7 +71,7 @@
                             <p>Điện thoại: {{ $goodsIssueBatch->goodsIssueDetail->goodsIssue->getCustomerPhone() }}</p>
                             <p>Địa chỉ: {{ $goodsIssueBatch->goodsIssueDetail->goodsIssue->getCustomerAddress() }}</p>
 
-                            <strong>Thông tin xuất kho (Batch)</strong>
+                            <strong>Thông tin đơn hàng (Batch)</strong>
                             <table class="table table-bordered">
                                 <thead>
                                     <tr>

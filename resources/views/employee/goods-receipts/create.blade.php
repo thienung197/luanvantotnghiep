@@ -231,6 +231,7 @@
             discountInput.setAttribute("name", `inputs[${indexRow}][discount]`);
             discountInput.setAttribute("min", 0);
             discountInput.style.width = "140px";
+            discountInput.value = 0;
             discountCell.appendChild(discountInput);
 
             let totalPriceCell = document.createElement("td");

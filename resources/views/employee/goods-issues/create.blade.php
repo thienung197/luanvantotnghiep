@@ -203,6 +203,7 @@
                 let quantity = $(this).val();
                 let locationId = $(".user_location").val();
 
+
                 if (productId && quantity) {
                     productsData.push({
                         productId: productId,
@@ -360,6 +361,7 @@
             let batchId = $(this).find(".product_batch_id").data('batch');
             let id = $(this).find("h6").data('id');
             let locationId = $(".user_location").val();
+            let unitPrice = $(this).find(".ajax-product-price").data('price');
 
             let newRow = document.createElement("tr");
 
@@ -423,6 +425,7 @@
             unitPriceInput.setAttribute("name", `inputs[${indexRow}][unit-price]`);
             unitPriceInput.setAttribute("min", 0);
             unitPriceInput.style.width = "140px";
+            unitPriceInput.value = unitPrice;
             unitPriceCell.appendChild(unitPriceInput);
 
 
@@ -433,6 +436,7 @@
             discountInput.setAttribute("name", `inputs[${indexRow}][discount]`);
             discountInput.setAttribute("min", 0);
             discountInput.style.width = "140px";
+            discountInput.value = 0;
             discountCell.appendChild(discountInput);
 
             let totalPriceCell = document.createElement("td");

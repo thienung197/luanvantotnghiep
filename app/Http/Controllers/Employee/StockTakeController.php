@@ -44,7 +44,7 @@ class StockTakeController extends Controller
         $warehouses = $this->warehouse->all();
         $creators = $this->user->all();
         $user = auth()->user();
-        $lastestCode = StockTake::latest('code')->first();
+        $lastestCode = StockTake::latest('id')->first();
         if ($lastestCode) {
             $lastNumber = (int)substr($lastestCode->code, 2);
             $newNumber = $lastNumber + 1;

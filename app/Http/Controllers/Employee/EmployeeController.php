@@ -48,6 +48,7 @@ class EmployeeController extends Controller
             ->whereHas('goodsIssueDetail', function ($query) use ($warehouseId) {
                 $query->where('warehouse_id', $warehouseId);
             })
+            ->orderBy('id', 'desc')
             ->get();
 
         $totalAmount = 0;
@@ -56,7 +57,6 @@ class EmployeeController extends Controller
                 $totalAmount += $batch->quantity * $goodsIssueBatch->goodsIssueDetail->unit_price - $goodsIssueBatch->goodsIssueDetail->discount;
             }
         }
-
         return view('employee.showOrders', compact('goodsIssueBatches', 'totalAmount'));
     }
 

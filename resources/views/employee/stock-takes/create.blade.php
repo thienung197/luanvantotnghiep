@@ -166,15 +166,14 @@
             $(document).on("input", ".search-input", function() {
                 var _text = $(this).val();
                 var warehouseId = $("#warehouse_id").val();
-                console.log(warehouseId);
 
                 if (_text.length > 0) {
                     $.ajax({
-                        url: "{{ route('ajax-search-batch') }}",
+                        url: "{{ route('ajax-search-product-by-warehouse') }}",
                         type: "GET",
                         data: {
                             key: _text,
-                            warehouse_id: 5
+                            warehouse_id: 7
                         },
                         success: function(res) {
                             $(".search-result").html(res).css("display", "block");
@@ -194,14 +193,16 @@
             let indexRow = 0;
             $(".search-result").on("click", ".search-result-item", function() {
                 let name = $(this).find("h4").data("name");
-                let code = $(this).find(".product-code").data('product-code');
+                let code = $(this).find(".product-code").data('code');
+                console.log(code);
+
                 let id = $(this).find(".product-id").data('id');
                 let newRow = document.createElement("tr");
                 let batchCode = $(this).find(".batch-code").data("batch-code");
-                let unit = $(this).find(".product-unit").data("unit");
-                let batchQuantity = $(this).find(".product-batch-quantity").data("batch-quantity");
+                let unit = $(this).find(".ajax-product-unit").data("unit");
 
-                let price = $(this).find(".product-price").data("price");
+                let batchQuantity = $(this).find(".product-batch-quantity").data("batch-quantity");
+                let price = $(this).find(".ajax-product-price").data("price");
 
                 //id hang
                 let idCell = document.createElement("td");
@@ -229,6 +230,7 @@
                 codeInput.setAttribute("type", "text");
                 codeInput.setAttribute("name", `inputs[${indexRow}][code]`);
                 codeInput.value = code;
+                codeInput.style.width = "120px";
                 codeCell.appendChild(codeInput);
 
                 //ten hang
@@ -240,48 +242,76 @@
                 nameCell.appendChild(nameInput);
 
                 //lo hang
-                let batchCodeCell = document.createElement("td");
-                let batchCodeInput = document.createElement("input");
-                batchCodeInput.setAttribute("type", "texgt");
-                batchCodeInput.setAttribute("name", `inputs[${indexRow}][batch_id]`);
-                batchCodeInput.value = batchCode;
-                batchCodeCell.appendChild(batchCodeInput);
+                // let batchCodeCell = document.createElement("td");
+                // let batchCodeInput = document.createElement("input");
+                // batchCodeInput.setAttribute("type", "texgt");
+                // batchCodeInput.setAttribute("name", `inputs[${indexRow}][batch_id]`);
+                // // batchCodeInput.value = batchCode;
+                // batchCodeInput.style.width = "160px";
+                // batchCodeCell.appendChild(batchCodeInput);
 
-                //don vi tinh
+                //tao batch
+                let batchList = document.querySelector('.batch-list');
+
+                let batchCodeCell = document.createElement("td");
+
+                let batchCodeSelect = document.createElement("select");
+                batchCodeSelect.classList.add("batch-select")
+                batchCodeSelect.setAttribute("name", `inputs[${indexRow}][batch_id]`);
+                batchCodeSelect.style.width = "160px";
+
+                let defaultOption = document.createElement("option");
+                defaultOption.text = "Chọn lô hàng";
+                defaultOption.value = "";
+                batchCodeSelect.appendChild(defaultOption);
+
+                let batchItems = batchList.querySelectorAll('p');
+                batchItems.forEach(item => {
+                    let batchId = item.getAttribute('data-batch-id');
+                    let batchCode = item.getAttribute('data-batch-code');
+
+                    let option = document.createElement("option");
+                    option.value = batchId;
+                    option.text = batchCode;
+                    batchCodeSelect.appendChild(option);
+                });
+
+                batchCodeCell.appendChild(batchCodeSelect);
+                //tao unit
                 let unitCell = document.createElement("td");
                 unitCell.textContent = unit;
 
-                //ton kho
                 let batchQuantityCell = document.createElement("td");
                 batchQuantityInput = document.createElement("input");
-                batchQuantityInput.classList.add("batch-quantity");
+                batchQuantityInput.classList.add("batch-quantity", "quantity_available_0");
                 batchQuantityInput.setAttribute("type", "number");
                 batchQuantityInput.setAttribute("name", `inputs[${indexRow}][batch-quantity]`);
                 batchQuantityInput.value = batchQuantity;
+                batchQuantityInput.style.width = "120px";
                 batchQuantityCell.appendChild(batchQuantityInput);
 
-                //thuc te
                 let actualQuantityCell = document.createElement("td");
                 actualQuantityInput = document.createElement("input");
                 actualQuantityInput.classList.add("actual-quantity");
                 actualQuantityInput.setAttribute("type", "number");
                 actualQuantityInput.setAttribute("name", `inputs[${indexRow}][actual-quantity]`);
+                actualQuantityInput.style.width = "120px";
                 actualQuantityCell.appendChild(actualQuantityInput);
 
-                //so luong lech
                 let quantityDifferenceCell = document.createElement("td");
                 let quantityDifferenceInput = document.createElement("input");
                 quantityDifferenceInput.classList.add("quantity-difference");
                 quantityDifferenceInput.setAttribute("type", "number");
                 quantityDifferenceInput.setAttribute("name", `inputs[${indexRow}][quantity-difference]`);
+                quantityDifferenceInput.style.width = "120px";
                 quantityDifferenceCell.appendChild(quantityDifferenceInput);
 
-                //gia tri lech
                 let valueDifferenceCell = document.createElement("td");
                 let valueDifferenceInput = document.createElement("input");
                 valueDifferenceInput.classList.add("value-difference");
                 valueDifferenceInput.setAttribute("type", "number");
                 valueDifferenceInput.setAttribute("readonly", true);
+                valueDifferenceInput.style.width = "120px";
                 valueDifferenceCell.appendChild(valueDifferenceInput);
 
                 let removeCell = document.createElement("td");
@@ -306,6 +336,34 @@
                 $(".search-result").css("display", "none");
                 indexRow++;
             })
+
+            $(document).on('change', '.batch-select', function() {
+                var batchId = $(this).val();
+                var warehouseId = $(this).find(':selected').data('warehouse-id');
+                var selectName = $(this).attr('name');
+                var batchQuantityInputName = selectName.replace('batch_id', 'batch-quantity');
+
+                if (batchId) {
+                    $.ajax({
+                        url: '{{ route('ajax-batch-inventory') }}',
+                        method: 'GET',
+                        data: {
+                            batch_id: batchId,
+                            warehouse_id: 7
+                        },
+                        success: function(response) {
+
+                            $('[name="' + batchQuantityInputName + '"]').val(response
+                                .quantity_available);
+                        },
+                        error: function() {
+                            alert('Không thể lấy thông tin tồn kho');
+                        }
+                    });
+                } else {
+                    $('batch-quantity').val('');
+                }
+            });
 
             //Ham cap nhat value-amount
             function updateQuantityAndValue(row) {

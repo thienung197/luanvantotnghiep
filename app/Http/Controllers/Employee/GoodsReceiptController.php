@@ -59,7 +59,7 @@ class GoodsReceiptController extends Controller
         $warehouseId = auth()->user()->warehouse_id;
         $warehouse = $this->warehouse->findOrFail($warehouseId);
         $warehouseName = $warehouse->name;
-        $lastestCode = $this->goodsReceipt::latest('code')->first();
+        $lastestCode = $this->goodsReceipt::latest('id')->first();
         if ($lastestCode) {
             $lastNumber = (int)substr($lastestCode->code, 2);
             $newNumber = $lastNumber + 1;
@@ -74,7 +74,7 @@ class GoodsReceiptController extends Controller
             'newCode',
             'user',
             'warehouseName'
-        ));
+        ))->with(['message' => 'Tạo phiếu nhập hàng thành công!']);
     }
 
     /**
@@ -83,6 +83,14 @@ class GoodsReceiptController extends Controller
     public function store(Request $request)
     {
         // dd($request->all());
+        $lastestCode = Batch::latest('id')->first();
+        if ($lastestCode) {
+            $lastNumber = (int)substr($lastestCode->code, 2);
+            $newNumber = $lastNumber + 1;
+        } else {
+            $newNumber = 1;
+        }
+        $newCode = 'LH' . str_pad($newNumber, 5, '0', STR_PAD_LEFT);
         $goodsReceipt = $this->goodsReceipt->create([
             'code' => $request->code,
             'warehouse_id' => $request->warehouse_id,
@@ -108,7 +116,7 @@ class GoodsReceiptController extends Controller
             //     $product_inventory->save();
             // } else {
             $newBatch = $this->batch->create([
-                'code' => $goodsReceipt->id,
+                'code' => $newCode,
                 'product_id' => $input['product_id'],
                 'price' => $input['unit-price'],
                 'manufacturing_date' => $input['manufacturing_date'] ?? null,
