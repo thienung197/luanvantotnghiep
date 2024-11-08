@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Location;
+use App\Models\Warehouse;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,12 +19,14 @@ return new class extends Migration
             $table->enum('gender', ['male', 'female'])->nullable();
             $table->date('birth_date')->nullable();
             $table->string('phone', 20)->nullable();
-            $table->string('address', 150)->nullable();
-            $table->enum('status', ['active', 'locked', 'inactive']);
+            $table->enum('status', ['active', 'inactive']);
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->rememberToken();
+            $table->foreignIdFor(Warehouse::class)->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Location::class)->nullable()->constrained()->cascadeOnUpdate();
+            $table->enum('type', ['admin', 'manager', 'customer'])->default('customer')->nullable();
+            // $table->timestamp('email_verified_at')->nullable();
+            // $table->rememberToken();
             $table->timestamps();
         });
     }

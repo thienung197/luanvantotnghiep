@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('code', 30);
             $table->foreignIdFor(User::class, 'creator_id')->constrained('users')->cascadeOnDelete();
             $table->foreignIdFor(Warehouse::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(Customer::class)->constrained()->cascadeOnDelete();
-            $table->decimal('discount', 10, 2)->default(0);
+            $table->foreignIdFor(User::class, 'customer_id')->constrained('users')->cascadeOnDelete();
+            // $table->decimal('discount', 10, 2)->default(0);
             $table->timestamps();
         });
     }

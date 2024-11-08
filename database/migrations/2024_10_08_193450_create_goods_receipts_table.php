@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreignIdFor(Warehouse::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(User::class, 'creator_id')->constrained('users')->cascadeOnDelete();
             $table->foreignIdFor(Provider::class)->constrained()->cascadeOnDelete();
-            $table->decimal('discount')->nullable();
+            // $table->decimal('discount')->nullable();
             $table->timestamps();
         });
     }

@@ -15,13 +15,15 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->string('code');
+            $table->string('code')->unique();
             $table->string('name');
             $table->foreignIdFor(Category::class)->constrained()->cascadeOnDelete();
             $table->string('description')->nullable();
             $table->foreignIdFor(Unit::class)->constrained()->cascadeOnDelete();
-            $table->enum('status', ['active', 'out_of_stock', 'discontinued']);
+            $table->decimal('selling_price', 10, 2)->nullable();
+            $table->enum('status', ['active', 'inactive'])->default('active');
             $table->boolean('refrigerated');
+            $table->integer('minimum_stock_level')->nullable();
             $table->timestamps();
         });
     }

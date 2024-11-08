@@ -24,18 +24,17 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        // Định nghĩa một Gate cho role "manager"
         Gate::define('is-manager', function ($user) {
-            return $user->hasRole('Manager');
+            return $user->hasRole('Khách hàng');
         });
 
         Gate::define('is-customer', function ($user) {
-            return $user->hasRole('Customer');
+            return $user->hasRole('Nguời quản lý kho riêng');
         });
 
         // Định nghĩa một Gate cho role "admin"
         Gate::define('is-admin', function ($user) {
-            return $user->hasRole('Admin');
+            return $user->hasRole('Người quản lý tất cả kho');
         });
     }
 }

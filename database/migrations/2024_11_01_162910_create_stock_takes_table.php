@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('stock_takes', function (Blueprint $table) {
             $table->id();
             $table->string('code', 20);
-            $table->date('date');
+            $table->date('date')->nullable();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Warehouse::class)->constrained()->cascadeOnDelete();
             $table->string('notes')->nullable();

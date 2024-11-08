@@ -27,32 +27,51 @@ return new class extends Migration
         Schema::create($tableNames['permissions'], function (Blueprint $table) {
             //$table->engine('InnoDB');
             $table->bigIncrements('id'); // permission id
-            // $table->string('code', 25);
+            $table->string('code', 25)->unique();
             $table->string('name', 100)->nullable();       // For MyISAM use string('name', 225); // (or 166 for InnoDB with Redundant/Compact row format)
             $table->string('group', 150);
-            $table->string('guard_name', 25); // For MyISAM use string('guard_name', 25);
+            // $table->string('guard_name', 25); // For MyISAM use string('guard_name', 25);
             $table->timestamps();
 
             // $table->unique(['code', 'guard_name']);
         });
 
+        // Schema::create($tableNames['roles'], function (Blueprint $table) use ($teams, $columnNames) {
+        //     //$table->engine('InnoDB');
+        //     $table->bigIncrements('id'); // role id
+        //     if ($teams || config('permission.testing')) { // permission.testing is a fix for sqlite testing
+        //         $table->unsignedBigInteger($columnNames['team_foreign_key'])->nullable();
+        //         $table->index($columnNames['team_foreign_key'], 'roles_team_foreign_key_index');
+        //     }
+        //     $table->string('code', 50)->unique();
+        //     $table->string('name', 100);
+        //     // $table->string('group', 150);
+        //     // $table->string('guard_name', 25); // For MyISAM use string('guard_name', 25);
+        //     $table->timestamps();
+        //     if ($teams || config('permission.testing')) {
+        //         // $table->unique([$columnNames['team_foreign_key'], 'name', 'guard_name']);
+        //         $table->unique([$columnNames['team_foreign_key'], 'code']);
+        //     } else {
+        //         $table->unique(['code']);
+        //     }
+        // });
+
         Schema::create($tableNames['roles'], function (Blueprint $table) use ($teams, $columnNames) {
-            //$table->engine('InnoDB');
             $table->bigIncrements('id'); // role id
-            if ($teams || config('permission.testing')) { // permission.testing is a fix for sqlite testing
+
+            if ($teams || config('permission.testing')) { // Điều kiện kiểm tra xem có sử dụng 'teams' không
                 $table->unsignedBigInteger($columnNames['team_foreign_key'])->nullable();
                 $table->index($columnNames['team_foreign_key'], 'roles_team_foreign_key_index');
-            }
-            // $table->string('code', 50);
-            $table->string('name', 100);
-            // $table->string('group', 150);
-            $table->string('guard_name', 25); // For MyISAM use string('guard_name', 25);
-            $table->timestamps();
-            if ($teams || config('permission.testing')) {
-                $table->unique([$columnNames['team_foreign_key'], 'name', 'guard_name']);
+
+                // Đặt ràng buộc 'unique' cho cả team_foreign_key và code khi có teams
+                $table->unique([$columnNames['team_foreign_key'], 'code'], 'roles_team_code_unique');
             } else {
-                $table->unique(['name', 'guard_name']);
+                // Chỉ đặt ràng buộc unique cho cột 'code' nếu không có teams
+                $table->string('code', 50)->unique('roles_code_unique');
             }
+
+            $table->string('name', 100);
+            $table->timestamps();
         });
 
         Schema::create($tableNames['model_has_permissions'], function (Blueprint $table) use ($tableNames, $columnNames, $pivotPermission, $teams) {
