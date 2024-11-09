@@ -188,6 +188,7 @@ ul.sub-menu li {
 #main {
     width: 79%;
     height: 100vh;
+    overflow-y: scroll;
 }
 /* end of main  */
 

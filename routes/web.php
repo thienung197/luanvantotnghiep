@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminGoodsIssueController;
 use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CustomerController;
@@ -65,6 +66,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('/goodsreceipts', GoodsReceiptController::class);
     Route::resource('/goodsissues', GoodsIssueController::class);
     Route::resource('/stocktakes', StockTakeController::class);
+    Route::get('/admin/goods-issues', [AdminGoodsIssueController::class, 'index'])->name('admin.goodsissues.index');
+    Route::post('/admin/store-goods-issues', [AdminGoodsIssueController::class, 'store'])->name('admin.goodsissue.store');
     Route::get('/products-filter-by-category', [ProductController::class, 'filterByCategory'])->name('products.filterByCategory');
     Route::get('/ajax-search-product', [ApiController::class, 'ajaxSearchProduct'])->name('ajax-search-product');
     Route::get('/ajax-search-product-by-warehouse', [ApiController::class, 'ajaxSearchProductByWarehouse'])->name('ajax-search-product-by-warehouse');

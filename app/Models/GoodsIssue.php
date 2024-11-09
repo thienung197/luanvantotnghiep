@@ -10,8 +10,8 @@ class GoodsIssue extends Model
     use HasFactory;
     protected $fillable = [
         'code',
-        'creator_id',
-        'warehouse_id',
+        'status',
+        'approved_by',
         'customer_id',
         'discount',
     ];
@@ -19,6 +19,11 @@ class GoodsIssue extends Model
     public function customer()
     {
         return $this->belongsTo(User::class, 'customer_id');
+    }
+
+    public function getCustomerLocationId()
+    {
+        return optional($this->customer)->location->id ?? '';
     }
 
     public function getCustomerName()
@@ -34,13 +39,28 @@ class GoodsIssue extends Model
     public function getCustomerAddress()
     {
         $customer = $this->customer;
-        if ($customer->location->street_address) {
+        $street = '';
+        $ward = '';
+        $district = '';
+        $city = '';
+        $address = '';
+        if ($customer->location) {
+            $street = $customer->location->street_address;
+            $ward = $customer->location->ward;
+            $district = $customer->location->district;
+            $city = $customer->location->city;
+        } else {
+            return '';
+        }
+
+        if ($street) {
             $street_address = $customer->location->street_address . ',';
         } else {
             $street_address = '';
         }
-        return  $customer->location->ward
-            . ',' . $customer->location->district . ',' . $customer->location->city;
+
+        return  $street_address . ', ' . $ward
+            . ',' . $district . ',' . $city;
     }
 
     public function warehouse()

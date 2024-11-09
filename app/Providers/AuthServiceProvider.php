@@ -24,11 +24,11 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        Gate::define('is-manager', function ($user) {
+        Gate::define('is-customer', function ($user) {
             return $user->hasRole('Khách hàng');
         });
 
-        Gate::define('is-customer', function ($user) {
+        Gate::define('is-manager', function ($user) {
             return $user->hasRole('Nguời quản lý kho riêng');
         });
 

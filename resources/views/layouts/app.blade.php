@@ -48,26 +48,26 @@
                                 </div>
                             </a>
                         </li>
-                        {{-- @can('is-admin') --}}
-                        <li class="{{ request()->routeIs('users.*') ? 'bg-blue' : '' }}">
-                            <a href="{{ route('users.index') }}">
-                                <div class="flex-left-content">
-                                    <img src="{{ asset('img/user.png') }}" alt="">
-                                    <span>Người dùng</span>
-                                </div>
-                            </a>
-                        </li>
-                        {{-- @endcan --}}
-                        {{-- @can('is-admin') --}}
-                        <li class="{{ request()->routeIs('roles.*') ? 'bg-blue' : '' }}">
-                            <a href="{{ route('roles.index') }}">
-                                <div class="flex-left-content">
-                                    <img src="{{ asset('img/user.png') }}" alt="">
-                                    <span>Nhóm vai trò </span>
-                                </div>
-                            </a>
-                        </li>
-                        {{-- @endcan --}}
+                        @can('is-admin')
+                            <li class="{{ request()->routeIs('users.*') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('users.index') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/user.png') }}" alt="">
+                                        <span>Người dùng</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('is-admin')
+                            <li class="{{ request()->routeIs('roles.*') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('roles.index') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/user.png') }}" alt="">
+                                        <span>Nhóm vai trò </span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endcan
                         @can('is-admin')
                             <li class="{{ request()->routeIs('warehouses.*') ? 'bg-blue' : '' }}">
                                 <a href="{{ route('warehouses.index') }}">
@@ -188,6 +188,15 @@
                                 </a>
                             </li>
                         @endcan
+
+                        <li class="{{ request()->routeIs('admin.goodsissues.index') ? 'bg-blue' : '' }}">
+                            <a href="{{ route('admin.goodsissues.index') }}">
+                                <div class="flex-left-content">
+                                    <img src="{{ asset('img/product.png') }}" alt="">
+                                    <span>Danh sách đơn hàng</span>
+                                </div>
+                            </a>
+                        </li>
 
                         @can('is-manager')
                             <li class="{{ request()->routeIs('manager.goodsissues.order') ? 'bg-blue' : '' }}">

@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class GoodsIssueController extends Controller
 {
@@ -49,7 +50,9 @@ class GoodsIssueController extends Controller
      */
     public function index()
     {
-        $goodsIssues = $this->goodsIssue::with('user')->latest('id')->get();
+        $user = Auth::user();
+        $userId = $user->id;
+        $goodsIssues = $this->goodsIssue::with('user')->where('customer_id', $userId)->latest('id')->get();
         return view('employee.goods-issues.index', compact('goodsIssues'));
     }
 
@@ -59,7 +62,7 @@ class GoodsIssueController extends Controller
     public function create()
     {
         $warehouses = $this->warehouse->all();
-        $customers = $this->customer->all();
+        // $customers = $this->customer->all();
         $creators = $this->user->all();
         $user = Auth::user();
         $locationId = $user->location ? $user->location->id : null;
@@ -75,7 +78,7 @@ class GoodsIssueController extends Controller
         $newCode = 'DH' . str_pad($newNumber, 5, '0', STR_PAD_LEFT);
         return view('employee.goods-issues.create', compact(
             'warehouses',
-            'customers',
+            // 'customers',
             'creators',
             'locationId',
             'newCode',
@@ -88,39 +91,45 @@ class GoodsIssueController extends Controller
      */
     public function store(Request $request)
     {
-        // Tạo mới Goods Issue
+        // Kiểm tra toàn bộ dữ liệu đầu vào
+        // dd($request->all());
+        DB::beginTransaction();
+        // Tạo Goods Issue
         $goodsIssue = $this->goodsIssue->create([
             'code' => $request->code,
             'customer_id' => $request->customer_id,
+            'status' => 0,
+            'approved_by' => null
         ]);
 
-        // Duyệt qua từng product_id trong batchData
-        foreach ($request->batchData as $productId => $batchData) {
-            // Tìm input cho product_id này trong inputs
-            $input = collect($request->inputs)->firstWhere('product_id', $productId);
-
-            if ($input) {
-                // Tạo Goods Issue Detail cho từng product_id
+        // Duyệt qua các sản phẩm trong 'inputs'
+        foreach ($request->inputs as $input) {
+            // Kiểm tra sự tồn tại của 'product_id' và dữ liệu lô hàng trong 'inputs'
+            if (isset($input['product_id']) && isset($input['quantity'])) {
+                // Tạo Goods Issue Detail
                 $goodsIssueDetail = $this->goodsIssueDetail->create([
                     'goods_issue_id' => $goodsIssue->id,
-                    'product_id' => $productId,
-                    'quantity' => $batchData['total_quantity_required'],
-                    'unit_price' => $input['unit-price'] ?? 0, // Lấy giá từ inputs
-                    'discount' => $input['discount'] ?? 0, // Lấy discount từ inputs nếu có
+                    'product_id' => $input['product_id'],
+                    'quantity' => $input['quantity'],
+                    'unit_price' => $input['unit-price'] ?? 0,
+                    'discount' => $input['discount'] ?? 0,
                 ]);
 
-                // Duyệt qua các batches của product_id để tạo Goods Issue Batch
-                foreach ($batchData['batches'] as $batch) {
-                    $this->goodsIssueBatch->create([
-                        'goods_issue_detail_id' => $goodsIssueDetail->id,
-                        'batch_id' => $batch['batch_id'],
-                        'quantity' => $batch['quantity'],
-                        'warehouse_id' => $batch['warehouse_id'],
-                    ]);
+                // Kiểm tra và tạo Goods Issue Batch từ dữ liệu batch
+                if (isset($input['batches']) && is_array($input['batches'])) {
+                    foreach ($input['batches'] as $batch) {
+                        $this->goodsIssueBatch->create([
+                            'goods_issue_detail_id' => $goodsIssueDetail->id,
+                            'batch_id' => $batch['batch_id'],
+                            'quantity' => $batch['quantity'],
+                            'warehouse_id' => $batch['warehouse_id'],
+                        ]);
+                    }
                 }
             }
         }
-
+        DB::commit();
+        // Điều hướng về trang goods issues và hiển thị thông báo
         return to_route("goodsissues.index")->with("message", "Đơn hàng được đặt thành công!");
     }
     /**

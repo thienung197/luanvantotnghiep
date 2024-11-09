@@ -24,7 +24,7 @@
             </form>
             <form action="{{ route('goodsissues.store') }}" method="POST">
                 <div class="content-10" class="table">
-                    <h6>Chọn <span id="batch-product-name"></span> sản phẩm từ lô hàng </h6>
+                    {{-- <h6>Chọn <span id="batch-product-name"></span> sản phẩm từ lô hàng </h6>
                     <table id="batch-table" class="table">
                         <thead>
                             <tr>
@@ -38,7 +38,7 @@
                         </thead>
                         <tbody id="batch-tbody">
                         </tbody>
-                    </table>
+                    </table> --}}
                 </div>
                 <input type="hidden" value="{{ $locationId }}" class="user_location">
                 <table id="product-table" class="table ">
@@ -104,10 +104,12 @@
             <h4> Địa chỉ</h4>
             <input type="hidden" name="customer_address" value="{{ old('customer_address') ?? $user->id }}"
                 id="customer_address" class="form-control" readonly>
-            @if ($user->location->street_addres)
-                {{ $user->location->street_addres }}-
+            @if ($user->location)
+                @if ($user->location->street_address)
+                    {{ $user->location->street_address }}-
+                @endif
+                {{ $user->location->ward }}-{{ $user->location->district }}-{{ $user->location->city }}
             @endif
-            {{ $user->location->ward }}-{{ $user->location->district }}-{{ $user->location->city }}
             @error('customer_address')
                 <div class="error message">{{ $message }}</div>
             @enderror
@@ -162,6 +164,7 @@
 
 @push('js')
     <script>
+        //xu ly kq tim kiem
         $(document).ready(function() {
             $(document).on("click", ".search-input", function(e) {
                 let _text = $(this).val();
@@ -170,6 +173,7 @@
                 }
             })
         })
+        //goi ham tim kiem
         $(document).on("input", ".search-input", function() {
             var _text = $(this).val();
             if (_text.length > 0) {
@@ -187,7 +191,7 @@
                 $(".search-result").css("display", "none");
             }
         });
-
+        //xu ly kq tim kiem
         $(document).on("click", function(e) {
             if (!$(e.target).closest(".search-result-container").length) {
                 $(".search-result").css("display", "none");

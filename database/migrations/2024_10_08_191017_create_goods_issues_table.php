@@ -17,8 +17,8 @@ return new class extends Migration
         Schema::create('goods_issues', function (Blueprint $table) {
             $table->id();
             $table->string('code', 30);
-            $table->foreignIdFor(User::class, 'creator_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignIdFor(Warehouse::class)->constrained()->cascadeOnDelete();
+            // $table->foreignIdFor(User::class, 'creator_id')->constrained('users')->cascadeOnDelete();
+            // $table->foreignIdFor(Warehouse::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(User::class, 'customer_id')->constrained('users')->cascadeOnDelete();
             // $table->decimal('discount', 10, 2)->default(0);
             $table->timestamps();
