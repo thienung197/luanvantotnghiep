@@ -234,6 +234,17 @@
                         @endcan
 
                         @can('is-manager')
+                            <li class="{{ request()->routeIs('restock-request.index') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('restock-request.index') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/product.png') }}" alt="">
+                                        <span>Phiếu đề nghị nhập hàng</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endcan
+
+                        @can('is-manager')
                             <li class="{{ request()->routeIs('issue-report.index') ? 'bg-blue' : '' }}">
                                 <a href="{{ route('issue-report.index') }}">
                                     <div class="flex-left-content">

@@ -20,6 +20,7 @@ use App\Http\Controllers\Employee\GoodsIssueController;
 use App\Http\Controllers\Employee\GoodsReceiptController;
 use App\Http\Controllers\Employee\IssueReportController;
 use App\Http\Controllers\Employee\StockTakeController;
+use App\Http\Controllers\RestockRequestController;
 use App\Models\AttributeValue;
 use App\Models\Customer;
 use App\Models\GoodsReceipt;
@@ -69,6 +70,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('/goodsissues', GoodsIssueController::class);
     Route::resource('/stocktakes', StockTakeController::class);
     Route::resource('/issue-report', IssueReportController::class);
+    Route::resource('/restock-request', RestockRequestController::class);
     Route::get('/admin/goods-issues', [AdminGoodsIssueController::class, 'index'])->name('admin.goodsissues.index');
     Route::post('/admin/store-goods-issues', [AdminGoodsIssueController::class, 'store'])->name('admin.goodsissue.store');
     Route::get('/products-filter-by-category', [ProductController::class, 'filterByCategory'])->name('products.filterByCategory');
