@@ -78,6 +78,13 @@ class GoodsIssue extends Model
         return $this->hasMany(GoodsIssueDetail::class);
     }
 
+    public function goodsIssueBatches()
+    {
+        return $this->hasMany(GoodsIssueBatch::class);
+    }
+
+
+
     public function getTotalAmount()
     {
         $details = $this->goodsIssueDetails;

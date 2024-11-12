@@ -9,6 +9,7 @@ use App\Models\ProductValue;
 use App\Models\Unit;
 use Barryvdh\Debugbar\Facades\Debugbar;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
@@ -141,7 +142,10 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $product = $this->product->findOrFail($id);
+        $categories = $this->category->all();
+        $units = $this->unit->all();
+        return view('admin.products.edit', compact('product', 'categories', 'units'));
     }
 
     /**
@@ -149,7 +153,26 @@ class ProductController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        DB::beginTransaction();
+        $product = $this->product->findOrFail($id);
+        $product->update([
+            'code' => $request->code,
+            'name' => $request->name,
+            'category_id' => $request->category_id,
+            'description' => $request->description,
+            'unit_id' => $request->unit_id,
+            'refrigerated' => $request->refrigerated,
+            'status' => $request->status
+        ]);
+        $currentImage = $product->images->count() > 0 ? $product->images->first()->url : '';
+        info($currentImage);
+        $imageUpdate = $this->product->updateImage($request, $currentImage);
+        info($imageUpdate);
+        $product->images()->delete();
+        $product->images()->create(['url' => $imageUpdate]);
+        $page = $request->get('page', 1);
+        DB::commit();
+        return to_route('products.index', ['page' => $page])->with(['message' => 'Cập nhật sản phẩm thành công!']);
     }
 
     /**

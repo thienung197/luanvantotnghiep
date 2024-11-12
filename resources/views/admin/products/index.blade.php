@@ -70,8 +70,9 @@
                     </td>
                     <td>{{ $product->created_at }}</td>
                     <td class="btn-cell">
-                        <a href="{{ route('products.edit', $product->id) }}"><img src="{{ asset('img/edit.png') }}"
-                                alt=""></a>
+                        <a
+                            href="{{ route('products.edit', ['product' => $product->id, 'page' => request()->get('page', 1)]) }}"><img
+                                src="{{ asset('img/edit.png') }}" alt=""></a>
                         <form action="{{ route('products.destroy', $product->id) }}" method="POST">
                             @csrf
                             @method('delete')

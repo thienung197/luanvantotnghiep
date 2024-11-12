@@ -10,7 +10,7 @@
             <p><a href="">Home</a> > <a href="">Người dùng</a></p>
         </div>
     </div>
-    <div class="set-price-section">
+    {{-- <div class="set-price-section">
         <div class="content-10">
             <div class="form-group input-div">
                 <h4>Danh mục</h4>
@@ -50,7 +50,7 @@
                 </label>
             </div>
         </div>
-    </div>
+    </div> --}}
     <div class="table_container">
         <div class="table_title">
             Danh sách hàng hóa
@@ -77,45 +77,36 @@
         <table class="table" id="table-list">
             <thead>
                 <tr>
-                    <th>Ảnh sản phẩm</th>
                     <th>Tên hàng hóa</th>
-                    <th>Mã hàng hóa </th>
-                    <th>Đơn vị </th>
+                    <th>Mã hàng hóa</th>
+                    <th>Đơn vị</th>
                     <th>Tồn kho</th>
                     <th>Giá nhập gần nhất</th>
-                    <th>Giá bán </th>
-                    {{-- <th>Thao tác</th> --}}
+                    <th>Giá bán</th>
+                </tr>
+                <tr>
+                    <td colspan="6">
+                        <input type="text" name="key" class="form-control search-input"
+                            placeholder="Nhập tên sản phẩm">
+                    </td>
                 </tr>
             </thead>
-            @php
-                $stt = ($products->currentPage() - 1) * $products->perPage() + 1;
-            @endphp
-            @foreach ($products as $product)
-                <tr>
-                    {{-- <td>{{ $stt++ }}</td> --}}
-                    <td><img width="100" height="100"
-                            src="{{ $product->images->count() > 0 ? asset('upload/' . $product->images->first()->url) : asset('upload/no-image.png') }}"
-                            alt=""></td>
-                    <td>{{ $product->name }}</td>
-                    <td>{{ $product->code }}</td>
-                    <td>{{ $product->getUnitName() }}</td>
-                    <td>{{ $product->status == 'active' ? 'Còn hàng' : ($product->status == 'out_of_stock' ? 'Ngừng hoạt động' : 'Ngừng kinh doanh') }}
-                    </td>
-                    <td>{{ $product->refrigerated === 1 ? 'Bảo quản lạnh' : 'Điều kiện thường' }}
-                    </td>
-                    <td>{{ $product->created_at }}</td>
-                    {{-- <td class="btn-cell">
-                        <a href="{{ route('products.edit', $product->id) }}"><img src="{{ asset('img/edit.png') }}"
-                                alt=""></a>
-                        <form action="{{ route('products.destroy', $product->id) }}" method="POST">
-                            @csrf
-                            @method('delete')
-                            <button type="submit"><img src="{{ asset('img/delete.png') }}" alt=""></button>
-                        </form>
-                    </td> --}}
-                </tr>
-            @endforeach
-
+            <tbody id="product-tbody">
+                @php
+                    $stt = ($products->currentPage() - 1) * $products->perPage() + 1;
+                @endphp
+                @foreach ($products as $product)
+                    <tr data-name="{{ strtolower($product->name) }}">
+                        <td>{{ $product->name }}</td>
+                        <td>{{ $product->code }}</td>
+                        <td>{{ $product->getUnitName() }}</td>
+                        <td>{{ $product->status == 'active' ? 'Còn hàng' : ($product->status == 'out_of_stock' ? 'Ngừng hoạt động' : 'Ngừng kinh doanh') }}
+                        </td>
+                        <td>{{ $product->refrigerated === 1 ? 'Bảo quản lạnh' : 'Điều kiện thường' }}</td>
+                        <td>{{ $product->selling_price }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
         </table>
         {{ $products->links() }}
     </div>
@@ -126,7 +117,64 @@
         @if (Session::has('message'))
             toastr.success("{{ Session::get('message') }}");
         @endif
+        document.querySelector('.search-input').addEventListener('input', function() {
+            let searchValue = this.value.toLowerCase();
+            let rows = document.querySelectorAll('#product-tbody tr');
 
+            rows.forEach(row => {
+                let productName = row.getAttribute('data-name');
+                if (productName.includes(searchValue)) {
+                    row.style.display = ''; // Show row
+                } else {
+                    row.style.display = 'none'; // Hide row
+                }
+            });
+        });
+        //goi ham tim kiem
+        $(document).on("input", ".search-input", function() {
+            var _text = $(this).val();
+            if (_text.length > 0) {
+                $.ajax({
+                    url: "{{ route('ajax-search-product-table') }}",
+                    type: "GET",
+                    data: {
+                        key: _text
+                    },
+                    success: function(res) {
+
+                        $("#product-tbody").html(
+                            res); // Inject the response HTML directly into the table body
+                    }
+                });
+            } else {
+                $("#product-tbody").html(""); // Clear the table if no search text is entered
+            }
+        });
+
+        //xu ly thay doi gia san pham
+        $(document).on("blur", ".selling-price-input", function() {
+            let productId = $(this).data("id");
+            let newPrice = $(this).val();
+            $.ajax({
+                url: "{{ route('ajax-update-product-price') }}",
+                type: "GET",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    product_id: productId,
+                    selling_price: newPrice
+                },
+                success: function(res) {
+                    if (res.success) {
+                        alert("Cập nhật giá thành công!");
+                    } else {
+                        alert("Lỗi khi cập nhật giá!");
+                    }
+                },
+                error: function() {
+                    alert("Xảy ra lỗi khi cập nhật giá!");
+                }
+            })
+        })
 
         $(document).on('change', '#category_id', function() {
             let categoryId = $(this).val();

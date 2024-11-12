@@ -20,7 +20,10 @@ trait  HandleUploadImageTrait
         if ($this->verify($request)) {
             $image = $request->file('image');
             $name = time() . '.' . $image->getClientOriginalExtension();
-            Image::make($image)->resize(300, 300)->save($this->path . $name);
+
+            // Save the uploaded image directly without resizing
+            $image->move(public_path($this->path), $name);
+
             return $name;
         }
     }

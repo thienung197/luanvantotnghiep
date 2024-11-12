@@ -10,9 +10,9 @@
             <p><a href="">Home</a> > <a href="">Phiếu xuất hàng</a></p>
         </div>
     </div>
-    {{-- <div class="btn-cs btn-add">
-        <a href="{{ route('goodsissues.create') }}">Thêm phiếu xuất hàng</a>
-    </div> --}}
+    <div class="btn-cs btn-add">
+        <a href="{{ route('issue-report.create') }}">Thêm phiếu xuất hàng</a>
+    </div>
     <div class="table_container">
         <div class="table_title">
             Danh sách đơn hàng
@@ -45,7 +45,7 @@
                 <th>Thao tác</th>
             </tr>
 
-            @foreach ($goodsIssues as $goodsIssue)
+            {{-- @foreach ($goodsIssues as $goodsIssue)
                 <tr class="goods-issue-row" data-id="{{ $goodsIssue->id }}">
                     <td>{{ $goodsIssue->code }}</td>
                     <td>{{ $goodsIssue->created_at }}</td>
@@ -115,7 +115,7 @@
                         </div>
                     </td>
                 </tr>
-            @endforeach
+            @endforeach --}}
         </table>
         {{-- {{ $goodsReceipts->links() }} --}}
     </div>

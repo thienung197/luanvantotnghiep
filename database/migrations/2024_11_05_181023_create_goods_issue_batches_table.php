@@ -13,15 +13,15 @@ return new class extends Migration
     {
         Schema::create('goods_issue_batches', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('goods_issue_detail_id');
+            $table->unsignedBigInteger('goods_issue_id');
             $table->unsignedBigInteger('warehouse_id');
             $table->unsignedBigInteger('batch_id');
             $table->integer('quantity');
             $table->timestamps();
 
-            $table->foreign('goods_issue_detail_id')
+            $table->foreign('goods_issue_id')
                 ->references('id')
-                ->on('goods_issue_details')
+                ->on('goods_issues')
                 ->onDelete('cascade');
 
             $table->foreign('warehouse_id')

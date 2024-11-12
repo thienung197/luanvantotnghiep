@@ -40,14 +40,36 @@
                 </div>
                 <div id="menu-container">
                     <ul>
-                        <li class="{{ request()->routeIs('dashboard') ? 'bg-blue' : '' }}">
-                            <a href="{{ route('dashboard') }}">
-                                <div class="flex-left-content">
-                                    <img src="{{ asset('img/dashboard.png') }}" alt="">
-                                    <span>Dashboard</span>
-                                </div>
-                            </a>
-                        </li>
+                        {{-- @can('is-admin')
+                            <li class="{{ request()->routeIs('customer.dashboard') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('customer.dashboard') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/dashboard.png') }}" alt="">
+                                        <span>Dashboard</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('is-manager')
+                            <li class="{{ request()->routeIs('dashboard') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('dashboard') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/dashboard.png') }}" alt="">
+                                        <span>Dashboard</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endcan --}}
+                        @can('is-customer')
+                            <li class="{{ request()->routeIs('customer.dashboard') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('customer.dashboard') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/dashboard.png') }}" alt="">
+                                        <span>Dashboard</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endcan
                         @can('is-admin')
                             <li class="{{ request()->routeIs('users.*') ? 'bg-blue' : '' }}">
                                 <a href="{{ route('users.index') }}">
@@ -189,14 +211,16 @@
                             </li>
                         @endcan
 
-                        <li class="{{ request()->routeIs('admin.goodsissues.index') ? 'bg-blue' : '' }}">
-                            <a href="{{ route('admin.goodsissues.index') }}">
-                                <div class="flex-left-content">
-                                    <img src="{{ asset('img/product.png') }}" alt="">
-                                    <span>Danh sách đơn hàng</span>
-                                </div>
-                            </a>
-                        </li>
+                        @can('is-admin')
+                            <li class="{{ request()->routeIs('admin.goodsissues.index') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('admin.goodsissues.index') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/product.png') }}" alt="">
+                                        <span>Danh sách đơn hàng</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endcan
 
                         @can('is-manager')
                             <li class="{{ request()->routeIs('manager.goodsissues.order') ? 'bg-blue' : '' }}">
@@ -204,6 +228,17 @@
                                     <div class="flex-left-content">
                                         <img src="{{ asset('img/product.png') }}" alt="">
                                         <span>Yêu cầu xuất kho</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endcan
+
+                        @can('is-manager')
+                            <li class="{{ request()->routeIs('issue-report.index') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('issue-report.index') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/product.png') }}" alt="">
+                                        <span>Báo cáo xuất kho</span>
                                     </div>
                                 </a>
                             </li>

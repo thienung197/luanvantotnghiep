@@ -40,24 +40,30 @@ class EmployeeController extends Controller
         $warehouseId = auth()->user()->warehouse_id;
 
         $goodsIssueBatches = GoodsIssueBatch::with([
-            'goodsIssueDetail.goodsIssue',
-            'goodsIssueDetail.filteredGoodsIssueBatches' => function ($query) use ($warehouseId) {
-                $query->where('warehouse_id', $warehouseId);
-            }
+            'goodsIssue',
+            'batch.product',
+            'goodsIssue.customer',
         ])
-            ->whereHas('goodsIssueDetail', function ($query) use ($warehouseId) {
+            ->whereHas('goodsIssue', function ($query) use ($warehouseId) {
                 $query->where('warehouse_id', $warehouseId);
             })
             ->orderBy('id', 'desc')
             ->get();
 
-        $totalAmount = 0;
-        foreach ($goodsIssueBatches as $goodsIssueBatch) {
-            foreach ($goodsIssueBatch->goodsIssueDetail->filteredGoodsIssueBatches as $batch) {
-                $totalAmount += $batch->quantity * $goodsIssueBatch->goodsIssueDetail->unit_price - $goodsIssueBatch->goodsIssueDetail->discount;
+        // Nhóm các goodsIssueBatches theo goods_issue_id
+        $groupedGoodsIssues = $goodsIssueBatches->groupBy('goods_issue_id');
+
+        // Tính tổng tiền hàng cho từng đơn hàng
+        $totals = [];
+        foreach ($groupedGoodsIssues as $goodsIssueId => $batches) {
+            $totalAmount = 0;
+            foreach ($batches as $batch) {
+                $totalAmount += $batch->quantity * $batch->unit_price - $batch->discount;
             }
+            $totals[$goodsIssueId] = $totalAmount;
         }
-        return view('employee.showOrders', compact('goodsIssueBatches', 'totalAmount'));
+
+        return view('employee.showOrders', compact('groupedGoodsIssues', 'totals'));
     }
 
     public function showInventory()

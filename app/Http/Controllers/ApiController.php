@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Batch;
 use App\Models\Customer;
+use App\Models\GoodsIssueBatch;
 use App\Models\Inventory;
 use App\Models\Location;
 use App\Models\Product;
@@ -53,6 +54,74 @@ class ApiController extends Controller
         } else {
             return response(`<p>Không tìm thấy sản phẩm!</p>`);
         }
+    }
+
+    public function ajaxSearchProductTable(Request $request)
+    {
+        $key = $request->input('key');
+        $products = $this->product->where('name', 'like', '%' . $key . '%')->get();
+
+        if ($products->count() > 0) {
+            $html = '';
+            foreach ($products as $product) {
+                $html .= '<tr>';
+                $html .= '<td>' . e($product->name) . '</td>';
+                $html .= '<td>' . e($product->code) . '</td>';
+                $html .= '<td>' . e($product->getUnitName()) . '</td>';
+                $html .= '<td>' . ($product->status == 'active' ? 'Còn hàng' : ($product->status == 'out_of_stock' ? 'Ngừng hoạt động' : 'Ngừng kinh doanh')) . '</td>';
+                $html .= '<td>' . ($product->refrigerated === 1 ? 'Bảo quản lạnh' : 'Điều kiện thường') . '</td>';
+                $html .= '<td><input type="number" class="selling-price-input" data-id="' . $product->id . '" value="' . e($product->selling_price) . '"></td>';
+                $html .= '</tr>';
+            }
+            return response($html);
+        } else {
+            return response('<tr><td colspan="6">Không tìm thấy sản phẩm!</td></tr>');
+        }
+    }
+
+    public function ajaxSearchGoodsIssueBatch(Request $request)
+    {
+        $key = $request->input('key');
+        $warehouseId = $request->input('warehouse_id');
+        $goodsIssueBatches = GoodsIssueBatch::where('code', 'like', '%' . $key . '%')
+            ->where('warehouse_id', $warehouseId)
+            ->where('status', 'processing')
+            ->get();
+        if ($goodsIssueBatches->count() > 0) {
+            $html = '';
+            foreach ($goodsIssueBatches as $batch) {
+                $productId = Batch::where('id', $batch->batch_id)->value('product_id');
+                $product = Product::where('id', $productId)->first();
+                $html .= '<div class="search-result-item">';
+                $html .= '<div>';
+                $html .= '<h4 class="goods-issue-batch-code" data-goods-issue-batch-code="' . $batch->code . '">' . 'Mã đơn hàng: ' . e($batch->code) . '</h4>';
+                $html .= '<p class="status" data-status="' . $batch->status . '">' . 'Trạng thái: ' . e($batch->status) . '</p>';
+                $html .= '<p class="created-at" data-created_at="' . $batch->created_at . '">' . 'Ngày tạo: ' . e($batch->created_at) . '</p>';
+                $html .= '<p style="display:none" class="product-code" data-product-code="' . $product->code . '">' . 'Mã hàng: ' . e($product->code) . '</p>';
+                $html .= '<p style="display:none" class="product-name" data-product-name="' . $product->name . '">' . 'Tên hàng: ' . e($product->name) . '</p>';
+                $html .= '<p style="display:none" style="display:none" class="product-quantity" data-product-quantity="' . $batch->quantity . '">' . 'Số lượng: ' . e($batch->quantity) . '</p>';
+                $html .= '<p style="display:none" class="product-selling-price" data-product-selling-price="' . $batch->unit_price . '">' . 'Giá bán: ' . e($batch->unit_price) . '</p>';
+                $html .= '<p style="display:none" class="product-discount" data-product-discount="' . $batch->discount . '">' . 'Giảm giá: ' . e($batch->discount) . '</p>';
+                $html .= '</div>';
+                $html .= '</div>';
+            }
+            return response($html);
+        } else {
+            return response('<p>Không tìm thấy đơn hàng chưa giao!</p>');
+        }
+    }
+
+    public function updateProductPrice(Request $request)
+    {
+        $product = Product::find($request->product_id);
+        info($product);
+        info($request->selling_price);
+        if ($product) {
+            $product->selling_price = $request->selling_price;
+            $product->save();
+            return response()->json(['success' => true]);
+        }
+        return response()->json(['success' => false, 'message' => 'Không tìm thấy sản phâm!']);
     }
 
     public function ajaxSearchProductByWarehouse(Request $request)
@@ -327,25 +396,21 @@ class ApiController extends Controller
 
                 $data = json_decode($response->getBody()->getContents(), true);
 
-                // Check if distance data is available
                 if (isset($data['routes'][0]['summary']['distance'])) {
-                    $distance = $data['routes'][0]['summary']['distance'] / 1000; // Distance in km
+                    $distance = $data['routes'][0]['summary']['distance'] / 1000;
 
-                    // Add warehouse and distance to array
                     $warehousesWithDistance[] = [
                         'warehouse' => $warehouse,
                         'distance' => $distance
                     ];
                 }
             } catch (\GuzzleHttp\Exception\RequestException $e) {
-                // Log the error for debugging, continue to the next warehouse
                 info('OpenRouteService API request failed: ' . $e->getMessage());
             } catch (\Exception $e) {
                 info('Error calculating distance: ' . $e->getMessage());
             }
         }
 
-        // Sort warehouses by distance in ascending order (closest first)
         usort($warehousesWithDistance, function ($a, $b) {
             return $a['distance'] <=> $b['distance'];
         });
@@ -362,18 +427,20 @@ class ApiController extends Controller
             $productId = $productData['productId'];
             $requiredQuantity = $productData['quantity'];
             $customerLocationId = $productData['locationId'];
-
-            // Fetch customer location and all warehouses
+            $unitPrice = $productData['unitPrice'];
+            info($unitPrice);
+            $discount = $productData['discount'];
+            info($discount);
+            $totalPrice = $productData['totalPrice'];
+            info($totalPrice);
             $customerLocation = $this->fetchLocationById($customerLocationId);
-            $warehouses = $this->fetchAllWarehouseWithLocation(); // Fetch all warehouses from the database
+            $warehouses = $this->fetchAllWarehouseWithLocation();
 
-            // Sort warehouses by proximity
             $warehousesByProximity = $this->getClosestWarehouses($customerLocation, $warehouses); // Pass both arguments
-
+            info($warehousesByProximity);
             $selectedBatches = [];
             $totalSelectedQuantity = 0;
 
-            // Loop through each warehouse by proximity to find batches
             foreach ($warehousesByProximity as $warehouseData) {
                 $warehouse = $warehouseData['warehouse'];
                 $batches = Product::select(
@@ -407,14 +474,18 @@ class ApiController extends Controller
                         'quantity' => $quantityToTake,
                         'expiry_date' => $batch->expiry_date,
                         'manufacturing_date' => $batch->manufacturing_date,
-                        'warehouse' => $batch->warehouse_id
+                        'warehouse' => $batch->warehouse_id,
+                        'unitPrice' => $unitPrice,
+                        'discount' => $discount,
+                        'totalPrice' => $totalPrice
+
                     ];
+                    info($selectedBatches);
 
                     $totalSelectedQuantity += $quantityToTake;
 
-                    // Stop if required quantity has been met
                     if ($totalSelectedQuantity >= $requiredQuantity) {
-                        break 2; // Exit both loops
+                        break 2;
                     }
                 }
             }

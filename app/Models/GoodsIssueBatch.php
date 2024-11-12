@@ -9,14 +9,22 @@ class GoodsIssueBatch extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'goods_issue_detail_id',
+        'goods_issue_id',
         'warehouse_id',
         'batch_id',
-        'quantity'
+        'quantity',
+        'unit_price',
+        'discount'
     ];
 
-    public function goodsIssueDetail()
+
+    public function goodsIssue()
     {
-        return $this->belongsTo(GoodsIssueDetail::class, 'goods_issue_detail_id');
+        return $this->belongsTo(GoodsIssue::class);
+    }
+
+    public function batch()
+    {
+        return $this->belongsTo(Batch::class);
     }
 }

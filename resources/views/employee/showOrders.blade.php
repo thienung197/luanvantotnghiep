@@ -36,72 +36,85 @@
             </div>
         </div>
         <table class="table" id="table-list">
-            <tr>
-                <th>Mã đơn hàng</th>
-                <th>Thời gian</th>
-                <th>Tổng tiền hàng</th>
-                <th>Trạng thái</th>
-                <th>Thao tác</th>
-            </tr>
-            @foreach ($goodsIssueBatches as $goodsIssueBatch)
-                <tr class="goods-issue-row" data-id="{{ $goodsIssueBatch->id }}">
-                    <td>{{ $goodsIssueBatch->goodsIssueDetail->goodsIssue->code }}</td>
-                    <td>{{ $goodsIssueBatch->goodsIssueDetail->goodsIssue->created_at }}</td>
-                    <td>{{ number_format($totalAmount, 2) }}</td>
-                    <td>Đơn hàng đã được phân bổ cho kho</td>
-                    <td class="btn-cell">
-                        <a href="{{ route('goodsissues.edit', $goodsIssueBatch->goodsIssueDetail->goodsIssue->id) }}"><img
-                                src="{{ asset('img/edit.png') }}" alt=""></a>
-                        <form
-                            action="{{ route('goodsissues.destroy', $goodsIssueBatch->goodsIssueDetail->goodsIssue->id) }}"
-                            method="POST" id="form-delete{{ $goodsIssueBatch->goodsIssueDetail->goodsIssue->id }}">
-                            @csrf
-                            @method('delete')
-                        </form>
-                        <button type="submit" class="btn-delete"
-                            data-id="{{ $goodsIssueBatch->goodsIssueDetail->goodsIssue->id }}"><img
-                                src="{{ asset('img/delete.png') }}" alt=""></button>
-                    </td>
+            <thead>
+                <tr>
+                    <th>Mã đơn hàng</th>
+                    <th>Thời gian</th>
+                    <th>Tổng tiền hàng</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
                 </tr>
-                <tr class="goods-issue-details" id="details-{{ $goodsIssueBatch->id }}" style="display: none;">
-                    <td colspan="5">
-                        <div class="details-container">
-                            <strong>Thông tin đơn hàng</strong>
-                            <p>Tên khách hàng: {{ $goodsIssueBatch->goodsIssueDetail->goodsIssue->getCustomerName() }}</p>
-                            <p>Điện thoại: {{ $goodsIssueBatch->goodsIssueDetail->goodsIssue->getCustomerPhone() }}</p>
-                            <p>Địa chỉ: {{ $goodsIssueBatch->goodsIssueDetail->goodsIssue->getCustomerAddress() }}</p>
+            </thead>
+            <tbody>
+                @foreach ($groupedGoodsIssues as $goodsIssueId => $batches)
+                    @php
+                        $goodsIssue = $batches->first()->goodsIssue;
+                    @endphp
+                    <tr class="goods-issue-row" data-id="{{ $goodsIssueId }}">
+                        <td>{{ $goodsIssue->code }}</td>
+                        <td>{{ $goodsIssue->created_at }}</td>
+                        <td>{{ number_format($totals[$goodsIssueId], 2) }}</td>
+                        <!-- Hiển thị tổng tiền hàng cho đơn hàng này -->
+                        <td>
+                            @if ($goodsIssue->status == 'approved')
+                                Đơn hàng được phân bổ đến kho
+                            @elseif($goodsIssue->status == 'shipping')
+                                Đơn hàng của bạn đang được vận chuyển
+                            @endif
+                        </td>
+                        <td class="btn-cell">
+                            <a href="{{ route('goodsissues.edit', $goodsIssue->id) }}"><img
+                                    src="{{ asset('img/edit.png') }}" alt="Edit"></a>
+                            <form action="{{ route('goodsissues.destroy', $goodsIssue->id) }}" method="POST"
+                                id="form-delete{{ $goodsIssue->id }}">
+                                @csrf
+                                @method('delete')
+                            </form>
+                            <button type="submit" class="btn-delete" data-id="{{ $goodsIssue->id }}"><img
+                                    src="{{ asset('img/delete.png') }}" alt="Delete"></button>
+                        </td>
+                    </tr>
 
-                            <strong>Thông tin đơn hàng (Batch)</strong>
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>Mã hàng</th>
-                                        <th>Tên hàng</th>
-                                        <th>Số lượng</th>
-                                        <th>Giá bán</th>
-                                        <th>Giảm giá</th>
-                                        <th>Thành tiền</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($goodsIssueBatch->goodsIssueDetail->filteredGoodsIssueBatches as $batch)
+                    <!-- Chi tiết đơn hàng -->
+                    <tr class="goods-issue-details" id="details-{{ $goodsIssueId }}" style="display: none;">
+                        <td colspan="5">
+                            <div class="details-container">
+                                <strong>Thông tin đơn hàng</strong>
+                                <p>Tên khách hàng: {{ $goodsIssue->customer->name ?? 'N/A' }}</p>
+                                <p>Điện thoại: {{ $goodsIssue->customer->phone ?? 'N/A' }}</p>
+                                <p>Địa chỉ: {{ $goodsIssue->customer->address ?? 'N/A' }}</p>
+
+                                <strong>Thông tin đơn hàng (Batch)</strong>
+                                <table class="table table-bordered">
+                                    <thead>
                                         <tr>
-                                            <td>{{ $goodsIssueBatch->goodsIssueDetail->product_id }}</td>
-                                            <td>{{ $goodsIssueBatch->goodsIssueDetail->product->name ?? 'N/A' }}</td>
-
-                                            <td>{{ $batch->quantity }}</td>
-                                            <td>{{ number_format($goodsIssueBatch->goodsIssueDetail->unit_price, 2) }}</td>
-                                            <td>{{ number_format($goodsIssueBatch->goodsIssueDetail->discount, 2) }}</td>
-                                            <td>{{ number_format($batch->quantity * $goodsIssueBatch->goodsIssueDetail->unit_price - $goodsIssueBatch->goodsIssueDetail->discount, 2) }}
-                                            </td>
+                                            <th>Mã hàng</th>
+                                            <th>Tên hàng</th>
+                                            <th>Số lượng</th>
+                                            <th>Giá bán</th>
+                                            <th>Giảm giá</th>
+                                            <th>Thành tiền</th>
                                         </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </td>
-                </tr>
-            @endforeach
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($batches as $batch)
+                                            <tr>
+                                                <td>{{ $batch->batch->code ?? 'N/A' }}</td>
+                                                <td>{{ $batch->batch->product->name ?? 'N/A' }}</td>
+                                                <td>{{ $batch->quantity }}</td>
+                                                <td>{{ number_format($batch->unit_price, 2) }}</td>
+                                                <td>{{ number_format($batch->discount, 2) }}</td>
+                                                <td>{{ number_format($batch->quantity * $batch->unit_price - $batch->discount, 2) }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
         </table>
         {{-- {{ $goodsReceipts->links() }} --}}
     </div>

@@ -50,11 +50,17 @@
                     <td>{{ $goodsIssue->created_at }}</td>
                     <td>{{ $goodsIssue->getTotalAmount() }}</td>
                     <td>
-                        @php
-                            if ($goodsIssue->status == 0) {
-                                echo 'Đơn hàng đã được đặt';
-                            }
-                        @endphp
+                        @if ($goodsIssue->status == 'pending')
+                            Đơn hàng đã được tạo và đang chờ xử lý
+                        @elseif($goodsIssue->status == 'approved')
+                            Đơn hàng đã được phê duyệt
+                        @elseif($goodsIssue->status == 'processing')
+                            Đơn hàng đang trong quá trình lấy hàng từ kho
+                        @elseif($goodsIssue->status == 'shipping')
+                            Đơn hàng đang được vận chuyển
+                        @elseif($goodsIssue->status == 'delivered')
+                            Đơn hàng đã được giao thành công
+                        @endif
                     </td>
                     <td class="btn-cell">
                         <a href="{{ route('goodsissues.edit', $goodsIssue->id) }}">
@@ -82,7 +88,7 @@
                             </p>
                             <p style="display: none" id="goodIssueId">{{ $goodsIssue->id }}</p>
                             <strong>Sản phẩm</strong>
-                            <table class="table table-bordered" id="product-table-{{ $goodsIssue->id }}">
+                            <table class="table table-bordered " id="product-table-{{ $goodsIssue->id }}">
                                 <thead>
                                     <tr>
                                         <th>Mã hàng</th>
@@ -96,41 +102,47 @@
                                 <tbody>
                                     @foreach ($goodsIssue->goodsIssueDetails as $detail)
                                         <tr>
-                                            <td class="goods-issue-id">{{ $detail->goods_issue_id }}</td>
+                                            <td style="display: none" class="goods-issue-id">{{ $detail->goods_issue_id }}
+                                            </td>
                                             <td style="display: none">{{ $detail->product->id }}</td>
                                             <td>{{ $detail->product->code }}</td>
                                             <td>{{ $detail->product->name ?? 'N/A' }}</td>
                                             <td>{{ $detail->quantity }}</td>
-                                            <td>{{ number_format($detail->unit_price, 2) }}</td>
-                                            <td>{{ number_format($detail->discount, 2) }}</td>
+                                            <td class="goods-issue-unit-price">{{ number_format($detail->unit_price, 2) }}
+                                            </td>
+                                            <td class="goods-issue-discount">{{ number_format($detail->discount, 2) }}</td>
                                             <td>{{ number_format($detail->quantity * $detail->unit_price - $detail->discount, 2) }}
                                             </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                             </table>
-                            <p><button id="btn-create">Đề xuất</button></p>
-                            <p><button id="btn-distribute">Phân kho </button></p>
-                            <strong>Đề xuất xuất kho</strong>
-                            <form action="{{ route('admin.goodsissue.store') }}" method="POST" id="distribution-form">
-                                @csrf
-                                <input type="text" name="goods-issue" id="goods-issue">
-                                <h6>Chọn <span id="batch-product-name"></span> sản phẩm từ lô hàng </h6>
-                                <table id="batch-table-{{ $goodsIssue->id }}" class="table table-border">
-                                    <thead>
-                                        <tr>
-                                            <th>Số lô</th>
-                                            <th>Ngày sản xuất</th>
-                                            <th>Ngày hết hạn</th>
-                                            <th>Số lượng có sẵn</th>
-                                            <th>Số lượng chọn</th>
-                                            <th>Xuất từ kho</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="batch-tbody">
-                                    </tbody>
-                                </table>
-                            </form>
+                            <div class="d-flex justify-content-between">
+                                <p><button id="btn-create">Đề xuất</button></p>
+                                <p><button id="btn-distribute">Phân kho </button></p>
+                            </div>
+                            <div class="suggestion-container">
+                                <strong>Đề xuất xuất kho</strong>
+                                <form action="{{ route('admin.goodsissue.store') }}" method="POST" id="distribution-form">
+                                    @csrf
+                                    <input type="hidden" name="goods-issue" id="goods-issue">
+                                    <h6>Chọn <span id="batch-product-name"></span> sản phẩm từ lô hàng </h6>
+                                    <table id="batch-table-{{ $goodsIssue->id }}" class="table table-border batch-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Số lô</th>
+                                                <th>Ngày sản xuất</th>
+                                                <th>Ngày hết hạn</th>
+                                                <th>Số lượng có sẵn</th>
+                                                <th>Số lượng chọn</th>
+                                                <th>Xuất từ kho</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="batch-tbody">
+                                        </tbody>
+                                    </table>
+                                </form>
+                            </div>
                         </div>
                     </td>
                 </tr>
@@ -140,16 +152,42 @@
     </div>
 @endsection
 
+@push('css')
+    <style>
+        .batch-table input {
+            border: none;
+        }
+
+        .suggestion-container {
+            display: none;
+        }
+    </style>
+@endpush
+
 @push('js')
     <script>
         @if (Session::has('message'))
             toastr.success("{{ Session::get('message') }}");
         @endif
 
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnCreate = document.getElementById('btn-create');
+            const suggestionContainer = document.querySelector('.suggestion-container');
+
+            btnCreate.addEventListener('click', function() {
+                if (suggestionContainer.style.display === 'none' || suggestionContainer.style.display ===
+                    '') {
+                    suggestionContainer.style.display = 'block';
+                } else {
+                    suggestionContainer.style.display = 'none';
+                }
+            });
+        });
+
         $(document).on("click", "#btn-distribute", function(e) {
-            let value = $(".goods-issue-id").first().text().trim();
+            let goodIssueId = $(".goods-issue-id").first().text().trim();
             console.log($(".goods-issue-id"));
-            $("#goods-issue").val(value);
+            $("#goods-issue").val(goodIssueId);
 
             $('#distribution-form').submit();
         });
@@ -158,17 +196,27 @@
             let batchId = $("#goodIssueId").text().trim();
             let productsData = [];
             $(`#product-table-${batchId} tbody tr`).each(function() {
+
                 let locationId = $("#customer_location_id").text().trim();
                 let productId = $(this).find('td').eq(1).text().trim();
                 let quantity = $(this).find('td').eq(4).text().trim();
+                let unitPrice = $(this).find('td').eq(5).text().trim();
+                let discount = $(this).find('td').eq(6).text().trim();
+                let totalPrice = $(this).find('td').eq(7).text().trim();
                 if (locationId && quantity && productId) {
                     productsData.push({
                         productId: productId,
                         quantity: quantity,
-                        locationId: locationId
+                        locationId: locationId,
+                        unitPrice,
+                        discount,
+                        totalPrice
                     });
+
                 }
             });
+            console.log(productsData);
+
             if (productsData.length > 0) {
                 fetchBatches(productsData);
             } else {
@@ -193,6 +241,7 @@
                         console.log(productBatches);
 
                         let productId = productBatches.productId;
+
                         let totalQuantityRequired = productBatches.batches.reduce((total, batch) =>
                             total + batch.quantity, 0);
 
@@ -201,8 +250,8 @@
                         // Product ID Cell with Input
                         let productCell = document.createElement("td");
                         let productInput = document.createElement("input");
-                        productInput.setAttribute("type", "text");
-                        productInput.setAttribute("readonly", true); // Read-only input for product ID
+                        productInput.setAttribute("type", "hidden");
+                        productInput.setAttribute("readonly", true);
                         productInput.setAttribute("name", `batchData[${productId}][product_id]`);
                         productInput.setAttribute("value", productId);
                         productCell.appendChild(productInput);
@@ -211,7 +260,7 @@
                         // Total Required Cell with Input
                         let totalRequiredCell = document.createElement("td");
                         let totalRequiredInput = document.createElement("input");
-                        totalRequiredInput.setAttribute("type", "text");
+                        totalRequiredInput.setAttribute("type", "hidden");
                         totalRequiredInput.setAttribute("readonly", true);
                         totalRequiredInput.setAttribute("name",
                             `batchData[${productId}][total_quantity_required]`);
@@ -224,6 +273,8 @@
                         // Create Rows for Each Batch
                         productBatches.batches.forEach((batch, index) => {
                             let batchRow = document.createElement("tr");
+
+
 
                             // Batch ID Cell with Input
                             let batchIdCell = document.createElement("td");
@@ -271,6 +322,28 @@
                             availableQuantityInput.setAttribute("value", batch.quantity);
                             availableQuantityCell.appendChild(availableQuantityInput);
                             batchRow.appendChild(availableQuantityCell);
+
+                            let unitPriceCell = document.createElement("td");
+                            let unitPriceInput = document.createElement("input");
+                            unitPriceInput.setAttribute("type", "hidden");
+                            unitPriceInput.setAttribute("readonly", true);
+                            unitPriceInput.setAttribute("name",
+                                `batchData[${productId}][batches][${index}][unit_price]`
+                            );
+                            unitPriceInput.setAttribute("value", batch.unitPrice);
+                            unitPriceCell.appendChild(unitPriceInput);
+                            batchRow.appendChild(unitPriceCell);
+
+                            let discountCell = document.createElement("td");
+                            let discountInput = document.createElement("input");
+                            discountInput.setAttribute("type", "hidden");
+                            discountInput.setAttribute("readonly", true);
+                            discountInput.setAttribute("name",
+                                `batchData[${productId}][batches][${index}][discount]`
+                            );
+                            discountInput.setAttribute("value", batch.discount);
+                            discountCell.appendChild(discountInput);
+                            batchRow.appendChild(discountCell);
 
                             // Quantity to Take Cell with Editable Input
                             let quantityCell = document.createElement("td");

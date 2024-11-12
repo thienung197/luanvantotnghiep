@@ -21,10 +21,8 @@ class GoodsIssueDetail extends Model
         return $this->belongsTo(GoodsIssue::class);
     }
 
-    public function goodsIssueBatches()
-    {
-        return $this->hasMany(GoodsIssueBatch::class);
-    }
+
+
 
     public function product()
     {
