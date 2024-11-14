@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminGoodsIssueController;
+use App\Http\Controllers\Admin\AdminGoodsReceiptController;
+use App\Http\Controllers\Admin\AdminRestockRequestController;
 use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CustomerController;
@@ -10,7 +12,6 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\ProviderController;
 use App\Http\Controllers\Admin\WarehouseController;
-use App\Http\Controllers\ApiController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Customer\CustomerDashboardController;
@@ -66,23 +67,18 @@ Route::middleware('auth')->group(function () {
     Route::post('/attribute/{attribute}/update/{attributeValue}', [AttributeController::class, 'updateAttributeValue']);
     Route::resource('/products', ProductController::class);
     Route::get('product/set-price', [ProductController::class, 'setPrice'])->name('products.setPrice');
-    Route::resource('/goodsreceipts', GoodsReceiptController::class);
+    // Route::resource('/goodsreceipts', GoodsReceiptController::class);
     Route::resource('/goodsissues', GoodsIssueController::class);
     Route::resource('/stocktakes', StockTakeController::class);
     Route::resource('/issue-report', IssueReportController::class);
     Route::resource('/restock-request', RestockRequestController::class);
+    Route::resource('/goodsreceipts', AdminGoodsReceiptController::class);
     Route::get('/admin/goods-issues', [AdminGoodsIssueController::class, 'index'])->name('admin.goodsissues.index');
     Route::post('/admin/store-goods-issues', [AdminGoodsIssueController::class, 'store'])->name('admin.goodsissue.store');
+    Route::get('/admin/restock-request', [AdminRestockRequestController::class, 'index'])->name('admin.restock-request.index');
     Route::get('/products-filter-by-category', [ProductController::class, 'filterByCategory'])->name('products.filterByCategory');
-    Route::get('/ajax-search-product', [ApiController::class, 'ajaxSearchProduct'])->name('ajax-search-product');
-    Route::get('/ajax-search-product-table', [ApiController::class, 'ajaxSearchProductTable'])->name('ajax-search-product-table');
-    Route::get('/ajax-update-product-price', [ApiController::class, 'updateProductPrice'])->name('ajax-update-product-price');
-    Route::get('/ajax-search-product-by-warehouse', [ApiController::class, 'ajaxSearchProductByWarehouse'])->name('ajax-search-product-by-warehouse');
-    Route::get('/ajax-search-goods-issue-batch', [ApiController::class, 'ajaxSearchGoodsIssueBatch'])->name('ajax-search-goods-issue-batch');
-    Route::get('/get-inventory-quantity', [ApiController::class, 'getInventoryQuantity'])->name('ajax-batch-inventory');
-    Route::get('/ajax-search-batch', [ApiController::class, 'ajaxSearchBatch'])->name('ajax-search-batch');
-    Route::get('/fetch-batches', [ApiController::class, 'getBatches'])->name('fetch-batches');
-    Route::get('/ajax-search-batch', [ApiController::class, 'ajaxSearchBatch'])->name('ajax-search-batch');
+
+
     Route::get('/categories/{id}/attributes', [ProductController::class, 'getAttributesByCategory'])->name('categories.attributes');
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventories.index');
     Route::get('warehouse/details/{id}', [InventoryController::class, 'showDetails']);

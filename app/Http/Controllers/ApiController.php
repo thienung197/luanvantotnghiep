@@ -8,6 +8,8 @@ use App\Models\GoodsIssueBatch;
 use App\Models\Inventory;
 use App\Models\Location;
 use App\Models\Product;
+use App\Models\RestockRequest;
+use App\Models\RestockRequestDetail;
 use App\Models\Warehouse;
 use Barryvdh\Debugbar\Facades\Debugbar as FacadesDebugbar;
 use Barryvdh\Debugbar\Twig\Extension\Debug;
@@ -17,6 +19,7 @@ use Debugbar;
 use DebugBar\DebugBar as DebugBarDebugBar;
 use GuzzleHttp\Client;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
 
 class ApiController extends Controller
 {
@@ -135,9 +138,15 @@ class ApiController extends Controller
             ->with(['batches' => function ($query) use ($warehouseId) {
                 $query->whereHas('inventories', function ($inventoryQuery) use ($warehouseId) {
                     $inventoryQuery->where('warehouse_id', $warehouseId);
-                });
+                })
+                    ->with(['inventories' => function ($inventoryQuery) use ($warehouseId) {
+                        $inventoryQuery->where('warehouse_id', $warehouseId)
+                            ->select('batch_id', DB::raw('SUM(available_quantity) as total_available_quantity'))
+                            ->groupBy('batch_id');
+                    }]);
             }])
             ->get();
+        info($products);
 
         if ($products->count() > 0) {
             $html = '';
@@ -175,6 +184,92 @@ class ApiController extends Controller
             return response('<p>Không tìm thấy sản phẩm!</p>');
         }
     }
+
+    public function ajaxSearchProductAndInventoryByWarehouse(Request $request)
+    {
+        $key = $request->input('key');
+        $warehouseId = $request->input('warehouse_id');
+        info($warehouseId);
+        $products = $this->product
+            ->where('name', 'like', '%' . $key . '%')
+            ->with([
+                'images',
+                'unit',
+                'batches' => function ($query) use ($warehouseId) {
+                    $query->whereHas('inventories', function ($inventoryQuery) use ($warehouseId) {
+                        $inventoryQuery->where('warehouse_id', $warehouseId);
+                    })
+                        ->with(['inventories' => function ($inventoryQuery) use ($warehouseId) {
+                            $inventoryQuery->where('warehouse_id', $warehouseId);
+                        }]);
+                }
+            ])
+            ->get()
+            ->map(function ($product) {
+                // Calculate total available quantity across all batches for each product
+                $totalQuantityAvailable = $product->batches->sum(function ($batch) {
+                    return $batch->inventories->sum('quantity_available');
+                });
+
+                $remainingStockLevel = $product->target_stock_level - $totalQuantityAvailable;
+
+                $product->total_quantity_available = $totalQuantityAvailable;
+                if ($remainingStockLevel > 0) {
+                    $product->remaining_stock_level = $remainingStockLevel;
+                } else {
+                    $product->remaining_stock_level = 0;
+                }
+                $product->image_url = $product->images->first()->url ?? null;
+
+                return $product;
+            });
+        info($products);
+        if ($products->count() > 0) {
+            $html = '';
+            foreach ($products as $item) {
+                $imageUrl = $item->images->first() ? $item->images->first()->url : 'No Image';
+                $itemId = $item->id;
+                $itemCode = $item->code;
+                $itemName = $item->name;
+                $unitName = $item->unit->name;
+                $sellingPrice = $item->selling_price;
+                $totalStock = $item->total_quantity_available;
+                $suggestedQuantity = $item->remaining_stock_level;
+                $imageUrl = $item->images->isNotEmpty() ? asset('upload/' . $item->images->first()->url) : asset('upload/no-image.png');
+                $html .= '<div class="search-result-item">';
+                $html .= '<img src="' . $imageUrl . '" alt="">';
+                $html .= '<div>';
+                $html .= '<h6 class="product-id" data-id ="' . $itemId . '" style="display:none"></h6>';
+                $html .= '<h4 data-name="' . $itemName . '">' . 'Tên sản phẩm: ' . e($itemName) . '</h4>';
+                $html .= '<p class="product-code" data-code="' . $itemCode . '">' . 'Mã sản phẩm: ' . e($itemCode) . '</p>';
+                $html .= '<p class="ajax-product-unit" style="display:none" data-unit="' . $unitName . '">' . 'Đơn vị tính: ' . e($unitName) . '</p>';
+                $html .= '<p class="ajax-product-price" style="display:none" data-price="' . $sellingPrice . '">' . 'Giá sản phẩm : ' . e($sellingPrice) . '</p>';
+                $html .= '<p class="ajax-product-inventory-quantity" style="display:none" data-inventory-quantity="' . $totalStock . '">' . 'Giá sản phẩm : ' . e($totalStock) . '</p>';
+                $html .= '<p class="ajax-product-suggested-quantity" style="display:none" data-suggested-quantity="' . $suggestedQuantity . '">' . 'Giá sản phẩm : ' . e($suggestedQuantity) . '</p>';
+
+                // if ($item->batches->isNotEmpty()) {
+                //     $html .= '<div class="batch-list">';
+                //     $html .= '<h5>Các lô hàng:</h5>';
+                //     foreach ($item->batches as $batch) {
+                //         $html .= '<p data-batch-id="' . $batch->id . '" data-batch-code="' . $batch->code . '">';
+                //         $html .= 'Mã lô: ' . e($batch->code);
+                //         $html .= '</p>';
+                //     }
+                //     $html .= '</div>';
+                // } else {
+                //     $html .= '<p>Không có lô hàng khả dụng trong kho.</p>';
+                // }
+
+                $html .= '</div>';
+                $html .= '</div>';
+            }
+
+            return response($html);
+        } else {
+            return response('<p>Không tìm thấy sản phẩm!</p>');
+        }
+    }
+
 
     public function getInventoryQuantity(Request $request)
     {
@@ -239,6 +334,71 @@ class ApiController extends Controller
         } else {
             return response(`<p>Không tìm thấy sản phẩm!</p >`);
         }
+    }
+
+    public function getSuggestedProducts(Request $request)
+    {
+        $reasonId = $request->reason_id;
+        operator:
+        $products = DB::table('products')
+            ->join('batches', 'products.id', '=', 'batches.product_id')
+            ->join('inventories', 'batches.id', '=', 'inventories.batch_id')
+            ->join('units', 'products.unit_id', '=', 'units.id')
+            ->select(
+                'products.id',
+                'products.name',
+                'products.code',
+                'units.name as unit_name',
+                // 'batches.price as unit_price',
+                DB::raw('SUM(inventories.quantity_available) as available_quantity'),
+                DB::raw('products.target_stock_level - SUM(inventories.quantity_available) as suggested_quantity'),
+                // 'products.minimum_stock_level'
+            )
+            ->where('inventories.warehouse_id', 1)
+            ->groupBy('products.id', 'products.code', 'products.name', 'units.name', 'products.target_stock_level', 'products.minimum_stock_level')
+            ->havingRaw('SUM(inventories.quantity_available) < products.minimum_stock_level')
+            ->get();
+        info($products);
+        return response($products);
+    }
+
+    public function updateRestockRequestStatus(Request $request, $id)
+    {
+        try {
+            $restockRequest = RestockRequest::findOrFail($id);
+            $restockRequest->status = $request->status;
+            $restockRequest->save();
+            return response()->json(['success' => true, 'message' => 'Trạng thái được cập nhập thành công!']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to update status'], 500);
+        }
+    }
+
+    public function loadApprovedProducts()
+    {
+
+        // $approvedProducts = Product::whereHas('restockRequestDetails', function ($query) {
+        //     $query->whereHas('restockRequest', function ($query) {
+        //         $query->where('status', 'approved');
+        //     });
+        // })->get();
+        $approvedProducts = Product::whereHas('restockRequestDetails', function ($query) {
+            $query->whereHas('restockRequest', function ($query) {
+                $query->where('status', 'approved');
+            });
+        })->get();
+        $products = [];
+        foreach ($approvedProducts as $product) {
+            $data = [
+                'id' => $product->id,
+                'code' => $product->code,
+                'name' => $product->name,
+                'unit' => $product->unit->name,
+            ];
+            $products[] = $data;
+        }
+
+        return response()->json($products);
     }
 
     // k biet cua cai nao?

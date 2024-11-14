@@ -74,7 +74,7 @@ class GoodsReceiptController extends Controller
             'newCode',
             'user',
             'warehouseName'
-        ))->with(['message' => 'Tạo phiếu nhập hàng thành công!']);
+        ));
     }
 
     /**

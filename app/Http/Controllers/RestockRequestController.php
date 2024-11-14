@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\RestockRequest;
+use App\Models\RestockRequestDetail;
 use App\Models\RestockRequestReason;
 use App\Models\User;
 use App\Models\Warehouse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class RestockRequestController extends Controller
 {
@@ -14,18 +16,23 @@ class RestockRequestController extends Controller
     protected $warehouse;
     protected $user;
     protected $restockRequestReason;
-    public function __construct(Warehouse $warehouse, User $user, RestockRequestReason $restockRequestReason)
+    protected $restockRequest;
+    public function __construct(Warehouse $warehouse, User $user, RestockRequestReason $restockRequestReason, RestockRequest $restockRequest)
     {
         $this->warehouse = $warehouse;
         $this->user = $user;
         $this->restockRequestReason = $restockRequestReason;
+        $this->restockRequest = $restockRequest;
     }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return view('employee.restock-request.index');
+        $user = auth()->user();
+        $warehouseId = $user->warehouse_id;
+        $restockRequests = $this->restockRequest::with('warehouse')->where('warehouse_id', $warehouseId)->latest('id')->get();
+        return view('employee.restock-request.index', compact('restockRequests'));
     }
 
     /**
@@ -59,7 +66,24 @@ class RestockRequestController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // dd($request->all());
+        $data = json_decode($request->data, true);
+        // DB::beginTransaction();
+        $restockRequest = RestockRequest::create([
+            'code' => $data['code'],
+            'user_id' => $data['user_id'],
+            'warehouse_id' => $data['warehouse_id'],
+            'status' => 'pending',
+        ]);
+        foreach ($data['products'] as $product) {
+            RestockRequestDetail::create([
+                'restock_request_id' => $restockRequest->id,
+                'product_id' => $product['id'],
+                'quantity' => $product['suggested_quantity'],
+            ]);
+        }
+        return to_route('restock-request.index')->with(['message' => 'Tạo yêu cầu nhập hàng thành công!']);
+        // DB::commit();
     }
 
     /**

@@ -178,7 +178,7 @@
                             </li>
                         @endcan
 
-                        @can('is-manager')
+                        @can('is-admin')
                             <li class="{{ request()->routeIs('goodsreceipts.*') ? 'bg-blue' : '' }}">
                                 <a href="{{ route('goodsreceipts.index') }}">
                                     <div class="flex-left-content">
@@ -239,6 +239,17 @@
                                     <div class="flex-left-content">
                                         <img src="{{ asset('img/product.png') }}" alt="">
                                         <span>Phiếu đề nghị nhập hàng</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endcan
+
+                        @can('is-admin')
+                            <li class="{{ request()->routeIs('admin.restock-request.index') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('admin.restock-request.index') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/product.png') }}" alt="">
+                                        <span>Danh sách đề nghị nhập hàng</span>
                                     </div>
                                 </a>
                             </li>

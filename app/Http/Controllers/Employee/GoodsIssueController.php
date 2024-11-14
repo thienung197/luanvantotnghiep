@@ -53,8 +53,8 @@ class GoodsIssueController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $userId = $user->id;
-        $goodsIssues = $this->goodsIssue::with('user')->where('customer_id', $userId)->latest('id')->get();
+        $warehouseId = $user->warehouse_id;
+        $goodsIssues = $this->goodsIssue::with('warehouse')->where('customer_id', $warehouseId)->latest('id')->get();
         return view('employee.goods-issues.index', compact('goodsIssues'));
     }
 

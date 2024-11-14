@@ -468,6 +468,14 @@ img.avatar {
     background-color: unset;
 }
 
+.btn-cell button.btn-approve {
+    background-color: var(--color-green);
+}
+
+.btn-cell button.btn-reject {
+    background-color: var(--color-red);
+}
+
 .btn-cell form {
     display: inline;
 }

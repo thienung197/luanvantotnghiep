@@ -26,7 +26,7 @@
         </div>
         <div class="form-group input-div">
             <h4>Mã phiếu yêu cầu nhập hàng </h4>
-            <input type="text" name="code" value="{{ old('code', $newCode) }}" id="code" class="form-control"
+            <input type="text" name="code" value="{{ old('code', $newCode) }}" id="submit_code" class="form-control"
                 readonly>
             @error('code')
                 <div class="error message">{{ $message }}</div>
@@ -40,7 +40,7 @@
 
         <div class="form-group input-div">
             <h4>Lý do yêu cầu nhập hàng</h4>
-            <select name="restock_request_reason_id " id="" class="form-control">
+            <select name="restock_request_reason_id" id="restock_request_reason_id" class="form-control">
                 <option value="">---Chọn yêu cầu nhập hàng---</option>
                 @foreach ($restockRequestReasons as $restockRequestReason)
                     <option value="{{ $restockRequestReason->id }}"
@@ -64,9 +64,25 @@
                     </div>
                 </div>
             </form>
-            <form action="{{ route('stocktakes.store') }}" method="POST">
+        </div>
+        <div id="product-suggestions" class="product-suggestions mt-4">
 
-                {{-- <table id="product-table" class="table ">
+        </div>
+        <form action="{{ route('restock-request.store') }}" method="POST" id="form-submit">
+            @csrf
+            <button type="submit" id="submit-request-btn">Gửi yêu cầu</button>
+            <input type="hidden" value="{{ $user->id }}" name="user_id" id="user_id">
+            <input type="hidden" value="{{ $user->warehouse_id }}" name="warehouse_id" id="warehouse_id">
+            <input type="hidden" name="data" id="data-submit">
+        </form>
+    </div>
+
+    {{-- <div class="content-10">
+      
+
+            <form action="{{ route('stocktakes.store') }}" method="POST"> --}}
+
+    {{-- <table id="product-table" class="table ">
                     <thead>
                         <th>Mã hàng</th>
                         <th>Tên hàng</th>
@@ -82,54 +98,16 @@
 
                     </tbody>
                 </table> --}}
-        </div>
-    </div>
+    {{-- </div>
+    </div> --}}
 
-    <div class="content-10">
-        <div class="form-group input-div">
-            <h4>Tổng thực tế</h4>
-            <input type="number" name="actual_total" value="{{ old('actual_total') }}" class="actual_total"
-                class="form-control">
-            @error('actual_total')
-                <div class="error message">{{ $message }}</div>
-            @enderror
-        </div>
-        <div class="form-group input-div">
-            <h4>Tổng lệch tăng </h4>
-            <input type="number" name="total_increase_variance" value="{{ old('total_increase_variance') }}"
-                class="total_increase_variance" class="form-control">
-            @error('total_increase_variance')
-                <div class="error message">{{ $message }}</div>
-            @enderror
-        </div>
-        <div class="form-group input-div">
-            <h4>Tổng lệch giảm</h4>
-            <input type="number" name="total_decrease_variance" value="{{ old('total_decrease_variance') }}"
-                class="total_decrease_variance" class="form-control">
-            @error('total_decrease_variance')
-                <div class="error message">{{ $message }}</div>
-            @enderror
-        </div>
-        <div class="form-group input-div">
-            <h4>Tổng chênh lệch</h4>
-            <input type="number" name="total_variance" value="{{ old('total_variance') }}" class="total_variance"
-                class="form-control">
-            @error('total_variance')
-                <div class="error message">{{ $message }}</div>
-            @enderror
-        </div>
-        <div class="btn-controls">
-            <div class="btn-cs btn-save"><button type="submit">Lưu thay đổi</button></div>
-            <div class="btn-cs btn-delete"><a href="{{ route('stocktakes.index') }}">Quay lại </a></div>
-        </div>
-        </form>
-    </div>
 
 @endsection
 
 @push('js')
     <script>
         $(document).ready(function() {
+
             $(document).on("click", ".search-input", function(e) {
                 let _text = $(this).val();
                 if (_text.length > 0) {
@@ -138,23 +116,95 @@
             })
         })
 
-        // $(document).on("input", ".search-input", function() {
-        //     var _text = $(this).val();
-        //     if (_text.length > 0) {
-        //         $.ajax({
-        //             url: "{{ route('ajax-search-product') }}",
-        //             type: "GET",
-        //             data: {
-        //                 key: _text
-        //             },
-        //             success: function(res) {
-        //                 $(".search-result").html(res).css("display", "block");
-        //             }
-        //         })
-        //     } else {
-        //         $(".search-result").css("display", "none");
-        //     }
-        // })
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+
+        $('select[name="restock_request_reason_id"]').on('change', function() {
+            let reasonId = $(this).val();
+
+            if (reasonId == 3) {
+                $.ajax({
+                    url: "{{ route('restock.suggested-products') }}",
+                    type: "GET",
+                    data: {
+                        reason_id: reasonId
+                    },
+                    success: function(products) {
+                        console.log(products);
+
+                        const table = document.createElement("table");
+                        table.classList.add("product-table");
+                        table.classList.add("table");
+                        const thead = document.createElement("thead");
+                        const tbody = document.createElement("tbody");
+                        const headerRow = document.createElement("tr");
+                        const headers = ["Mã sản phẩm", "Tên sản phẩm", "Đơn vị", "Số lượng tồn kho",
+                            "Số lượng đặt dự kiến", "Xóa"
+                        ];
+                        headers.forEach(headerText => {
+                            const th = document.createElement("th");
+                            th.textContent = headerText;
+                            headerRow.appendChild(th);
+                        })
+                        thead.appendChild(headerRow);
+
+                        products.forEach((product, index) => {
+                            const row = document.createElement("tr");
+
+                            const idCell = document.createElement("td");
+                            idCell.style.display = "none";
+                            idCell.textContent = product.id;
+                            row.appendChild(idCell);
+
+                            const codeCell = document.createElement("td");
+                            codeCell.textContent = product.code;
+                            row.appendChild(codeCell);
+
+                            const nameCell = document.createElement("td");
+                            nameCell.textContent = product.name;
+                            row.appendChild(nameCell);
+
+                            const unitIdCell = document.createElement("td");
+                            unitIdCell.textContent = product.unit_name;
+                            row.appendChild(unitIdCell);
+
+                            const availableQtyCell = document.createElement("td");
+                            availableQtyCell.textContent = product.available_quantity;
+                            row.appendChild(availableQtyCell);
+
+                            const suggestedQtyCell = document.createElement("td");
+                            suggestedQtyCell.textContent = product.suggested_quantity;
+                            row.appendChild(suggestedQtyCell)
+
+                            const actionCell = document.createElement("td");
+                            const deleteBtn = document.createElement("button");
+                            deleteBtn.textContent = "Delete";
+                            deleteBtn.classList.add("delete-btn");
+                            actionCell.appendChild(deleteBtn);
+                            row.appendChild(actionCell);
+
+                            deleteBtn.addEventListener("click", () => {
+                                row.remove();
+                                // products.splice(index, 1);
+                            })
+
+                            tbody.appendChild(row);
+                        })
+
+                        table.appendChild(thead);
+                        table.appendChild(tbody);
+                        $("#product-suggestions").html(table);
+
+                    }
+                })
+            } else {
+                $("#product-suggestions").html('');
+            }
+        })
 
         $(document).on("input", ".search-input", function() {
             var _text = $(this).val();
@@ -162,11 +212,11 @@
 
             if (_text.length > 0) {
                 $.ajax({
-                    url: "{{ route('ajax-search-product-by-warehouse') }}",
+                    url: "{{ route('ajax-search-product-and-inventory-by-warehouse') }}",
                     type: "GET",
                     data: {
                         key: _text,
-                        warehouse_id: 7
+                        warehouse_id: 1
                     },
                     success: function(res) {
                         $(".search-result").html(res).css("display", "block");
@@ -183,152 +233,248 @@
             }
         })
 
-        let indexRow = 0;
-        $(".search-result").on("click", ".search-result-item", function() {
-            let name = $(this).find("h4").data("name");
-            let code = $(this).find(".product-code").data('code');
-            console.log(code);
+        $(document).ready(function() {
+            $("#submit-request-btn").on("click", function(e) {
+                e.preventDefault();
+                let code = $("#submit_code").val();
+                let user_id = $("#user_id").val();
+                let warehouse_id = $("#warehouse_id").val();
 
-            let id = $(this).find(".product-id").data('id');
-            let newRow = document.createElement("tr");
-            let batchCode = $(this).find(".batch-code").data("batch-code");
-            let unit = $(this).find(".ajax-product-unit").data("unit");
+                let products = [];
+                $(".product-table tbody tr").each(function() {
+                    let product = {
+                        id: $(this).find("td:nth-child(1)").text(),
+                        suggested_quantity: $(this).find("td:nth-child(6)").text()
+                    };
+                    products.push(product);
 
-            let batchQuantity = $(this).find(".product-batch-quantity").data("batch-quantity");
-            let price = $(this).find(".ajax-product-price").data("price");
-
-            //id hang
-            let idCell = document.createElement("td");
-            idCell.style.display = "none";
-            let idInput = document.createElement("input");
-            idInput.setAttribute("type", "hidden");
-            idInput.setAttribute("name", `inputs[${indexRow}][product_id]`);
-            idInput.value = id;
-            idCell.appendChild(idInput);
-
-            //price
-            let priceCell = document.createElement("td");
-            priceCell.style.display = "none";
-            let priceInput = document.createElement("input");
-            priceInput.classList.add("price");
-            priceInput.setAttribute("type", "hidden");
-            priceInput.setAttribute("name", `inputs[${indexRow}][price]`);
-            priceInput.value = price;
-
-            priceCell.appendChild(priceInput);
-
-            //ma hang
-            let codeCell = document.createElement("td");
-            let codeInput = document.createElement("input");
-            codeInput.setAttribute("type", "text");
-            codeInput.setAttribute("name", `inputs[${indexRow}][code]`);
-            codeInput.value = code;
-            codeInput.style.width = "120px";
-            codeCell.appendChild(codeInput);
-
-            //ten hang
-            let nameCell = document.createElement("td");
-            let nameInput = document.createElement("input");
-            nameInput.setAttribute("type", "text");
-            nameInput.setAttribute("name", `inputs[${indexRow}][name]`);
-            nameInput.value = name;
-            nameCell.appendChild(nameInput);
-
-            //lo hang
-            // let batchCodeCell = document.createElement("td");
-            // let batchCodeInput = document.createElement("input");
-            // batchCodeInput.setAttribute("type", "texgt");
-            // batchCodeInput.setAttribute("name", `inputs[${indexRow}][batch_id]`);
-            // // batchCodeInput.value = batchCode;
-            // batchCodeInput.style.width = "160px";
-            // batchCodeCell.appendChild(batchCodeInput);
-
-            //tao batch
-            let batchList = document.querySelector('.batch-list');
-
-            let batchCodeCell = document.createElement("td");
-
-            let batchCodeSelect = document.createElement("select");
-            batchCodeSelect.classList.add("batch-select")
-            batchCodeSelect.setAttribute("name", `inputs[${indexRow}][batch_id]`);
-            batchCodeSelect.style.width = "160px";
-
-            let defaultOption = document.createElement("option");
-            defaultOption.text = "Chọn lô hàng";
-            defaultOption.value = "";
-            batchCodeSelect.appendChild(defaultOption);
-
-            let batchItems = batchList.querySelectorAll('p');
-            batchItems.forEach(item => {
-                let batchId = item.getAttribute('data-batch-id');
-                let batchCode = item.getAttribute('data-batch-code');
-
-                let option = document.createElement("option");
-                option.value = batchId;
-                option.text = batchCode;
-                batchCodeSelect.appendChild(option);
-            });
-
-            batchCodeCell.appendChild(batchCodeSelect);
-            //tao unit
-            let unitCell = document.createElement("td");
-            unitCell.textContent = unit;
-
-            let batchQuantityCell = document.createElement("td");
-            batchQuantityInput = document.createElement("input");
-            batchQuantityInput.classList.add("batch-quantity", "quantity_available_0");
-            batchQuantityInput.setAttribute("type", "number");
-            batchQuantityInput.setAttribute("name", `inputs[${indexRow}][batch-quantity]`);
-            batchQuantityInput.value = batchQuantity;
-            batchQuantityInput.style.width = "120px";
-            batchQuantityCell.appendChild(batchQuantityInput);
-
-            let actualQuantityCell = document.createElement("td");
-            actualQuantityInput = document.createElement("input");
-            actualQuantityInput.classList.add("actual-quantity");
-            actualQuantityInput.setAttribute("type", "number");
-            actualQuantityInput.setAttribute("name", `inputs[${indexRow}][actual-quantity]`);
-            actualQuantityInput.style.width = "120px";
-            actualQuantityCell.appendChild(actualQuantityInput);
-
-            let quantityDifferenceCell = document.createElement("td");
-            let quantityDifferenceInput = document.createElement("input");
-            quantityDifferenceInput.classList.add("quantity-difference");
-            quantityDifferenceInput.setAttribute("type", "number");
-            quantityDifferenceInput.setAttribute("name", `inputs[${indexRow}][quantity-difference]`);
-            quantityDifferenceInput.style.width = "120px";
-            quantityDifferenceCell.appendChild(quantityDifferenceInput);
-
-            let valueDifferenceCell = document.createElement("td");
-            let valueDifferenceInput = document.createElement("input");
-            valueDifferenceInput.classList.add("value-difference");
-            valueDifferenceInput.setAttribute("type", "number");
-            valueDifferenceInput.setAttribute("readonly", true);
-            valueDifferenceInput.style.width = "120px";
-            valueDifferenceCell.appendChild(valueDifferenceInput);
-
-            let removeCell = document.createElement("td");
-            let removeBtn = document.createElement("button");
-            removeBtn.classList.add("remove-product");
-            removeBtn.textContent = "Xóa";
-            removeCell.appendChild(removeBtn);
-
-            newRow.appendChild(idCell);
-            newRow.appendChild(priceCell);
-            newRow.appendChild(codeCell);
-            newRow.appendChild(nameCell);
-            newRow.appendChild(batchCodeCell);
-            newRow.appendChild(unitCell);
-            newRow.appendChild(batchQuantityCell);
-            newRow.appendChild(actualQuantityCell);
-            newRow.appendChild(quantityDifferenceCell);
-            newRow.appendChild(valueDifferenceCell);
-            newRow.appendChild(removeCell);
-
-            document.querySelector("#body-product-table").appendChild(newRow);
-            $(".search-result").css("display", "none");
-            indexRow++;
+                })
+                let data = {
+                    code: code,
+                    user_id: user_id,
+                    warehouse_id: warehouse_id,
+                    products: products,
+                    // _token: $('meta[name="csrf-token"]').attr('content')
+                };
+                $("#data-submit").val(JSON.stringify(data));
+                $("#form-submit").submit();
+            })
         })
+
+        $(document).ready(function() {
+            $(".search-result").on("click", ".search-result-item", function() {
+                let productId = $(this).find(".product-id").data("id");
+                let productCode = $(this).find(".product-code").data("code");
+                let productName = $(this).find("h4").data("name");
+                let unit = $(this).find(".ajax-product-unit").data("unit");
+                let inventoryQuantity = $(this).find(".ajax-product-inventory-quantity").data(
+                    "inventory-quantity");
+                let suggestedQuantity = $(this).find(".ajax-product-suggested-quantity").data(
+                    "suggested-quantity");
+                // let imageUrl = $(this).find("img").attr("src");
+
+                let newRow = document.createElement('tr');
+
+                // let imgCell = document.createElement('td');
+                // let imgElement = document.createElement('img');
+                // imgElement.src = imageUrl;
+                // imgElement.alt = "Product Image";
+                // imgElement.width = 50;
+                // imgElement.height = 50;
+                // imgCell.appendChild(imgElement);
+
+                let idCell = document.createElement("td");
+                idCell.textContent = productId;
+
+                let codeCell = document.createElement('td');
+                codeCell.textContent = productCode;
+
+                let nameCell = document.createElement('td');
+                nameCell.textContent = productName;
+
+                let unitCell = document.createElement('td');
+                unitCell.textContent = unit;
+
+                // let priceCell = document.createElement('td');
+                // priceCell.textContent = price;
+
+                let inventoryCell = document.createElement('td');
+                inventoryCell.textContent = inventoryQuantity;
+
+                let suggestedCell = document.createElement('td');
+                suggestedCell.textContent = suggestedQuantity;
+
+                const actionCell = document.createElement("td");
+                const deleteBtn = document.createElement("button");
+                deleteBtn.textContent = "Delete";
+                deleteBtn.classList.add("delete-btn");
+                actionCell.appendChild(deleteBtn);
+
+                deleteBtn.addEventListener("click", () => {
+                    newRow.remove();
+                    // products.splice(index, 1);
+                })
+
+                // newRow.appendChild(imgCell);
+                newRow.appendChild(codeCell);
+                newRow.appendChild(nameCell);
+                newRow.appendChild(unitCell);
+                // newRow.appendChild(priceCell);
+                newRow.appendChild(inventoryCell);
+                newRow.appendChild(suggestedCell);
+                newRow.appendChild(actionCell);
+
+                $(".product-table tbody").append(newRow);
+                $(".search-result").css("display", "none");
+            });
+        });
+
+        // let indexRow = 0;
+        // $(".search-result").on("click", ".search-result-item", function() {
+        //     let name = $(this).find("h4").data("name");
+        //     let code = $(this).find(".product-code").data('code');
+        //     console.log(code);
+
+        //     let id = $(this).find(".product-id").data('id');
+        //     let newRow = document.createElement("tr");
+        //     let batchCode = $(this).find(".batch-code").data("batch-code");
+        //     let unit = $(this).find(".ajax-product-unit").data("unit");
+
+        //     let batchQuantity = $(this).find(".product-batch-quantity").data("batch-quantity");
+        //     let price = $(this).find(".ajax-product-price").data("price");
+
+        //     //id hang
+        //     let idCell = document.createElement("td");
+        //     idCell.style.display = "none";
+        //     let idInput = document.createElement("input");
+        //     idInput.setAttribute("type", "hidden");
+        //     idInput.setAttribute("name", `inputs[${indexRow}][product_id]`);
+        //     idInput.value = id;
+        //     idCell.appendChild(idInput);
+
+        //     //price
+        //     let priceCell = document.createElement("td");
+        //     priceCell.style.display = "none";
+        //     let priceInput = document.createElement("input");
+        //     priceInput.classList.add("price");
+        //     priceInput.setAttribute("type", "hidden");
+        //     priceInput.setAttribute("name", `inputs[${indexRow}][price]`);
+        //     priceInput.value = price;
+
+        //     priceCell.appendChild(priceInput);
+
+        //     //ma hang
+        //     let codeCell = document.createElement("td");
+        //     let codeInput = document.createElement("input");
+        //     codeInput.setAttribute("type", "text");
+        //     codeInput.setAttribute("name", `inputs[${indexRow}][code]`);
+        //     codeInput.value = code;
+        //     codeInput.style.width = "120px";
+        //     codeCell.appendChild(codeInput);
+
+        //     //ten hang
+        //     let nameCell = document.createElement("td");
+        //     let nameInput = document.createElement("input");
+        //     nameInput.setAttribute("type", "text");
+        //     nameInput.setAttribute("name", `inputs[${indexRow}][name]`);
+        //     nameInput.value = name;
+        //     nameCell.appendChild(nameInput);
+
+        //     //lo hang
+        //     // let batchCodeCell = document.createElement("td");
+        //     // let batchCodeInput = document.createElement("input");
+        //     // batchCodeInput.setAttribute("type", "texgt");
+        //     // batchCodeInput.setAttribute("name", `inputs[${indexRow}][batch_id]`);
+        //     // // batchCodeInput.value = batchCode;
+        //     // batchCodeInput.style.width = "160px";
+        //     // batchCodeCell.appendChild(batchCodeInput);
+
+        //     //tao batch
+        //     let batchList = document.querySelector('.batch-list');
+
+        //     let batchCodeCell = document.createElement("td");
+
+        //     let batchCodeSelect = document.createElement("select");
+        //     batchCodeSelect.classList.add("batch-select")
+        //     batchCodeSelect.setAttribute("name", `inputs[${indexRow}][batch_id]`);
+        //     batchCodeSelect.style.width = "160px";
+
+        //     let defaultOption = document.createElement("option");
+        //     defaultOption.text = "Chọn lô hàng";
+        //     defaultOption.value = "";
+        //     batchCodeSelect.appendChild(defaultOption);
+
+        //     let batchItems = batchList.querySelectorAll('p');
+        //     batchItems.forEach(item => {
+        //         let batchId = item.getAttribute('data-batch-id');
+        //         let batchCode = item.getAttribute('data-batch-code');
+
+        //         let option = document.createElement("option");
+        //         option.value = batchId;
+        //         option.text = batchCode;
+        //         batchCodeSelect.appendChild(option);
+        //     });
+
+        //     batchCodeCell.appendChild(batchCodeSelect);
+        //     //tao unit
+        //     let unitCell = document.createElement("td");
+        //     unitCell.textContent = unit;
+
+        //     let batchQuantityCell = document.createElement("td");
+        //     batchQuantityInput = document.createElement("input");
+        //     batchQuantityInput.classList.add("batch-quantity", "quantity_available_0");
+        //     batchQuantityInput.setAttribute("type", "number");
+        //     batchQuantityInput.setAttribute("name", `inputs[${indexRow}][batch-quantity]`);
+        //     batchQuantityInput.value = batchQuantity;
+        //     batchQuantityInput.style.width = "120px";
+        //     batchQuantityCell.appendChild(batchQuantityInput);
+
+        //     let actualQuantityCell = document.createElement("td");
+        //     actualQuantityInput = document.createElement("input");
+        //     actualQuantityInput.classList.add("actual-quantity");
+        //     actualQuantityInput.setAttribute("type", "number");
+        //     actualQuantityInput.setAttribute("name", `inputs[${indexRow}][actual-quantity]`);
+        //     actualQuantityInput.style.width = "120px";
+        //     actualQuantityCell.appendChild(actualQuantityInput);
+
+        //     let quantityDifferenceCell = document.createElement("td");
+        //     let quantityDifferenceInput = document.createElement("input");
+        //     quantityDifferenceInput.classList.add("quantity-difference");
+        //     quantityDifferenceInput.setAttribute("type", "number");
+        //     quantityDifferenceInput.setAttribute("name", `inputs[${indexRow}][quantity-difference]`);
+        //     quantityDifferenceInput.style.width = "120px";
+        //     quantityDifferenceCell.appendChild(quantityDifferenceInput);
+
+        //     let valueDifferenceCell = document.createElement("td");
+        //     let valueDifferenceInput = document.createElement("input");
+        //     valueDifferenceInput.classList.add("value-difference");
+        //     valueDifferenceInput.setAttribute("type", "number");
+        //     valueDifferenceInput.setAttribute("readonly", true);
+        //     valueDifferenceInput.style.width = "120px";
+        //     valueDifferenceCell.appendChild(valueDifferenceInput);
+
+        //     let removeCell = document.createElement("td");
+        //     let removeBtn = document.createElement("button");
+        //     removeBtn.classList.add("remove-product");
+        //     removeBtn.textContent = "Xóa";
+        //     removeCell.appendChild(removeBtn);
+
+        //     newRow.appendChild(idCell);
+        //     newRow.appendChild(priceCell);
+        //     newRow.appendChild(codeCell);
+        //     newRow.appendChild(nameCell);
+        //     newRow.appendChild(batchCodeCell);
+        //     newRow.appendChild(unitCell);
+        //     newRow.appendChild(batchQuantityCell);
+        //     newRow.appendChild(actualQuantityCell);
+        //     newRow.appendChild(quantityDifferenceCell);
+        //     newRow.appendChild(valueDifferenceCell);
+        //     newRow.appendChild(removeCell);
+
+        //     document.querySelector("#body-product-table").appendChild(newRow);
+        //     $(".search-result").css("display", "none");
+        //     indexRow++;
+        // })
 
         $(document).on('change', '.batch-select', function() {
             var batchId = $(this).val();

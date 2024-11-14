@@ -64,4 +64,17 @@ class Product extends Model
     {
         return $this->hasMany(StockTakeDetail::class);
     }
+
+    public function restockRequestDetails()
+    {
+        return $this->hasMany(RestockRequestDetail::class, 'product_id');
+    }
+
+
+    public function getTotalAvailableQuantityAttribute()
+    {
+        return $this->batches->sum(function ($batch) {
+            return $batch->inventories->sum('total_available_quantity');
+        });
+    }
 }
