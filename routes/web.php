@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\ProviderController;
 use App\Http\Controllers\Admin\WarehouseController;
+use App\Http\Controllers\ApiController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Customer\CustomerDashboardController;
@@ -40,6 +41,7 @@ use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
 
 Route::get('/', function () {
     return view('welcome');

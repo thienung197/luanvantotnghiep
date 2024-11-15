@@ -20,7 +20,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::get('/approved-products', [ApiController::class, 'loadApprovedProducts'])->name('approved-products');
-Route::post('/restock-request/{id}/status', action: [ApiController::class, 'updateRestockRequestStatus'])->name('update-restock-request-status');
+Route::post('/restock-request/{id}/status',  [ApiController::class, 'updateRestockRequestStatus'])->name('update-restock-request-status');
 Route::get('/ajax-search-product', [ApiController::class, 'ajaxSearchProduct'])->name('ajax-search-product');
 Route::get('/ajax-search-product-table', [ApiController::class, 'ajaxSearchProductTable'])->name('ajax-search-product-table');
 Route::get('/ajax-update-product-price', [ApiController::class, 'updateProductPrice'])->name('ajax-update-product-price');

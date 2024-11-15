@@ -31,7 +31,8 @@ a:focus {
 #aside {
     width: 21%;
     background-color: var(--color-white);
-    height: auto;
+    height: 100vh;
+    overflow-y: scroll;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 

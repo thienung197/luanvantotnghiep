@@ -17,12 +17,18 @@ class Product extends Model
         'price', //So luong ton kho
         'unit_id',
         'status',
-        'refrigerated'
+        'refrigerated',
+        'provider_id'
     ];
 
     public function unit()
     {
         return $this->belongsTo(Unit::class);
+    }
+
+    public function provider()
+    {
+        return $this->belongsTo(Provider::class);
     }
 
     public function getUnitName()

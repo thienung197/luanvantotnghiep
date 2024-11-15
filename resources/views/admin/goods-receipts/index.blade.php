@@ -10,15 +10,41 @@
             <p><a href="">Home</a> > <a href="">Phiếu nhập hàng</a></p>
         </div>
     </div>
-    <div class="btn-cs btn-add">
-        <a href="{{ route('goodsreceipts.create') }}">Thêm phiếu nhập hàng </a>
-    </div>
+
     <div class="table_container">
         <div class="table_title">
             Danh sách phiếu nhập hàng
         </div>
+        <p>Danh sách các sản phẩm được yêu cầu nhập hàng, phân loại theo nhà cung cấp</p>
+        @foreach ($approvedProducts as $provider)
+            <h3>Tên nhà cung cấp:{{ $provider['provider_name'] }}</h3>
+            <div class="suggested-products-container">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Mã sản phẩm</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Đơn vị tính</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($provider['products'] as $product)
+                            <tr>
+                                <td>{{ $product['code'] }}</td>
+                                <td>{{ $product['name'] }}</td>
+                                <td>{{ $product['unit'] }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            <a
+                href="{{ route('goodsreceipts.create', ['provider_id' => $provider['provider_id'], 'product_ids' => $provider['product_ids']]) }}">Đặt
+                hàng</a>
+        @endforeach
+
         <div class="table_filter-controls">
-            <form action="{{ route('goodsreceipts.index') }}" method="GET">
+            {{-- <form action="{{ route('goodsreceipts.index') }}" method="GET">
                 <label for="">Hiển thị </label>
                 <select name="entries" id="entries" onchange="this.form.submit()">
                     <option value="5" {{ request('entries') == 5 ? 'selected' : '' }}>5</option>
@@ -26,7 +52,10 @@
                     <option value="25" {{ request('entries') == 25 ? 'selected' : '' }}>25</option>
                 </select>
                 mục
-            </form>
+            </form> --}}
+            <div class="btn-cs btn-add">
+                <a href="{{ route('goodsreceipts.create') }}">Thêm phiếu nhập hàng </a>
+            </div>
             <div class="table_search-box">
                 <form action="{{ route('goodsreceipts.index') }}" method="GET">
                     <input type="text" name="search" id="search" value="{{ request('search') }}"

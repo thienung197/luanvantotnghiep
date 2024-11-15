@@ -14,11 +14,10 @@
     </div>
 
     <div class="content-10">
-        @csrf
 
         <div class="form-group input-div">
             <h4>Người tạo</h4>
-            <input type="hidden" name="creator_id" value="{{ Auth::user()->id }}" id="creator_id">
+
             <input type="text" value="{{ Auth::user()->name }}" readonly class="form-control">
             @error('creator_id')
                 <div class="error message">{{ $message }}</div>
@@ -32,18 +31,18 @@
                 <div class="error message">{{ $message }}</div>
             @enderror
         </div>
+        <div class="form-group input-div">
+            <h4>Gửi đến nhà cung cấp </h4>
+            <input type="text" name="provider_id" value="{{ old('provider_id', $provider->name) }}" id="provider_id"
+                class="form-control" readonly>
+            @error('provider_id')
+                <div class="error message">{{ $message }}</div>
+            @enderror
+        </div>
         <button id="show-products" class="btn btn-primary">Các sản phẩm được đề xuất</button>
         <div class="ajax-table-container">
 
         </div>
-        {{-- <div class="form-group input-div">
-            <h4>Nhà kho</h4>
-            <input type="hidden" name="warehouse_id" value="{{ Auth::user()->warehouse_id }}" id="warehouse_id">
-            <input type="text" value="{{ $warehouseName }}" readonly class="form-control">
-            @error('warehouse_id')
-                <div class="error message">{{ $message }}</div>
-            @enderror
-        </div> --}}
     </div>
     <div class="content-10">
         <div class="search-result-container">
@@ -56,13 +55,17 @@
                 </div>
             </form>
             <form action="{{ route('goodsreceipts.store') }}" method="POST">
-
+                @csrf
+                <input type="hidden" name="creator_id" value="{{ Auth::user()->id }}" id="creator_id">
+                <input type="hidden" name="code" value="{{ old('code', $newCode) }}" id="code"
+                    class="form-control" readonly>
+                <input type="hidden" name="provider_id" value="{{ old('provider_id', $provider->id) }}" id="provider_id"
+                    class="form-control" readonly>
                 <table id="product-table" class="table ">
                     <thead>
                         <th>Mã hàng</th>
                         <th>Tên hàng</th>
-                        <th>Ngày sản xuất</th>
-                        <th>Hạn sử dụng</th>
+                        <th>Đơn vị tính</th>
                         <th>Số lượng</th>
                         <th>Đơn giá</th>
                         <th>Giảm giá</th>
@@ -70,25 +73,49 @@
                         <th>Xóa</th>
                     </thead>
                     <tbody id="body-product-table">
+                        @foreach ($approvedProduct as $product)
+                            <tr data-id="{{ $product->id }}">
+                                <td style="display: none">
+                                    <input type="hidden" name="products[{{ $product->id }}][id]"
+                                        value="{{ $product['id'] }}">
+                                </td>
+                                <td>{{ $product['code'] }}</td>
+                                <td>{{ $product['name'] }}</td>
+                                <td>{{ $product->unit->name }}</td>
+                                <td>
+                                    @if ($product->restockRequestDetails->isNotEmpty())
+                                        <input type="number" class="form-control"
+                                            name="products[{{ $product->id }}][quantity]"
+                                            value=" {{ $product->restockRequestDetails->first()->quantity }}">
+                                    @else
+                                        <input type="number">
+                                    @endif
 
+
+                                </td>
+                                <td><input type="number" class="form-control" id=""
+                                        name="products[{{ $product->id }}][unit_price]">
+                                </td>
+                                <td><input type="number" class="form-control" value="0"
+                                        name="products[{{ $product->id }}][discount]"></td>
+                                <td><input type="number" class="form-control"></td>
+                                <td><button class="btn btn-danger delete-row-btn">Xóa</button></td>
+                            </tr>
+                        @endforeach
                     </tbody>
                 </table>
+                <div class="form-group input-div">
+                    <h4>Tổng tiền hàng</h4>
+                    <input type="number" value="{{ old('total_amount') }}" class="total_amount" class="form-control">
+                    @error('total_amount')
+                        <div class="error message">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <button type="submit">Đặt hàng</button>
+            </form>
+
         </div>
-    </div>
-    <div class="content-10">
-        <div class="form-group input-div">
-            <h4>Tổng tiền hàng</h4>
-            <input type="number" name="total_amount" value="{{ old('total_amount') }}" class="total_amount"
-                class="form-control">
-            @error('total_amount')
-                <div class="error message">{{ $message }}</div>
-            @enderror
-        </div>
-        <div class="btn-controls">
-            <div class="btn-cs btn-save"><button type="submit">Lưu thay đổi</button></div>
-            <div class="btn-cs btn-delete"><a href="{{ route('goodsreceipts.index') }}">Quay lại </a></div>
-        </div>
-        </form>
     </div>
 
 @endsection
@@ -123,6 +150,17 @@
                 if (!$(e.target).closest(".search-result-container").length) {
                     $(".search-result").css("display", "none");
                 }
+            })
+        })
+
+        //Tao nut xoa
+        document.addEventListener("DOMContentLoaded", function() {
+            const deletButton = document.querySelectorAll(".delete-row-btn");
+            deletButton.forEach(button => {
+                button.addEventListener("click", function() {
+                    const row = this.closest("tr");
+                    row.remove();
+                })
             })
         })
 
@@ -245,7 +283,71 @@
         });
 
 
+        $(".search-result").on("click", ".search-result-item", function() {
+            let name = $(this).find("h4").data("name");
+            let code = $(this).find("p[data-code]").data("code");
+            let unit = $(this).find("p[data-unit]").data("unit");
+            let id = $(this).find("h6").data("id");
 
+            const row = document.createElement("tr");
+
+            const idCell = document.createElement("td");
+            idCell.style.display = "none";
+            idCell.textContent = id;
+            row.appendChild(idCell);
+
+            const nameCell = document.createElement("td");
+            nameCell.textContent = name;
+            row.appendChild(nameCell);
+
+            const codeCell = document.createElement("td");
+            codeCell.textContent = code;
+            row.appendChild(codeCell);
+
+            const unitCell = document.createElement("td");
+            unitCell.textContent = unit;
+            row.appendChild(unitCell);
+
+            const quantityCell = document.createElement("td");
+            const quantityInput = document.createElement("input");
+            quantityInput.classList.add("form-control");
+            quantityInput.setAttribute("type", "number");
+            quantityCell.appendChild(quantityInput);
+            row.appendChild(quantityCell);
+
+            const unitPriceCell = document.createElement("td");
+            const unitPriceInput = document.createElement("input");
+            unitPriceInput.classList.add("form-control");
+            unitPriceInput.setAttribute("type", "number");
+            unitPriceCell.appendChild(unitPriceInput);
+            row.appendChild(unitPriceCell);
+
+            const discountCell = document.createElement("td");
+            const discountInput = document.createElement("input");
+            discountInput.classList.add("form-control");
+            discountInput.setAttribute("type", "number");
+            discountInput.value = 0;
+            discountCell.appendChild(discountInput);
+            row.appendChild(discountCell);
+
+            const totalPriceCell = document.createElement("td");
+            const totalPriceInput = document.createElement("input");
+            totalPriceInput.classList.add("form-control");
+            totalPriceInput.setAttribute("type", "number");
+            totalPriceCell.appendChild(totalPriceInput);
+            row.appendChild(totalPriceCell);
+
+            const deleteCell = document.createElement("td");
+            const deleteButton = document.createElement("button");
+            deleteButton.classList.add("btn", "btn-cell", "delete-row-btn");
+            deleteButton.textContent = "Xóa";
+            deleteCell.appendChild(deleteButton);
+            row.appendChild(deleteCell);
+
+            const tbody = $("#product-table tbody");
+            tbody.append(row);
+            $(".search-result").css("display", "none");
+        })
 
         // let indexRow = 0;
         // $(".search-result").on("click", ".search-result-item", function() {

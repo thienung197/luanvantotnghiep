@@ -131,6 +131,8 @@
             document.querySelectorAll(".btn-approve").forEach(btn => {
                 btn.addEventListener("click", function() {
                     let restockRequestId = this.getAttribute("data-id");
+                    console.log(restockRequestId);
+
                     updateStatus(restockRequestId, "approved");
                 })
             })
@@ -144,7 +146,8 @@
 
             function updateStatus(id, status) {
                 $.ajax({
-                    url: `/restock-request/${id}/status`,
+
+                    url: `{{ route('update-restock-request-status', ':id') }}`.replace(':id', id),
                     type: 'POST',
                     data: {
                         _token: "{{ csrf_token() }}",

@@ -339,6 +339,7 @@ class ApiController extends Controller
     public function getSuggestedProducts(Request $request)
     {
         $reasonId = $request->reason_id;
+        $warehouseId = $request->warehouse_id;
         operator:
         $products = DB::table('products')
             ->join('batches', 'products.id', '=', 'batches.product_id')
@@ -354,7 +355,7 @@ class ApiController extends Controller
                 DB::raw('products.target_stock_level - SUM(inventories.quantity_available) as suggested_quantity'),
                 // 'products.minimum_stock_level'
             )
-            ->where('inventories.warehouse_id', 1)
+            ->where('inventories.warehouse_id', $warehouseId)
             ->groupBy('products.id', 'products.code', 'products.name', 'units.name', 'products.target_stock_level', 'products.minimum_stock_level')
             ->havingRaw('SUM(inventories.quantity_available) < products.minimum_stock_level')
             ->get();
@@ -366,6 +367,7 @@ class ApiController extends Controller
     {
         try {
             $restockRequest = RestockRequest::findOrFail($id);
+            info($restockRequest);
             $restockRequest->status = $request->status;
             $restockRequest->save();
             return response()->json(['success' => true, 'message' => 'Trạng thái được cập nhập thành công!']);

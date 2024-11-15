@@ -131,7 +131,8 @@
                     url: "{{ route('restock.suggested-products') }}",
                     type: "GET",
                     data: {
-                        reason_id: reasonId
+                        reason_id: reasonId,
+                        warehouse_id: 3
                     },
                     success: function(products) {
                         console.log(products);
