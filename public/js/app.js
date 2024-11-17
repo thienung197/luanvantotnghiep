@@ -12,7 +12,39 @@ liActivity.forEach(function (li) {
         li.classList.toggle("show");
     });
 });
+//Luu vi tri cuon
+document.addEventListener("DOMContentLoaded", function () {
+    const sidebar = document.getElementById("menu-container");
+    const savedPosition = localStorage.getItem("sidebarScrollPosition");
+    if (savedPosition) {
+        sidebar.scrollTop = savedPosition;
+    }
+    sidebar.addEventListener("scroll", () => {
+        localStorage.setItem("sidebarScrollPosition", sidebar.scrollTop);
+    });
+});
 
+//su kien sub menu
+document.addEventListener("DOMContentLoaded", () => {
+    const menuItems = document.querySelectorAll("#menu-container li > a");
+    menuItems.forEach((menuItem) => {
+        menuItem.addEventListener("click", (e) => {
+            // e.preventDefault();
+            const subMenu = this.nextElementSibling;
+            if (subMenu) {
+                subMenu.style.display =
+                    subMenu.style.display === "block" ? "none" : "block";
+            }
+        });
+    });
+    const active = document.querySelector(".bg-blue");
+    if (active) {
+        const submenu = active.closest(".sub-menu");
+        if (submenu) {
+            submenu.style.display = "block";
+        }
+    }
+});
 //Su kien load hinh anh
 $(() => {
     function readURL(input) {

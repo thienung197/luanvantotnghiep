@@ -30,10 +30,11 @@ a:focus {
 /* body  */
 #aside {
     width: 21%;
-    background-color: var(--color-white);
     height: 100vh;
-    overflow-y: scroll;
+    background-color: var(--color-white);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
 }
 
 /* end of body  */
@@ -45,6 +46,7 @@ a:focus {
     justify-content: center;
     border-bottom: 1px solid rgb(244, 247, 254);
     padding: 40px 20px;
+    max-height: 150px;
 }
 
 #logo-container span {
@@ -84,8 +86,8 @@ a:focus {
 /* begin of mẹnu container  */
 #menu-container {
     padding: 40px;
-    height: auto;
     background-color: var(--color-white);
+    height: ;
     overflow-y: scroll;
 }
 

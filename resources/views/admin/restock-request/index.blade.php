@@ -44,7 +44,7 @@
                 {{-- <th>Tổng tiền hàng</th> --}}
                 <th>Trạng thái</th>
                 <th>Ngày tạo </th>
-                <th>Thao tác</th>
+                {{-- <th>Thao tác</th> --}}
             </tr>
 
             @foreach ($restockRequests as $restockRequest)
@@ -52,20 +52,20 @@
                     <td>{{ $restockRequest->code }}</td>
                     <td>{{ $restockRequest->getUserName() }}</td>
                     <td>{{ $restockRequest->warehouse->name }}</td>
-                    <td class="status-cell">
+                    <td class="status-cell" data-status="{{ $restockRequest->status }}">
                         @if ($restockRequest->status == 'pending')
-                            Phiếu yêu cầu đã được gửi đi
-                        @elseif($restockRequest->status == 'approved')
-                            Phiếu yêu cầu được phê duyệt
-                        @elseif($restockRequest->status == 'rejected')
-                            Phiếu yêu cầu bị từ chối
+                            Yêu cầu này chưa được phê duyệt
+                        @elseif($restockRequest->status == 'in_review')
+                            Yêu cầu này đang được phê duyệt
+                        @elseif($restockRequest->status == 'reviewed')
+                            Bạn cầu này đã được phê duyệt
                         @endif
                     </td>
                     <td>{{ $restockRequest->created_at }}</td>
-                    <td class="btn-cell">
+                    {{-- <td class="btn-cell">
                         <button class="btn btn-primary btn-approve" data-id="{{ $restockRequest->id }}">Phê duyệt</button>
                         <button class="btn btn-primary btn-reject" data-id="{{ $restockRequest->id }}">Từ chối</button>
-                    </td>
+                    </td> --}}
                 </tr>
 
                 <tr class="goods-issue-details" id="details-{{ $restockRequest->id }}" style="display: none;">
@@ -78,6 +78,8 @@
                                         <th>Mã hàng</th>
                                         <th>Tên hàng</th>
                                         <th>Số lượng</th>
+                                        <th>Thao tác</th>
+
                                         {{-- <th>Giá bán</th>
                                         <th>Giảm giá</th>
                                         <th>Thành tiền</th> --}}
@@ -85,10 +87,22 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($restockRequest->restockRequestDetails as $detail)
-                                        <tr>
+                                        <tr class="restock-request-detail-row" data-id="{{ $detail->id }}">
                                             <td>{{ $detail->product->code }}</td>
                                             <td>{{ $detail->product->name }}</td>
                                             <td>{{ $detail->quantity }}</td>
+                                            <td class="btn-cell">
+                                                <button class="btn btn-primary btn-approve" data-id="{{ $detail->id }}"
+                                                    data-parent-id="{{ $restockRequest->id }}"
+                                                    data-status="{{ $detail->status }}">
+                                                    {{ $detail->status === 'approved' ? 'Đã phê duyệt' : 'Phê duyệt' }}
+                                                </button>
+                                                <button class="btn btn-primary btn-reject" data-id="{{ $detail->id }}"
+                                                    data-parent-id="{{ $restockRequest->id }}"
+                                                    data-status="{{ $detail->status }}">
+                                                    {{ $detail->status === 'rejected' ? 'Đã từ chối' : 'Từ chối' }}
+                                                </button>
+                                            </td>
                     </td>
                 </tr>
             @endforeach
@@ -117,7 +131,6 @@
                             'btn-reject')) {
                         const restockRequestId = this.getAttribute("data-id");
                         const detailsRow = document.getElementById(`details-${restockRequestId}`);
-                        console.log(detailsRow);
 
                         if (detailsRow.style.display === "none") {
                             detailsRow.style.display = "table-row";
@@ -130,37 +143,67 @@
 
             document.querySelectorAll(".btn-approve").forEach(btn => {
                 btn.addEventListener("click", function() {
-                    let restockRequestId = this.getAttribute("data-id");
-                    console.log(restockRequestId);
+                    let restockRequestId = this.getAttribute("data-parent-id");
+                    let restockRequestDetailId = this.getAttribute("data-id");
+                    let currentStatus = this.getAttribute("data-status");
+                    let newStatus = (currentStatus === 'approved') ? 'pending' : 'approved';
+                    console.log(newStatus);
 
-                    updateStatus(restockRequestId, "approved");
+                    updateStatus(restockRequestDetailId, restockRequestId, newStatus);
+
                 })
             })
 
             document.querySelectorAll(".btn-reject").forEach(btn => {
                 btn.addEventListener("click", function() {
-                    let restockRequestId = this.getAttribute("data-id");
-                    updateStatus(restockRequestId, "rejected")
+                    let restockRequestId = this.getAttribute("data-parent-id");
+                    let restockRequestDetailId = this.getAttribute("data-id");
+                    let currentStatus = this.getAttribute("data-status");
+                    let newStatus = (currentStatus === 'rejected') ? 'pending' : 'rejected';
+                    updateStatus(restockRequestDetailId, restockRequestId, newStatus)
                 })
             })
 
-            function updateStatus(id, status) {
+            function updateStatus(id, restockRequestId, status) {
                 $.ajax({
 
                     url: `{{ route('update-restock-request-status', ':id') }}`.replace(':id', id),
                     type: 'POST',
                     data: {
                         _token: "{{ csrf_token() }}",
-                        status: status
+                        status: status,
+                        restockRequestId: restockRequestId
                     },
                     success: function(res) {
-                        console.log(res);
 
                         if (res.success) {
-                            const row = document.querySelector(`.restock-request-row[data-id="${id}"]`);
+                            const row = document.querySelector(
+                                `.restock-request-detail-row[data-id="${id}"]`);
+                            const approvedBtn = row.querySelector(".btn-approve");
+                            const rejectedBtn = row.querySelector(".btn-reject");
+                            approvedBtn.textContent = status === 'approved' ?
+                                'Đã phê duyệt' : 'Phê duyệt';
+                            rejectedBtn.textContent = status === 'rejected' ?
+                                'Đã từ chối' : 'Từ chối';
+                            approvedBtn.setAttribute("data-status", status);
+                            rejectedBtn.setAttribute("data-status", status);
 
-                            row.querySelector(".status-cell").textContent = status === 'approved' ?
-                                'Phiếu yêu cầu được phê duyệt' : 'Phiếu yêu cầu bị từ chối';
+                            const requestId = approvedBtn.getAttribute("data-parent-id");
+                            const requestRow = document.querySelector(
+                                `.restock-request-row[data-id="${requestId}"]`);
+                            if (requestRow) {
+                                const statusCell = requestRow.querySelector(".status-cell");
+
+                                if (res.requestStatus == 1) {
+                                    statusCell.textContent = "Yêu cầu này chưa được phê duyệt";
+                                } else if (res.requestStatus == 2) {
+                                    statusCell.textContent = "Yêu cầu này đang được phê duyệt";
+                                }
+                                if (res.requestStatus == 3) {
+                                    statusCell.textContent = "Yêu cầu này đã được phê duyệt";
+                                }
+                            }
+
                         }
                     },
                     error: function(xhr, status, error) {

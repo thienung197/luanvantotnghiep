@@ -125,6 +125,8 @@
 
         $('select[name="restock_request_reason_id"]').on('change', function() {
             let reasonId = $(this).val();
+            let warehouseId = $('#warehouse_id').val();
+            console.log(warehouseId);
 
             if (reasonId == 3) {
                 $.ajax({
@@ -132,7 +134,7 @@
                     type: "GET",
                     data: {
                         reason_id: reasonId,
-                        warehouse_id: 3
+                        warehouse_id: warehouseId
                     },
                     success: function(products) {
                         console.log(products);
@@ -330,152 +332,6 @@
             });
         });
 
-        // let indexRow = 0;
-        // $(".search-result").on("click", ".search-result-item", function() {
-        //     let name = $(this).find("h4").data("name");
-        //     let code = $(this).find(".product-code").data('code');
-        //     console.log(code);
-
-        //     let id = $(this).find(".product-id").data('id');
-        //     let newRow = document.createElement("tr");
-        //     let batchCode = $(this).find(".batch-code").data("batch-code");
-        //     let unit = $(this).find(".ajax-product-unit").data("unit");
-
-        //     let batchQuantity = $(this).find(".product-batch-quantity").data("batch-quantity");
-        //     let price = $(this).find(".ajax-product-price").data("price");
-
-        //     //id hang
-        //     let idCell = document.createElement("td");
-        //     idCell.style.display = "none";
-        //     let idInput = document.createElement("input");
-        //     idInput.setAttribute("type", "hidden");
-        //     idInput.setAttribute("name", `inputs[${indexRow}][product_id]`);
-        //     idInput.value = id;
-        //     idCell.appendChild(idInput);
-
-        //     //price
-        //     let priceCell = document.createElement("td");
-        //     priceCell.style.display = "none";
-        //     let priceInput = document.createElement("input");
-        //     priceInput.classList.add("price");
-        //     priceInput.setAttribute("type", "hidden");
-        //     priceInput.setAttribute("name", `inputs[${indexRow}][price]`);
-        //     priceInput.value = price;
-
-        //     priceCell.appendChild(priceInput);
-
-        //     //ma hang
-        //     let codeCell = document.createElement("td");
-        //     let codeInput = document.createElement("input");
-        //     codeInput.setAttribute("type", "text");
-        //     codeInput.setAttribute("name", `inputs[${indexRow}][code]`);
-        //     codeInput.value = code;
-        //     codeInput.style.width = "120px";
-        //     codeCell.appendChild(codeInput);
-
-        //     //ten hang
-        //     let nameCell = document.createElement("td");
-        //     let nameInput = document.createElement("input");
-        //     nameInput.setAttribute("type", "text");
-        //     nameInput.setAttribute("name", `inputs[${indexRow}][name]`);
-        //     nameInput.value = name;
-        //     nameCell.appendChild(nameInput);
-
-        //     //lo hang
-        //     // let batchCodeCell = document.createElement("td");
-        //     // let batchCodeInput = document.createElement("input");
-        //     // batchCodeInput.setAttribute("type", "texgt");
-        //     // batchCodeInput.setAttribute("name", `inputs[${indexRow}][batch_id]`);
-        //     // // batchCodeInput.value = batchCode;
-        //     // batchCodeInput.style.width = "160px";
-        //     // batchCodeCell.appendChild(batchCodeInput);
-
-        //     //tao batch
-        //     let batchList = document.querySelector('.batch-list');
-
-        //     let batchCodeCell = document.createElement("td");
-
-        //     let batchCodeSelect = document.createElement("select");
-        //     batchCodeSelect.classList.add("batch-select")
-        //     batchCodeSelect.setAttribute("name", `inputs[${indexRow}][batch_id]`);
-        //     batchCodeSelect.style.width = "160px";
-
-        //     let defaultOption = document.createElement("option");
-        //     defaultOption.text = "Chọn lô hàng";
-        //     defaultOption.value = "";
-        //     batchCodeSelect.appendChild(defaultOption);
-
-        //     let batchItems = batchList.querySelectorAll('p');
-        //     batchItems.forEach(item => {
-        //         let batchId = item.getAttribute('data-batch-id');
-        //         let batchCode = item.getAttribute('data-batch-code');
-
-        //         let option = document.createElement("option");
-        //         option.value = batchId;
-        //         option.text = batchCode;
-        //         batchCodeSelect.appendChild(option);
-        //     });
-
-        //     batchCodeCell.appendChild(batchCodeSelect);
-        //     //tao unit
-        //     let unitCell = document.createElement("td");
-        //     unitCell.textContent = unit;
-
-        //     let batchQuantityCell = document.createElement("td");
-        //     batchQuantityInput = document.createElement("input");
-        //     batchQuantityInput.classList.add("batch-quantity", "quantity_available_0");
-        //     batchQuantityInput.setAttribute("type", "number");
-        //     batchQuantityInput.setAttribute("name", `inputs[${indexRow}][batch-quantity]`);
-        //     batchQuantityInput.value = batchQuantity;
-        //     batchQuantityInput.style.width = "120px";
-        //     batchQuantityCell.appendChild(batchQuantityInput);
-
-        //     let actualQuantityCell = document.createElement("td");
-        //     actualQuantityInput = document.createElement("input");
-        //     actualQuantityInput.classList.add("actual-quantity");
-        //     actualQuantityInput.setAttribute("type", "number");
-        //     actualQuantityInput.setAttribute("name", `inputs[${indexRow}][actual-quantity]`);
-        //     actualQuantityInput.style.width = "120px";
-        //     actualQuantityCell.appendChild(actualQuantityInput);
-
-        //     let quantityDifferenceCell = document.createElement("td");
-        //     let quantityDifferenceInput = document.createElement("input");
-        //     quantityDifferenceInput.classList.add("quantity-difference");
-        //     quantityDifferenceInput.setAttribute("type", "number");
-        //     quantityDifferenceInput.setAttribute("name", `inputs[${indexRow}][quantity-difference]`);
-        //     quantityDifferenceInput.style.width = "120px";
-        //     quantityDifferenceCell.appendChild(quantityDifferenceInput);
-
-        //     let valueDifferenceCell = document.createElement("td");
-        //     let valueDifferenceInput = document.createElement("input");
-        //     valueDifferenceInput.classList.add("value-difference");
-        //     valueDifferenceInput.setAttribute("type", "number");
-        //     valueDifferenceInput.setAttribute("readonly", true);
-        //     valueDifferenceInput.style.width = "120px";
-        //     valueDifferenceCell.appendChild(valueDifferenceInput);
-
-        //     let removeCell = document.createElement("td");
-        //     let removeBtn = document.createElement("button");
-        //     removeBtn.classList.add("remove-product");
-        //     removeBtn.textContent = "Xóa";
-        //     removeCell.appendChild(removeBtn);
-
-        //     newRow.appendChild(idCell);
-        //     newRow.appendChild(priceCell);
-        //     newRow.appendChild(codeCell);
-        //     newRow.appendChild(nameCell);
-        //     newRow.appendChild(batchCodeCell);
-        //     newRow.appendChild(unitCell);
-        //     newRow.appendChild(batchQuantityCell);
-        //     newRow.appendChild(actualQuantityCell);
-        //     newRow.appendChild(quantityDifferenceCell);
-        //     newRow.appendChild(valueDifferenceCell);
-        //     newRow.appendChild(removeCell);
-
-        //     document.querySelector("#body-product-table").appendChild(newRow);
-        //     $(".search-result").css("display", "none");
-        //     indexRow++;
-        // })
 
         $(document).on('change', '.batch-select', function() {
             var batchId = $(this).val();

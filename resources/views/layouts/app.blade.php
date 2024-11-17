@@ -179,24 +179,24 @@
                         @endcan
 
                         @can('is-admin')
-                            <li class="{{ request()->routeIs('goodsreceipts.*') ? 'bg-blue' : '' }}">
-                                <a href="{{ route('goodsreceipts.index') }}">
+                            <li>
+                                <a href="javascript:void(0)">
                                     <div class="flex-left-content">
                                         <img src="{{ asset('img/product.png') }}" alt="">
                                         <span>Nhập hàng</span>
                                     </div>
-                                </a>
-                            </li>
-                        @endcan
+                                    <img class="angle-down" src="{{ asset('img/angle-down.png') }}" alt="">
 
-                        @can('is-customer')
-                            <li class="{{ request()->routeIs('customers.update.*') ? 'bg-blue' : '' }}">
-                                <a href="{{ route('customers.update.index') }}">
-                                    <div class="flex-left-content">
-                                        <img src="{{ asset('img/product.png') }}" alt="">
-                                        <span>Cập nhật thông tin</span>
-                                    </div>
                                 </a>
+                                <ul class="sub-menu">
+                                    <li
+                                        class="{{ request()->routeIs('goodsreceipts.index') || request()->routeIs('goodsreceipts.create') ? 'bg-blue' : '' }}">
+                                        <a href="{{ route('goodsreceipts.index') }}">Mua Hàng</a>
+                                    </li>
+                                    <li class="{{ request()->routeIs('goodsreceipts.display') ? 'bg-blue' : '' }}">
+                                        <a href="{{ route('goodsreceipts.display') }}">Danh sách phiếu mua hàng</a>
+                                    </li>
+                                </ul>
                             </li>
                         @endcan
 

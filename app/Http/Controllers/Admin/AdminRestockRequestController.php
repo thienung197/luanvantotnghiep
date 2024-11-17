@@ -20,8 +20,6 @@ class AdminRestockRequestController extends Controller
     {
         $user = auth()->user();
         $restockRequests = $this->restockRequest::with('warehouse')->latest('id')->get();
-        info($restockRequests);
-
         return view('admin.restock-request.index', compact('restockRequests'));
     }
 }

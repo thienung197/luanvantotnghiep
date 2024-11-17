@@ -15,4 +15,9 @@ class PurchaseOrderDetail extends Model
         'unit_price',
         'discount',
     ];
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
 }

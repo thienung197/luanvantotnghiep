@@ -25,26 +25,57 @@
                             <th>Mã sản phẩm</th>
                             <th>Tên sản phẩm</th>
                             <th>Đơn vị tính</th>
+                            <th>Tổng số lượng đặt</th>
+                            <th>Yêu cầu nhập từ nhà kho</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($provider['products'] as $product)
-                            <tr>
-                                <td>{{ $product['code'] }}</td>
-                                <td>{{ $product['name'] }}</td>
-                                <td>{{ $product['unit'] }}</td>
-                            </tr>
-                        @endforeach
+                        <form action="{{ route('goodsreceipts.create') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="provider_id" value="{{ $provider['provider_id'] }}">
+                            @foreach ($provider['products'] as $product)
+                                <tr>
+                                    <td style="display: none">{{ $product['id'] }}</td>
+                                    <td>{{ $product['code'] }}</td>
+                                    <td>{{ $product['name'] }}</td>
+                                    <td>{{ $product['unit'] }}</td>
+                                    <td>{{ $product['totalQuantity'] }}</td>
+                                    <td>
+                                        @if (!empty($product['restock_details']))
+                                            @foreach ($product['restock_details'] as $detail)
+                                                <li>
+                                                    <strong>Nhà kho: </strong> {{ $detail['warehouse_name'] }}<br />
+                                                    <strong>Số lượng yêu cầu: </strong> {{ $detail['quantity'] }}
+                                                </li>
+                                            @endforeach
+                                        @else
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <input type="hidden" name="products[{{ $product['id'] }}][product_id]"
+                                            value="{{ $product['id'] }}">
+                                        <input type="hidden" name="products[{{ $product['id'] }}][product_code]"
+                                            value="{{ $product['code'] }}">
+                                        <input type="hidden" name="products[{{ $product['id'] }}][product_name]"
+                                            value="{{ $product['name'] }}">
+                                        <input type="hidden" name="products[{{ $product['id'] }}][product_unit]"
+                                            value="{{ $product['unit'] }}">
+                                        <input type="hidden" name="products[{{ $product['id'] }}][totalQuantity]"
+                                            value="{{ $product['totalQuantity'] }}">
+                                    </td>
+                                </tr>
+                            @endforeach
                     </tbody>
                 </table>
             </div>
-            <a
-                href="{{ route('goodsreceipts.create', ['provider_id' => $provider['provider_id'], 'product_ids' => $provider['product_ids']]) }}">Đặt
-                hàng</a>
+
+
+            <button type="submit" class="btn btn-primary">Đặt hàng</button>
+            </form>
         @endforeach
 
-        <div class="table_filter-controls">
-            {{-- <form action="{{ route('goodsreceipts.index') }}" method="GET">
+        {{-- <div class="table_filter-controls">
+            <form action="{{ route('goodsreceipts.index') }}" method="GET">
                 <label for="">Hiển thị </label>
                 <select name="entries" id="entries" onchange="this.form.submit()">
                     <option value="5" {{ request('entries') == 5 ? 'selected' : '' }}>5</option>
@@ -52,7 +83,7 @@
                     <option value="25" {{ request('entries') == 25 ? 'selected' : '' }}>25</option>
                 </select>
                 mục
-            </form> --}}
+            </form>
             <div class="btn-cs btn-add">
                 <a href="{{ route('goodsreceipts.create') }}">Thêm phiếu nhập hàng </a>
             </div>
@@ -64,47 +95,14 @@
                 </form>
             </div>
         </div>
-        <table class="table" id="table-list">
-            <tr>
-                <th>Mã phiếu nhập hàng</th>
-                <th>Nhà cung cấp</th>
-                <th>Nhà kho</th>
-                <th>Ngày tạo </th>
-                <th>Thao tác</th>
-            </tr>
-            {{-- @php
-                $stt = ($goodsReceipts->currentPage() - 1) * $goodsReceipts->perPage() + 1;
-            @endphp --}}
-            @foreach ($goodsReceipts as $goodsReceipt)
-                <tr>
-                    <td>{{ $goodsReceipt->code }}</td>
-                    <td>{{ $goodsReceipt->getProviderName() }}</td>
-                    <td>{{ $goodsReceipt->getWarehouseName() }}</td>
-                    <td>{{ $goodsReceipt->created_at }}</td>
-                    <td class="btn-cell">
-                        <a href="{{ route('goodsreceipts.edit', $goodsReceipt->id) }}"><img
-                                src="{{ asset('img/edit.png') }}" alt=""></a>
-                        <form action="{{ route('goodsreceipts.destroy', $goodsReceipt->id) }}" method="POST"
-                            id="form-delete{{ $goodsReceipt->id }}">
-                            @csrf
-                            @method('delete')
-                        </form>
-                        <button type="submit" class="btn-delete" data-id="{{ $goodsReceipt->id }}"><img
-                                src="{{ asset('img/delete.png') }}" alt=""></button>
 
-                    </td>
-                </tr>
-            @endforeach
+    </div> --}}
+    @endsection
 
-        </table>
-        {{-- {{ $goodsReceipts->links() }} --}}
-    </div>
-@endsection
-
-@push('js')
-    <script>
-        @if (Session::has('message'))
-            toastr.success("{{ Session::get('message') }}");
-        @endif
-    </script>
-@endpush
+    @push('js')
+        <script>
+            @if (Session::has('message'))
+                toastr.success("{{ Session::get('message') }}");
+            @endif
+        </script>
+    @endpush

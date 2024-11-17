@@ -66,6 +66,8 @@
                         <th>Mã hàng</th>
                         <th>Tên hàng</th>
                         <th>Đơn vị tính</th>
+                        <th>Ngày sản xuất</th>
+                        <th>Hạn sử dụng</th>
                         <th>Số lượng</th>
                         <th>Đơn giá</th>
                         <th>Giảm giá</th>
@@ -73,32 +75,33 @@
                         <th>Xóa</th>
                     </thead>
                     <tbody id="body-product-table">
-                        @foreach ($approvedProduct as $product)
-                            <tr data-id="{{ $product->id }}">
+                        @foreach ($approvedProduct as $key => $product)
+                            <tr data-id="{{ $key }}">
                                 <td style="display: none">
-                                    <input type="hidden" name="products[{{ $product->id }}][id]"
-                                        value="{{ $product['id'] }}">
+                                    <input type="hidden" name="products[{{ $key }}][id]"
+                                        value="{{ $product['product_id'] }}">
                                 </td>
-                                <td>{{ $product['code'] }}</td>
-                                <td>{{ $product['name'] }}</td>
-                                <td>{{ $product->unit->name }}</td>
+                                <td>{{ $product['product_code'] }}</td>
+                                <td>{{ $product['product_name'] }}</td>
+                                <td>{{ $product['product_unit'] }}</td>
+                                <td><input type="date" name="products[{{ $key }}][manufacturing_date]"
+                                        id=""></td>
+                                <td><input type="date" name="products[{{ $key }}][expiry_date]" id="">
+                                </td>
                                 <td>
-                                    @if ($product->restockRequestDetails->isNotEmpty())
-                                        <input type="number" class="form-control"
-                                            name="products[{{ $product->id }}][quantity]"
-                                            value=" {{ $product->restockRequestDetails->first()->quantity }}">
-                                    @else
-                                        <input type="number">
-                                    @endif
+                                    <input type="number" class="form-control"
+                                        name="products[{{ $key }}][quantity]"
+                                        value="{{ $product['totalQuantity'] }}">
 
 
                                 </td>
                                 <td><input type="number" class="form-control" id=""
-                                        name="products[{{ $product->id }}][unit_price]">
+                                        name="products[{{ $key }}][unit_price]">
                                 </td>
                                 <td><input type="number" class="form-control" value="0"
-                                        name="products[{{ $product->id }}][discount]"></td>
-                                <td><input type="number" class="form-control"></td>
+                                        name="products[{{ $key }}][discount]"></td>
+                                <td><input type="number" class="form-control"
+                                        name="products[{{ $key }}][total_price]"></td>
                                 <td><button class="btn btn-danger delete-row-btn">Xóa</button></td>
                             </tr>
                         @endforeach
@@ -163,6 +166,43 @@
                 })
             })
         })
+        //xu ly su kien input thanh tien
+        document.addEventListener("DOMContentLoaded", () => {
+            const tbody = document.querySelector("#body-product-table");
+            const totalAmountInput = document.querySelector(".total_amount");
+            tbody.addEventListener("input", (e) => {
+                const target = e.target;
+                if (target.matches("input[name^='products'][name$='[quantity]']") ||
+                    target.matches("input[name^='products'][name$='[unit_price]']") ||
+                    target.matches("input[name^='products'][name$='[discount]']")
+                ) {
+                    const row = target.closest("tr");
+                    updateTotalPrice(row);
+                    updateTotalAmount();
+                }
+            })
+
+            function updateTotalPrice(row) {
+                const quantity = parseFloat(row.querySelector("input[name$='[quantity]']").value) || 0;
+                const unitPrice = parseFloat(row.querySelector("input[name$='[unit_price]']").value) || 0;
+                const discount = parseFloat(row.querySelector("input[name$='[discount]']").value) || 0;
+                const totalPrice = quantity * unitPrice - discount;
+                const totalPriceInput = row.querySelector("input[name$='[total_price]']");
+                if (totalPrice) {
+                    totalPriceInput.value = totalPrice;
+                }
+            }
+
+            function updateTotalAmount() {
+                let totalAmount = 0;
+                tbody.querySelectorAll("input[name$='[total_price]']").forEach(input => {
+                    totalAmount += parseFloat(input.value) || 0;
+                });
+                totalAmountInput.value = totalAmount.toFixed(2);
+            }
+
+        })
+
 
         $(document).ready(function() {
             $('#show-products').click(function() {
@@ -185,97 +225,112 @@
                 });
             }
 
-            function createTable(products) {
-                const container = document.querySelector(".ajax-table-container");
+            // function createTable(products) {
+            //     const container = document.querySelector(".ajax-table-container");
 
-                container.innerHTML = '';
+            //     container.innerHTML = '';
 
-                const table = document.createElement("table");
-                table.classList.add("table");
+            //     const table = document.createElement("table");
+            //     table.classList.add("table");
 
-                const thead = document.createElement("thead");
-                const headerRow = document.createElement("tr");
+            //     const thead = document.createElement("thead");
+            //     const headerRow = document.createElement("tr");
 
-                const headers = ["Mã sản phẩm", "Tên sản phẩm", "Đơn vị tính", "Số lượng", "Đơn giá", "Giảm giá",
-                    "Thành tiền",
-                    "Xóa"
-                ];
-                headers.forEach(header => {
-                    const th = document.createElement("th");
-                    th.textContent = header;
-                    headerRow.appendChild(th);
-                });
+            //     const headers = ["Mã sản phẩm", "Tên sản phẩm", "Đơn vị tính", "Số lượng", "Đơn giá", "Giảm giá",
+            //         "Thành tiền",
+            //         "Xóa"
+            //     ];
+            //     headers.forEach(header => {
+            //         const th = document.createElement("th");
+            //         th.textContent = header;
+            //         headerRow.appendChild(th);
+            //     });
 
-                thead.appendChild(headerRow);
-                table.appendChild(thead);
+            //     thead.appendChild(headerRow);
+            //     table.appendChild(thead);
 
-                const tbody = document.createElement("tbody");
-                products.forEach(product => {
-                    const row = document.createElement("tr");
+            //     const tbody = document.createElement("tbody");
+            //     products.forEach(product => {
+            //         const row = document.createElement("tr");
 
-                    const idCell = document.createElement("td");
-                    idCell.style.display = "none";
-                    idCell.textContent = product.id;
-                    row.appendChild(idCell);
+            //         const productId = product.id;
+            //         const idCell = document.createElement("td");
+            //         idCell.style.display = "none";
+            //         idCell.textContent = product.id;
+            //         row.appendChild(idCell);
 
-                    const codeCell = document.createElement("td");
-                    codeCell.textContent = product.code;
-                    row.appendChild(codeCell);
+            //         const codeCell = document.createElement("td");
+            //         codeCell.textContent = product.code;
+            //         row.appendChild(codeCell);
 
-                    const nameCell = document.createElement("td");
-                    nameCell.textContent = product.name;
-                    row.appendChild(nameCell);
+            //         const nameCell = document.createElement("td");
+            //         nameCell.textContent = product.name;
+            //         row.appendChild(nameCell);
 
-                    const unitCell = document.createElement("td");
-                    unitCell.textContent = product.unit;
-                    row.appendChild(unitCell);
+            //         const unitCell = document.createElement("td");
+            //         unitCell.textContent = product.unit;
+            //         row.appendChild(unitCell);
 
-                    const quantityCell = document.createElement("td");
-                    const quantityInput = document.createElement("input");
-                    quantityInput.classList.add("form-control")
-                    quantityInput.setAttribute("type", "number");
-                    quantityCell.appendChild(quantityInput);
-                    row.appendChild(quantityCell);
+            //         const manufacturingDateCell = document.createElement("td");
+            //         const manufacturingDateInput = document.createElement("input");
+            //         manufacturingDateInput.classList.add("form-control");
+            //         manufacturingDateInput.setAttribute("type", "date");
+            //         manufacturingDateCell.appendChild(manufacturingDateInput);
+            //         row.appendChild(manufacturingDateCell);
 
-                    const unitPriceCell = document.createElement("td");
-                    const unitPriceInput = document.createElement("input");
-                    unitPriceInput.classList.add("form-control")
-                    unitPriceInput.setAttribute("type", "text");
-                    unitPriceCell.appendChild(unitPriceInput);
-                    row.appendChild(unitPriceCell);
+            //         const expiryDateCell = document.createElement("td");
+            //         const expiryDateInput = document.createElement("input");
+            //         expiryDateInput.classList.add("form-control");
+            //         expiryDateInput.setAttribute("type", "date");
+            //         expiryDateCell.appendChild(expiryDateInput);
+            //         row.appendChild(expiryDateCell);
 
-                    const discountCell = document.createElement("td");
-                    const discountInput = document.createElement("input");
-                    discountInput.classList.add("form-control")
-                    discountInput.setAttribute("type", "text");
-                    discountCell.appendChild(discountInput);
-                    discountInput.value = 0;
-                    row.appendChild(discountCell);
+            //         const quantityCell = document.createElement("td");
+            //         const quantityInput = document.createElement("input");
+            //         quantityInput.classList.add("form-control")
+            //         quantityInput.setAttribute("type", "number");
+            //         quantityCell.appendChild(quantityInput);
+            //         row.appendChild(quantityCell);
 
-                    const totalPriceCell = document.createElement("td");
-                    const totalPriceInput = document.createElement("input");
-                    totalPriceInput.classList.add("form-control")
-                    totalPriceInput.setAttribute("type", "text");
-                    totalPriceCell.appendChild(totalPriceInput);
-                    row.appendChild(totalPriceCell);
+            //         const unitPriceCell = document.createElement("td");
+            //         const unitPriceInput = document.createElement("input");
+            //         unitPriceInput.classList.add("form-control")
+            //         unitPriceInput.setAttribute("type", "text");
+            //         unitPriceCell.appendChild(unitPriceInput);
+            //         row.appendChild(unitPriceCell);
 
-                    const deleteCell = document.createElement("td");
-                    deleteCell.classList.add("form-control");
-                    const deleteButton = document.createElement("button");
-                    deleteButton.classList.add("btn", "btn-danger");
-                    deleteButton.textContent = "Xóa"
-                    deleteButton.addEventListener("click", function() {
-                        deleteRow(row);
-                    })
-                    deleteCell.appendChild(deleteButton);
-                    row.appendChild(deleteCell);
-                    tbody.appendChild(row);
-                });
+            //         const discountCell = document.createElement("td");
+            //         const discountInput = document.createElement("input");
+            //         discountInput.classList.add("form-control")
+            //         discountInput.setAttribute("type", "text");
+            //         discountCell.appendChild(discountInput);
+            //         discountInput.value = 0;
+            //         row.appendChild(discountCell);
+
+            //         const totalPriceCell = document.createElement("td");
+            //         const totalPriceInput = document.createElement("input");
+            //         totalPriceInput.classList.add("form-control")
+            //         totalPriceInput.setAttribute("type", "text");
+            //         totalPriceCell.appendChild(totalPriceInput);
+            //         row.appendChild(totalPriceCell);
+
+            //         const deleteCell = document.createElement("td");
+            //         deleteCell.classList.add("form-control");
+            //         const deleteButton = document.createElement("button");
+            //         deleteButton.classList.add("btn", "btn-danger");
+            //         deleteButton.textContent = "Xóa"
+            //         deleteButton.addEventListener("click", function() {
+            //             deleteRow(row);
+            //         })
+            //         deleteCell.appendChild(deleteButton);
+            //         row.appendChild(deleteCell);
+            //         tbody.appendChild(row);
+            //     });
 
 
-                table.appendChild(tbody);
-                container.appendChild(table);
-            }
+            //     table.appendChild(tbody);
+            //     container.appendChild(table);
+            // }
 
             function deleteRow(row) {
                 row.remove();
@@ -293,8 +348,14 @@
 
             const idCell = document.createElement("td");
             idCell.style.display = "none";
-            idCell.textContent = id;
+            const idInput = document.createElement("input");
+            idInput.classList.add("form-control");
+            idInput.setAttribute("type", "number");
+            idInput.setAttribute("name", `products[${id}][id]`);
+            idInput.value = id;
+            idCell.appendChild(idInput);
             row.appendChild(idCell);
+
 
             const nameCell = document.createElement("td");
             nameCell.textContent = name;
@@ -308,10 +369,27 @@
             unitCell.textContent = unit;
             row.appendChild(unitCell);
 
+            const manufacturingDateCell = document.createElement("td");
+            const manufacturingDateInput = document.createElement("input");
+            manufacturingDateInput.classList.add("form-control");
+            manufacturingDateInput.setAttribute("type", "date");
+            manufacturingDateInput.setAttribute("name", `products[${id}][manufacturing_date]`);
+            manufacturingDateCell.appendChild(manufacturingDateInput);
+            row.appendChild(manufacturingDateCell);
+
+            const expiryDateCell = document.createElement("td");
+            const expiryDateInput = document.createElement("input");
+            expiryDateInput.classList.add("form-control");
+            expiryDateInput.setAttribute("type", "date");
+            expiryDateInput.setAttribute("name", `products[${id}][expiry_date]`);
+            expiryDateCell.appendChild(expiryDateInput);
+            row.appendChild(expiryDateCell);
+
             const quantityCell = document.createElement("td");
             const quantityInput = document.createElement("input");
             quantityInput.classList.add("form-control");
             quantityInput.setAttribute("type", "number");
+            quantityInput.setAttribute("name", `products[${id}][quantity]`);
             quantityCell.appendChild(quantityInput);
             row.appendChild(quantityCell);
 
@@ -319,6 +397,7 @@
             const unitPriceInput = document.createElement("input");
             unitPriceInput.classList.add("form-control");
             unitPriceInput.setAttribute("type", "number");
+            unitPriceInput.setAttribute("name", `products[${id}][unit_price]`);
             unitPriceCell.appendChild(unitPriceInput);
             row.appendChild(unitPriceCell);
 
@@ -326,6 +405,7 @@
             const discountInput = document.createElement("input");
             discountInput.classList.add("form-control");
             discountInput.setAttribute("type", "number");
+            discountInput.setAttribute("name", `products[${id}][discount]`);
             discountInput.value = 0;
             discountCell.appendChild(discountInput);
             row.appendChild(discountCell);
@@ -334,6 +414,7 @@
             const totalPriceInput = document.createElement("input");
             totalPriceInput.classList.add("form-control");
             totalPriceInput.setAttribute("type", "number");
+            totalPriceInput.setAttribute("name", `products[${id}][total_price]`);
             totalPriceCell.appendChild(totalPriceInput);
             row.appendChild(totalPriceCell);
 

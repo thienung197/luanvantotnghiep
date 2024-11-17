@@ -335,7 +335,7 @@ class ApiController extends Controller
             return response(`<p>Không tìm thấy sản phẩm!</p >`);
         }
     }
-
+    //nha kho dung de de xuat hang hoa de nhap hang(do ton kho thap)
     public function getSuggestedProducts(Request $request)
     {
         $reasonId = $request->reason_id;
@@ -350,27 +350,47 @@ class ApiController extends Controller
                 'products.name',
                 'products.code',
                 'units.name as unit_name',
+                'inventories.warehouse_id',
                 // 'batches.price as unit_price',
                 DB::raw('SUM(inventories.quantity_available) as available_quantity'),
                 DB::raw('products.target_stock_level - SUM(inventories.quantity_available) as suggested_quantity'),
                 // 'products.minimum_stock_level'
             )
             ->where('inventories.warehouse_id', $warehouseId)
-            ->groupBy('products.id', 'products.code', 'products.name', 'units.name', 'products.target_stock_level', 'products.minimum_stock_level')
+            ->groupBy('products.id', 'products.code', 'products.name', 'units.name', 'inventories.warehouse_id', 'products.target_stock_level', 'products.minimum_stock_level')
             ->havingRaw('SUM(inventories.quantity_available) < products.minimum_stock_level')
             ->get();
         info($products);
         return response($products);
     }
-
+    //cap nhat trang thai khi admin danh gia de nghi nhap hang
     public function updateRestockRequestStatus(Request $request, $id)
     {
         try {
-            $restockRequest = RestockRequest::findOrFail($id);
-            info($restockRequest);
-            $restockRequest->status = $request->status;
-            $restockRequest->save();
-            return response()->json(['success' => true, 'message' => 'Trạng thái được cập nhập thành công!']);
+            $restockRequestId = $request->restockRequestId;
+            $restockRequestDetail = RestockRequestDetail::findOrFail($id);
+            $restockRequestDetail->status = $request->status;
+            $restockRequestDetail->save();
+            $restockRequestDetails = RestockRequestDetail::where('restock_request_id', $restockRequestDetail->restock_request_id)->get();
+            $allPending = $restockRequestDetails->every(function ($detail) {
+                return $detail->status === 'pending';
+            });
+            $somePending = $restockRequestDetails->some(function ($detail) {
+                return $detail->status === 'pending';
+            });
+            $requestStatus = 0;
+            if ($allPending) {
+                $restockRequestDetail->restockRequest->status = 'pending';
+                $requestStatus = 1;
+            } elseif ($somePending) {
+                $restockRequestDetail->restockRequest->status = 'in_review';
+                $requestStatus = 2;
+            } else {
+                $restockRequestDetail->restockRequest->status = 'reviewed';
+                $requestStatus = 3;
+            }
+            $restockRequestDetail->restockRequest->save();
+            return response()->json(['success' => true, 'message' => 'Trạng thái được cập nhập thành công!', 'requestStatus' => $requestStatus]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Failed to update status'], 500);
         }

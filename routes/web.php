@@ -75,6 +75,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('/issue-report', IssueReportController::class);
     Route::resource('/restock-request', RestockRequestController::class);
     Route::resource('/goodsreceipts', AdminGoodsReceiptController::class);
+    Route::post('/goodsreceipts/store-receipt', [AdminGoodsReceiptController::class, 'storeReceipt'])->name('goodsreceipts.store-receipt');
+    Route::post('/goodsreceipts/create', [AdminGoodsReceiptController::class, 'create'])->name('goodsreceipts.create');
+    Route::get('/goods-receipts/display', [AdminGoodsReceiptController::class, 'display'])->name('goodsreceipts.display');
     Route::get('/admin/goods-issues', [AdminGoodsIssueController::class, 'index'])->name('admin.goodsissues.index');
     Route::post('/admin/store-goods-issues', [AdminGoodsIssueController::class, 'store'])->name('admin.goodsissue.store');
     Route::get('/admin/restock-request', [AdminRestockRequestController::class, 'index'])->name('admin.restock-request.index');

@@ -13,4 +13,21 @@ class PurchaseOrder extends Model
         'user_id',
         'provider_id',
     ];
+
+    public function provider()
+    {
+        return $this->belongsTo(Provider::class);
+    }
+
+    public function purchaseOrderDetails()
+    {
+        return $this->hasMany(PurchaseOrderDetail::class);
+    }
+
+    public function getTotalAmountAttribute()
+    {
+        return $this->purchaseOrderDetails->sum(function ($detail) {
+            return ($detail->quantity * $detail->unit_price - $detail->discount);
+        });
+    }
 }
