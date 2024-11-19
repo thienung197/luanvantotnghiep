@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminComprehensiveStockReportController;
 use App\Http\Controllers\Admin\AdminGoodsIssueController;
 use App\Http\Controllers\Admin\AdminGoodsReceiptController;
 use App\Http\Controllers\Admin\AdminRestockRequestController;
@@ -17,11 +18,14 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Customer\CustomerDashboardController;
 use App\Http\Controllers\Customer\UpdateInformationController;
+use App\Http\Controllers\Employee\ComprehensiveStockReport;
+use App\Http\Controllers\Employee\ComprehensiveStockReportController;
 use App\Http\Controllers\Employee\EmployeeController;
 use App\Http\Controllers\Employee\GoodsIssueController;
 use App\Http\Controllers\Employee\GoodsReceiptController;
 use App\Http\Controllers\Employee\IssueReportController;
 use App\Http\Controllers\Employee\StockTakeController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RestockRequestController;
 use App\Models\AttributeValue;
 use App\Models\Customer;
@@ -75,6 +79,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('/issue-report', IssueReportController::class);
     Route::resource('/restock-request', RestockRequestController::class);
     Route::resource('/goodsreceipts', AdminGoodsReceiptController::class);
+    Route::resource('/comprehensive-stock-report', ComprehensiveStockReportController::class);
+    Route::get('/admin/comprehensive-stock-report', [AdminComprehensiveStockReportController::class, 'index'])->name('admin.comprehensive-stock-report.index');
     Route::post('/goodsreceipts/store-receipt', [AdminGoodsReceiptController::class, 'storeReceipt'])->name('goodsreceipts.store-receipt');
     Route::post('/goodsreceipts/create', [AdminGoodsReceiptController::class, 'create'])->name('goodsreceipts.create');
     Route::get('/goods-receipts/display', [AdminGoodsReceiptController::class, 'display'])->name('goodsreceipts.display');
@@ -96,6 +102,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/cart/remove/{productId}', [GoodsIssueController::class, 'removeFromCart'])->name('cart.remove');
     Route::post('/cart/store-order', [GoodsIssueController::class, 'storeOrder'])->name('cart.storeOrder');
 });
+
+Route::get('/notifications/unread', [NotificationController::class, 'getUnReadNotifications']);
+Route::post('/notifications/read', [NotificationController::class, 'markAllAsRead']);
 
 Route::post('/logout', [App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');

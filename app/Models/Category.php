@@ -38,8 +38,8 @@ class Category extends Model
         return optional($this->parent)->name;
     }
 
-    public function getParents()
-    {
-        return Category::whereNull('parent_id')->get(['id', 'name']);
-    }
+    // public function getParents()
+    // {
+    //     return Category::whereNull('parent_id')->get(['id', 'name']);
+    // }
 }

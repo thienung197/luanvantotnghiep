@@ -36,8 +36,8 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        $parentCategories = $this->category->getParents();
-        return view('admin.categories.create', compact('parentCategories'));
+        // $parentCategories = $this->category->getParents();
+        return view('admin.categories.create');
     }
 
     /**

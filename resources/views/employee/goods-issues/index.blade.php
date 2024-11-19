@@ -1,13 +1,13 @@
 @extends('layouts.app')
-@section('title', 'Phiếu xuất hàng')
+@section('title', 'Đơn hàng')
 @section('content')
     <div class="content_header">
         <div class="content_header--title">
-            Quản lý phiếu xuất hàng
+            Quản lý đơn hàng
         </div>
         <div class="content_header--path">
             <img src="{{ asset('img/home.png') }}" alt="">
-            <p><a href="">Home</a> > <a href="">Phiếu xuất hàng</a></p>
+            <p><a href="">Home</a> > <a href="">Quản lý đơn hàng</a></p>
         </div>
     </div>
     {{-- <div class="btn-cs btn-add">
@@ -15,17 +15,17 @@
     </div> --}}
     <div class="table_container">
         <div class="table_title">
-            Danh sách đơn hàng
+            Danh sách đơn hàng của bạn
         </div>
         <div class="table_filter-controls">
             <form action="{{ route('goodsissues.index') }}" method="GET">
-                <label for="">Hiển thị </label>
+                {{-- <label for="">Hiển thị </label>
                 <select name="entries" id="entries" onchange="this.form.submit()">
                     <option value="5" {{ request('entries') == 5 ? 'selected' : '' }}>5</option>
                     <option value="10" {{ request('entries') == 10 ? 'selected' : '' }}>10</option>
                     <option value="25" {{ request('entries') == 25 ? 'selected' : '' }}>25</option>
                 </select>
-                mục
+                mục --}}
             </form>
             <div class="table_search-box">
                 <form action="{{ route('goodsissues.index') }}" method="GET">
@@ -37,18 +37,16 @@
         </div>
 
         <table class="table" id="table-list">
-            <tr>
+            {{-- <tr>
                 <th>Mã đơn hàng</th>
-                <th>Thời gian</th>
                 <th>Tổng tiền hàng</th>
                 <th>Trạng thái</th>
-                <th>Thao tác</th>
-            </tr>
+                <th>Thời gian</th>
+            </tr> --}}
 
             @foreach ($goodsIssues as $goodsIssue)
-                <tr class="goods-issue-row" data-id="{{ $goodsIssue->id }}">
+                {{-- <tr class="goods-issue-row" data-id="{{ $goodsIssue->id }}">
                     <td>{{ $goodsIssue->code }}</td>
-                    <td>{{ $goodsIssue->created_at }}</td>
                     <td>{{ $goodsIssue->getTotalAmount() }}</td>
                     <td>
                         @if ($goodsIssue->status == 'pending')
@@ -63,28 +61,36 @@
                             Đơn hàng của bạn đã được giao thành công
                         @endif
                     </td>
-                    <td class="btn-cell">
-                        <a href="{{ route('goodsissues.edit', $goodsIssue->id) }}">
-                            <img src="{{ asset('img/edit.png') }}" alt="">
-                        </a>
-                        <form action="{{ route('goodsissues.destroy', $goodsIssue->id) }}" method="POST"
-                            id="form-delete{{ $goodsIssue->id }}">
-                            @csrf
-                            @method('delete')
-                        </form>
-                        <button type="submit" class="btn-delete" data-id="{{ $goodsIssue->id }}">
-                            <img src="{{ asset('img/delete.png') }}" alt="">
-                        </button>
-                    </td>
-                </tr>
+                    <td>{{ $goodsIssue->created_at }}</td>
+                </tr> --}}
 
-                <tr class="goods-issue-details" id="details-{{ $goodsIssue->id }}" style="display: none;">
+                <tr class="goods-issue-details" id="details-{{ $goodsIssue->id }}">
                     <td colspan="5">
                         <div class="details-container">
-                            <strong>Thông tin đơn hàng</strong>
-                            <p>Tên khách hàng:{{ $goodsIssue->getCustomerName() }}</p>
-                            <p>Điện thoại: {{ $goodsIssue->getCustomerPhone() }}</p>
-                            <p>Địa chỉ: {{ $goodsIssue->getCustomerAddress() }}</p>
+                            <p class="title">Thông tin đơn hàng</p>
+                            <div class="customer-order-info-container">
+                                <div class="customer-info-container">
+                                    <p><span>Tên khách hàng:</span>{{ $goodsIssue->getCustomerName() }}</p>
+                                    <p><span>Điện thoại:</span> {{ $goodsIssue->getCustomerPhone() }}</p>
+                                    <p><span>Địa chỉ:</span> {{ $goodsIssue->getCustomerAddress() }}</p>
+                                </div>
+                                <div class="order-info-container">
+                                    <p> <span>Tình trạng đơn hàng: </span>
+                                        @if ($goodsIssue->status == 'pending')
+                                            Đơn hàng của bạn đã được tạo và đang chờ xử lý
+                                        @elseif($goodsIssue->status == 'approved')
+                                            Đơn hàng của bạn đã được phê duyệt
+                                        @elseif($goodsIssue->status == 'processing')
+                                            Đơn hàng của bạn đang trong quá trình lấy hàng từ kho
+                                        @elseif($goodsIssue->status == 'shipping')
+                                            Đơn hàng của bạn đang được vận chuyển
+                                        @elseif($goodsIssue->status == 'delivered')
+                                            Đơn hàng của bạn đã được giao thành công
+                                        @endif
+                                    </p>
+                                    <p><span>Thời gian đặt hàng: {{ $goodsIssue->created_at }}</span></p>
+                                </div>
+                            </div>
 
                             <strong>Sản phẩm</strong>
                             <table class="table table-bordered">
@@ -101,7 +107,7 @@
                                 <tbody>
                                     @foreach ($goodsIssue->goodsIssueDetails as $detail)
                                         <tr>
-                                            <td>{{ $detail->product_id }}</td>
+                                            <td>{{ $detail->product->code }}</td>
                                             <td>{{ $detail->product->name ?? 'N/A' }}</td>
                                             <td>{{ $detail->quantity }}</td>
                                             <td>{{ number_format($detail->unit_price, 2) }}</td>
@@ -112,6 +118,7 @@
                                     @endforeach
                                 </tbody>
                             </table>
+                            <p><span>Tổng tiền hàng: </span>{{ $goodsIssue->getTotalAmount() }}</p>
                         </div>
                     </td>
                 </tr>
@@ -126,22 +133,38 @@
         @if (Session::has('message'))
             toastr.success("{{ Session::get('message') }}");
         @endif
-
-        document.addEventListener("DOMContentLoaded", function() {
-            const rows = document.querySelectorAll(".goods-issue-row");
-
-            rows.forEach(row => {
-                row.addEventListener("click", function() {
-                    const goodsIssueId = this.getAttribute("data-id");
-                    const detailsRow = document.getElementById(`details-${goodsIssueId}`);
-
-                    if (detailsRow.style.display === "none") {
-                        detailsRow.style.display = "table-row";
-                    } else {
-                        detailsRow.style.display = "none";
-                    }
-                });
-            });
-        });
     </script>
+@endpush
+
+@push('css')
+    <style>
+        .customer-order-info-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .customer-info-container {
+            width: 50%;
+        }
+
+        .details-container p {
+            text-align: left;
+            font-style: italic;
+            color: var(--color-black);
+        }
+
+        .details-container p span {
+            font-style: italic;
+            color: var(--color-black);
+            font-weight: 500;
+            margin-right: 20px;
+        }
+
+        .details-container p.title {
+            color: var(--color-black);
+            font-weight: 600;
+            font-size: 20px;
+            font-style: italic;
+        }
+    </style>
 @endpush

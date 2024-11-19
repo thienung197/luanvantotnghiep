@@ -12,88 +12,22 @@
         </div>
     </div>
 
-    {{-- <div class="content-10">
-        <div class="search-result-container"> --}}
-    {{-- <form action="" role="search">
-                <div class="form-group input-div">
-                    <input type="text" name="key" class="form-control search-input" placeholder="Nhập tên sản phẩm">
-                    <div class="search-result" style="z-index:1;display:none">
-
-                    </div>
-                </div>
-            </form> --}}
-    {{-- <form action="{{ route('goodsissues.store') }}" method="POST">
-                <div class="content-10" class="table"> --}}
-    {{-- <h6>Chọn <span id="batch-product-name"></span> sản phẩm từ lô hàng </h6>
-                    <table id="batch-table" class="table">
-                        <thead>
-                            <tr>
-                                <th>Số lô</th>
-                                <th>Ngày sản xuất</th>
-                                <th>Ngày hết hạn</th>
-                                <th>Số lượng có sẵn</th>
-                                <th>Số lượng chọn</th>
-                                <th>Xuất từ kho</th>
-                            </tr>
-                        </thead>
-                        <tbody id="batch-tbody">
-                        </tbody>
-                    </table> --}}
-    {{-- </div>
-                <input type="hidden" value="{{ $locationId }}" class="user_location">
-
-
-        </div>
-    </div> --}}
-
-
 
     <div class="content-10">
-        @csrf
-
-        <div class="form-group input-div">
-            <h4>Mã phiếu xuất </h4>
-            <input type="text" name="code" value="{{ old('code') ?? $newCode }}" id="code" class="form-control"
-                readonly>
-            @error('code')
-                <div class="error message">{{ $message }}</div>
-            @enderror
-        </div>
-        <div class="form-group input-div">
-            <h4> Tên Khách hàng</h4>
-            <input type="hidden" name="customer_id" value="{{ old('customer_id') ?? $user->id }}" id="customer_id"
-                class="form-control" readonly>
-            {{ $user->name }}
-            @error('customer_id')
-                <div class="error message">{{ $message }}</div>
-            @enderror
-        </div>
-        <div class="form-group input-div">
-            <h4> Số điện thoại </h4>
-            <input type="hidden" name="customer_phone" value="{{ old('customer_phone') ?? $user->phone }}"
-                id="customer_phone" class="form-control" readonly>
-            {{ $user->phone }}
-            @error('customer_phone')
-                <div class="error message">{{ $message }}</div>
-            @enderror
-        </div>
-        <div class="form-group input-div">
-            <h4> Địa chỉ</h4>
-            <input type="hidden" name="customer_address" value="{{ old('customer_address') ?? $user->id }}"
-                id="customer_address" class="form-control" readonly>
+        <h3>Thông tin của khách hàng</h3>
+        <h6><span>Tên khách hàng:</span> {{ $user->name }}</h6>
+        <h6><span>Số điện thoại:</span> {{ $user->phone }}</h6>
+        <h6><span>Địa chỉ:</span>
             @if ($user->location)
                 @if ($user->location->street_address)
                     {{ $user->location->street_address }}-
                 @endif
                 {{ $user->location->ward }}-{{ $user->location->district }}-{{ $user->location->city }}
             @endif
-            @error('customer_address')
-                <div class="error message">{{ $message }}</div>
-            @enderror
-        </div>
+        </h6>
     </div>
     <div class="content-10">
-        <h1>Giỏ hàng</h1>
+        <h3>Giỏ hàng</h3>
 
         @if (session()->has('success'))
             <div class="alert alert-success">
@@ -128,11 +62,14 @@
                                 <input type="number" class="form-control" value="1" min="1"
                                     id="quantity-{{ $product->id }}">
                             </td>
-                            <td>{{ number_format($product->selling_price, 0, ',', '.') }} VNĐ</td>
                             <td>
-                                <input type="number" class="form-control" value="{{ $product->discount }}" min="0"
-                                    step="1" id="discount-{{ $product->id }}"
-                                    name="discount-{{ $product->id }}" />
+                                <input type="number" class="form-control" id="price-{{ $product->id }}"
+                                    value="{{ $product->selling_price }}">
+                            </td>
+                            <td>
+                                <input type="number" class="form-control" value="{{ $product->discount ?? 0 }}"
+                                    min="0" step="1" id="discount-{{ $product->id }}"
+                                    name="discount-{{ $product->id }}">
                             </td>
                             <td>
                                 <span id="total-{{ $product->id }}">
@@ -141,11 +78,7 @@
                                 </span>
                             </td>
                             <td>
-                                <form
-                                    action="
-                                {{ route('cart.remove', $product->id) }}
-                                 "
-                                    method="POST">
+                                <form action="{{ route('cart.remove', $product->id) }}" method="POST">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-danger">Xóa</button>
@@ -155,228 +88,171 @@
                     @endforeach
                 </tbody>
             </table>
-            <div class="form-group input-div text-end">
-                <h4>Tổng tiền hàng</h4>
-                <input type="number" name="total_amount" value="{{ old('total_amount') }}" class="total_amount"
-                    class="form-control">
-                @error('total_amount')
-                    <div class="error message">{{ $message }}</div>
-                @enderror
+            <div class="total-amount-container">
+                <span></span>
+                <span id="total-amount">Tổng tiền hàng: </span>
             </div>
-            <div class="text-end">
+            <div class="button-submit-container">
+                <span></span>
                 <form action="{{ route('cart.storeOrder') }}" method="POST" id="orderForm">
                     @csrf
                     <input type="hidden" name="customer_id" value="{{ $customerId }}">
                     <input type="hidden" name="cartData" id="cartData">
-                    <button type="submit" class="btn btn-success order-btn">Dặt hàng</button>
+                    <button type="submit" class="btn btn-success order-btn">Đặt hàng</button>
                 </form>
             </div>
         @else
-            <p>Giỏ hàng của bạn đang trống.</p>
+            <p class="cart-out">Giỏ hàng của bạn đang trống.</p>
         @endif
     </div>
-    {{-- <div class="content-10">
-        <div class="form-group input-div">
-            <h4>Tổng tiền hàng</h4>
-            <input type="number" name="total_amount" value="{{ old('total_amount') }}" class="total_amount"
-                class="form-control">
-            @error('total_amount')
-                <div class="error message">{{ $message }}</div>
-            @enderror
-        </div>
-        <div class="btn-controls">
-            <div class="btn-cs btn-save"><button type="submit">Lưu thay đổi</button></div>
-            <div class="btn-cs btn-delete"><a href="{{ route('goodsissues.index') }}">Quay lại </a></div>
-        </div>
-        </form>
-    </div> --}}
-
 @endsection
 
 @push('js')
     <script>
-        @foreach ($products as $product)
-            document.getElementById('quantity-{{ $product->id }}').addEventListener('input', function() {
-                updateTotal({{ $product->id }});
+        function formatCurrency(value) {
+            return value.toLocaleString('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
             });
+        }
 
-            document.getElementById('discount-{{ $product->id }}').addEventListener('input', function() {
-                updateTotal({{ $product->id }});
-            });
-        @endforeach
+
+        updateTotalAmount();
 
         function updateTotal(productId) {
-            var quantity = document.getElementById('quantity-' + productId).value;
-            var discount = document.getElementById('discount-' + productId).value;
-            var price = {{ $product->selling_price }};
-            var total = (price - discount) * quantity;
+            let quantity = parseFloat(document.getElementById('quantity-' + productId).value);
+            let price = parseFloat(document.getElementById('price-' + productId).value.replace(/[^0-9.-]+/g, ""));
+            let discount = parseFloat(document.getElementById('discount-' + productId).value);
 
-            document.getElementById('total-' + productId).innerText = formatCurrency(total) + ' VNĐ';
+            if (isNaN(quantity)) quantity = 1;
+            if (isNaN(price)) price = 0;
+            if (isNaN(discount)) discount = 0;
+
+            let total = (price - discount) * quantity;
+
+            document.getElementById('total-' + productId).innerText = formatCurrency(total);
+
+            updateTotalAmount();
         }
 
-        function formatCurrency(value) {
-            return value.toLocaleString('vi-VN');
-        }
-        //xu ly kq tim kiem
-        $(document).ready(function() {
-            $(document).on("click", ".search-input", function(e) {
-                let _text = $(this).val();
-                if (_text.length > 0) {
-                    $(".search-result").css("display", "block");
+        function updateTotalAmount() {
+            let totalAmount =
+                0;
+            @foreach ($products as $product)
+                {
+                    let productTotal = parseFloat(document.getElementById('total-{{ $product->id }}').innerText.replace(
+                        /[^0-9.-]+/g, ""));
+                    totalAmount += productTotal;
                 }
-            })
-        })
+            @endforeach
+            console.log(totalAmount);
+            document.getElementById('total-amount').innerText = 'Tổng tiền hàng: ' + totalAmount + '000 VND';
+        }
 
-
-
-        //goi ham tim kiem
-        $(document).on("input", ".search-input", function() {
-            var _text = $(this).val();
-            if (_text.length > 0) {
-                $.ajax({
-                    url: "{{ route('ajax-search-product') }}",
-                    type: "GET",
-                    data: {
-                        key: _text
-                    },
-                    success: function(res) {
-                        $(".search-result").html(res).css("display", "block");
-                    }
-                })
-            } else {
-                $(".search-result").css("display", "none");
-            }
-        });
-        //xu ly kq tim kiem
-        $(document).on("click", function(e) {
-            if (!$(e.target).closest(".search-result-container").length) {
-                $(".search-result").css("display", "none");
-            }
-        });
-
-        //xu ly du lieu gui form
         document.addEventListener("DOMContentLoaded", function() {
+            @foreach ($products as $product)
+                document.getElementById('quantity-{{ $product->id }}').addEventListener('input', function() {
+                    updateTotal({{ $product->id }});
+                });
+                document.getElementById('price-{{ $product->id }}').addEventListener('input', function() {
+                    updateTotal({{ $product->id }});
+                });
+                document.getElementById('discount-{{ $product->id }}').addEventListener('input', function() {
+                    updateTotal({{ $product->id }});
+                });
+            @endforeach
+
+            // Xử lý dữ liệu gửi form
             const checkoutButton = document.querySelector(".order-btn");
             checkoutButton.addEventListener("click", function(e) {
                 e.preventDefault();
                 const cartItems = [];
                 @foreach ($products as $product)
-                    let quantityItem_{{ $product->id }} = document.getElementById(
-                        `quantity-{{ $product->id }}`).value;
-                    let discountItem_{{ $product->id }} = document.getElementById(
-                        `discount-{{ $product->id }}`).value;
-                    cartItems.push({
-                        product_id: {{ $product->id }},
-                        quantity: quantityItem_{{ $product->id }},
-                        unit_price: {{ $product->selling_price }},
-                        discount: discountItem_{{ $product->id }} || 0,
-                    })
+                    {
+                        let quantityItem = document.getElementById(`quantity-{{ $product->id }}`)
+                            .value;
+                        let discountItem = document.getElementById(`discount-{{ $product->id }}`)
+                            .value;
+                        cartItems.push({
+                            product_id: {{ $product->id }},
+                            quantity: quantityItem,
+                            unit_price: {{ $product->selling_price }},
+                            discount: discountItem || 0,
+                        });
+                    }
                 @endforeach
                 document.getElementById('cartData').value = JSON.stringify(cartItems);
                 document.getElementById('orderForm').submit();
-            })
-
-
-        })
-
-        //Ham cap nhat gia tri total-price
-        function updateTotalPrice(row) {
-            let quantity = parseFloat(row.find(".quantity").val());
-            let unitPrice = parseFloat(row.find(".unit-price").val());
-            let discount = parseFloat(row.find(".discount").val());
-            let totalPrice = quantity * unitPrice - discount;
-            row.find(".total-price").val(totalPrice);
-        }
-        //Cap nhat gia tri total-price
-        $("#product-table").on("input", ".quantity,.unit-price,.discount", function() {
-            updateTotalPrice($(this).closest("tr"));
-        })
-
-        //Ham cap nhat total_amount
-        function updateTotalAmount() {
-            let sum = 0;
-            $("#product-table tr").each(function() {
-                let quantity = parseFloat($(this).find(".quantity").val());
-                let unitPrice = parseFloat($(this).find(".unit-price").val());
-                let discount = parseFloat($(this).find(".discount").val());
-                let totalPrice = quantity * unitPrice - discount;
-                if (!isNaN(totalPrice)) {
-                    sum += totalPrice;
-                }
-            })
-            $(".total_amount").val(sum);
-        }
-
-        //Cap nhat total-amount
-        $("#product-table").on("input", ".quantity,.unit-price,.discount,.total-price", function() {
-            updateTotalAmount();
-        })
-
-        //Ham cap nhat amount_due
-        function updateAmountDue() {
-            let totalAmount = parseFloat($(".total_amount").val()) || 0;
-            let totalDiscount = parseFloat($(".total_discount").val()) || 0;
-            let amountDue = totalAmount - totalDiscount;
-            $(".amount_due").val(amountDue.toFixed(2));
-        }
-
-        //Cap nhat amount_due
-        $(document).on("input", ".total_amount,.total_discount", function() {
-            updateAmountDue();
-        })
-
-        $("#product-table").on("click", ".remove-product", function() {
-            $(this).closest("tr").remove();
-            updateTotalAmount();
-        })
+            });
+        });
     </script>
 @endpush
 
+
 @push('css')
     <style>
-        .search-result-container .form-group {
-            position: relative;
+        .content-10 h3 {
+            text-transform: uppercase;
+            color: var(--color-black);
+            font-weight: 600;
+            font-size: 26px;
+            text-align: center;
+            margin: 15px 0;
         }
 
-        .search-result {
-            z-index: 1000;
-            display: none;
-            position: absolute;
-            display: block;
-            min-width: 500px;
-            background: var(--color-white);
-            border: 1px solid var(--color-default-light);
-        }
-
-        .search-result-item {
-            border-bottom: 1px solid black;
-            cursor: pointer;
-            padding: 10px 5px;
+        .content-10 h6 {
+            font-size: 22px;
+            font-weight: 400;
             display: flex;
-            align-items: center;
         }
 
-        .search-result-item h4,
-        h6 {
-            margin: 0;
-            font-size: 21px;
+        .content-10 h6 span {
+            color: var(--color-black);
+            font-size: 22px;
+            font-style: italic;
+            font-weight: 600;
+            width: 15%;
         }
 
-        .search-result-item p {
-            margin: 0;
-        }
-
-        .search-result-item img {
-            width: 50px;
-            margin-right: 15px;
-        }
-
-        .search-result-container table {
+        .content-10 table {
             margin: 40px 0;
         }
 
-        tr th,
-        tr td {
+        tr th {
+            text-align: center;
+        }
+
+        .total-amount-container,
+        .button-submit-container {
+            display: flex;
+        }
+
+        .total-amount-container span:first-child {
+            width: 70%;
+        }
+
+        .button-submit-container span {
+            width: 90%;
+        }
+
+        .button-submit-container form {
+            margin: 20px 0;
+        }
+
+        .button-submit-container form button {
+            padding: 10px 17px;
+            font-size: 20px;
+        }
+
+        .total-amount-container span:last-child {
+            color: var(--color-black);
+            font-size: 22px;
+            font-style: italic;
+            font-weight: 600;
+        }
+
+        .cart-out {
+            padding: 100px;
             text-align: center;
         }
     </style>

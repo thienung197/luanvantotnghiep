@@ -53,8 +53,8 @@ class GoodsIssueController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $warehouseId = $user->warehouse_id;
-        $goodsIssues = $this->goodsIssue::with('warehouse')->where('customer_id', $warehouseId)->latest('id')->get();
+        $user_id = $user->id;
+        $goodsIssues = $this->goodsIssue::with('warehouse')->where('customer_id', $user_id)->latest('id')->get();
         return view('employee.goods-issues.index', compact('goodsIssues'));
     }
 
@@ -178,6 +178,7 @@ class GoodsIssueController extends Controller
             $goodsIssueDetail->save();
         }
         DB::commit();
+        session()->forget('cart');
         // Trả về với thông báo thành công
         return redirect()->route('goodsissues.index')->with('success', 'Đơn hàng đã được tạo thành công.');
     }

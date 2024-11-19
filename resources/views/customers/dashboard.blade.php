@@ -19,7 +19,6 @@
         </div>
     </div>
     <div class="container">
-        <!-- Tab danh mục sản phẩm -->
         <ul class="nav nav-tabs" id="categoryTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="tab-all" data-bs-toggle="tab" data-bs-target="#category-all"
@@ -38,19 +37,18 @@
             @endforeach
         </ul>
 
-        <!-- Tab Content -->
         <div class="tab-content mt-3" id="categoryTabContent">
-            <!-- Tab "Tất cả" -->
             <div class="tab-pane fade show active" id="category-all" role="tabpanel">
                 <div class="row">
-                    @foreach ($allProducts as $product)
-                        <div class="col-md-3 mb-4"> <!-- 4 sản phẩm mỗi hàng -->
+                    @foreach ($paginatedProducts as $product)
+                        <div class="col-md-3 mb-4">
                             <div class="card h-100">
                                 <img src="{{ $product->images->count() > 0 ? asset('upload/' . $product->images->first()->url) : asset('upload/no-image.png') }}"
                                     class="card-img-top">
                                 <div class="card-body">
                                     <h5 class="card-title">{{ $product->name }}</h5>
-                                    <p class="card-text">{{ number_format($product->price, 0, ',', '.') }} VNĐ</p>
+                                    <h4>Tồn kho: {{ $product->totalStock }}</h4>
+                                    <p class="card-text">{{ number_format($product->selling_price, 0, ',', '.') }} VNĐ</p>
                                     <button class="btn btn-primary add-to-cart-btn" data-product-id="{{ $product->id }}">
                                         Đặt hàng
                                     </button>
@@ -60,18 +58,16 @@
                     @endforeach
                 </div>
 
-                <!-- Hiển thị phân trang cho tab "Tất cả" -->
                 <div class="d-flex justify-content-center mt-4">
-                    {{ $allProducts->links() }}
+                    {{ $paginatedProducts->links() }}
                 </div>
             </div>
 
-            <!-- Các Tab danh mục sản phẩm -->
             @foreach ($categoriesWithProducts as $category)
                 <div class="tab-pane fade" id="category-{{ $category->id }}" role="tabpanel">
                     <div class="row">
                         @foreach ($category->products as $product)
-                            <div class="col-md-3 mb-4"> <!-- 4 sản phẩm mỗi hàng -->
+                            <div class="col-md-3 mb-4">
                                 <div class="card h-100">
                                     <img src="{{ $product->images->count() > 0 ? asset('upload/' . $product->images->first()->url) : asset('upload/no-image.png') }}"
                                         class="card-img-top">
@@ -88,18 +84,15 @@
                         @endforeach
                     </div>
 
-                    <!-- Hiển thị phân trang cho mỗi danh mục -->
                     <div class="d-flex justify-content-center mt-4">
-                        {{-- {{ $category->products->links() }} --}}
                     </div>
                 </div>
             @endforeach
         </div>
 
-        <!-- Nút Đặt hàng để chuyển đến trang đặt hàng -->
-        <div class="text-end mt-4">
-            <a href="{{ route('goodsissues.create') }}" class="btn btn-success">Đặt hàng</a>
-        </div>
+        {{-- <div class="text-end mt-4">
+            <a href="{{ route('goodsissues.create') }}" class="btn btn-success order-btn">Đặt hàng</a>
+        </div> --}}
     </div>
 @endsection
 
@@ -111,6 +104,14 @@
 
         #navbar.show {
             display: flex;
+        }
+
+        .order-btn {
+            position: fixed;
+            bottom: 103px;
+            right: 123px;
+            font-size: 27px;
+            padding: 20px 10px;
         }
     </style>
 @endpush

@@ -22,7 +22,6 @@
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="{{ asset('css/variables.css') }}">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-
     @stack('css')
 </head>
 
@@ -65,7 +64,7 @@
                                 <a href="{{ route('customer.dashboard') }}">
                                     <div class="flex-left-content">
                                         <img src="{{ asset('img/dashboard.png') }}" alt="">
-                                        <span>Dashboard</span>
+                                        <span>Trang chủ</span>
                                     </div>
                                 </a>
                             </li>
@@ -227,7 +226,7 @@
                                 <a href="{{ route('manager.goodsissues.order') }}">
                                     <div class="flex-left-content">
                                         <img src="{{ asset('img/product.png') }}" alt="">
-                                        <span>Yêu cầu xuất kho</span>
+                                        <span>Phiếu xuất kho</span>
                                     </div>
                                 </a>
                             </li>
@@ -239,6 +238,29 @@
                                     <div class="flex-left-content">
                                         <img src="{{ asset('img/product.png') }}" alt="">
                                         <span>Phiếu đề nghị nhập hàng</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endcan
+
+                        @can('is-manager')
+                            <li class="{{ request()->routeIs('comprehensive-stock-report.index') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('comprehensive-stock-report.index') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/product.png') }}" alt="">
+                                        <span>Báo cáo xuất nhập tồn</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endcan
+
+                        @can('is-admin')
+                            <li
+                                class="{{ request()->routeIs('admin.comprehensive-stock-report.index') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('admin.comprehensive-stock-report.index') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/product.png') }}" alt="">
+                                        <span>Báo cáo xuất nhập tồn</span>
                                     </div>
                                 </a>
                             </li>
@@ -277,7 +299,20 @@
                             </li>
                         @endcan
 
-                        @can('is-manager')
+                        @can('is-customer')
+                            <li class="{{ request()->routeIs('customers.update.index') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('customers.update.index') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/product.png') }}" alt="">
+                                        <span>Cập nhật thông tin</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endcan
+
+
+
+                        {{-- @can('is-manager')
                             <li class="{{ request()->routeIs('stocktakes.*') ? 'bg-blue' : '' }}">
                                 <a href="{{ route('stocktakes.index') }}">
                                     <div class="flex-left-content">
@@ -286,7 +321,7 @@
                                     </div>
                                 </a>
                             </li>
-                        @endcan
+                        @endcan --}}
                         {{-- <li>
                             <a href="">
                                 <div class="flex-left-content">
@@ -319,7 +354,7 @@
                                 onclick="event.preventDefault();document.getElementById('logout-form').submit();">
                                 <div class="flex-left-content">
                                     <img src="{{ asset('img/log-out.png') }}" alt="">
-                                    <span>Log out</span>
+                                    <span>Đăng xuất</span>
                                 </div>
                             </a>
                         </li>
@@ -337,17 +372,42 @@
                         {{-- <p>Pages / <span>@yield('route1')</span></p>
                         <p>@yield('route2')</p> --}}
                     </div>
-                    <div id="navbar-right">
-                        <div class="notification">
-                            <img src="{{ asset('img/bell.png') }}" alt="">
-
+                    <div id="navbar-right" class="notification-container">
+                        <div class="notification" id="notification-icon">
+                            <img src="{{ asset('img/bell.png') }}" alt="" id="notification-bell">
+                            <span class="notification-count" id="notification-count">0</span>
                         </div>
-                        <img class="avatar" src="{{ asset('img/example-avatar.png') }}" alt="">
-                        @if (Auth::check())
-                            <span class="username">{{ Auth::user()->name }}</span>
-                        @else
-                            <span class="username">Khách</span>
-                        @endif
+                        <div class="notification-dropdown" id="notification-dropdown">
+                            <div class="notification-header">
+                                <h4>Thông báo</h4>
+                                @if (Auth::check() && Auth::user()->warehouse_id)
+                                    <input type="hidden" name="warehouse_id"
+                                        value="{{ Auth::user()->warehouse_id }}" id="warehouse_id">
+                                @else
+                                    <input type="hidden" name="warehouse_id" value="" id="warehouse_id">
+                                @endif
+                                <div class="notification-status">
+                                    <div class="notification-status--left">
+                                        <button>Xem tất cả</button>
+                                        <button>Chưa xem</button>
+                                    </div>
+                                    {{-- <div class="notification-status--right">
+                                        <p>Đánh giá là đã đọc</p>
+                                    </div> --}}
+                                </div>
+                            </div>
+                            <ul id="notification-list">
+
+                            </ul>
+                        </div>
+                        <div class="user-info-container">
+                            <img class="avatar" src="{{ asset('img/example-avatar.png') }}" alt="">
+                            @if (Auth::check())
+                                <span class="username">{{ Auth::user()->name }}</span>
+                            @else
+                                <span class="username">Khách</span>
+                            @endif
+                        </div>
                     </div>
 
                 </div>
@@ -382,6 +442,67 @@
         integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="{{ asset('js/app.js') }}"></script>
+    <script>
+        $(document).ready(function() {
+            const notificationIcon = $('#notification-icon');
+            const notificationDropdown = $('#notification-dropdown');
+            const notificationList = $('#notification-list');
+            const notificationCount = $('#notification-count');
+
+            // Khi click vào icon thông báo
+            notificationIcon.click(function() {
+                notificationDropdown.toggle(); // Hiển thị/ẩn dropdown
+                const warehouseId = $("#warehouse_id").val();
+
+                // Gọi AJAX để lấy thông báo
+                $.ajax({
+                    url: '/notifications/unread',
+                    method: 'GET',
+                    data: {
+                        warehouse_id: warehouseId
+                    },
+                    success: function(notifications) {
+
+                        notificationList.empty(); // Xóa các thông báo cũ
+
+                        if (notifications.length > 0) {
+                            notifications.forEach(notification => {
+                                notificationList.append(
+                                    `<li class="notification-item">
+                                <p>${notification.message}</p>
+                            </li>`
+                                );
+                            });
+                        } else {
+                            notificationList.append('<li>Không có thông báo mới</li>');
+                        }
+
+                        // Cập nhật số lượng thông báo
+                        notificationCount.text(notifications.length);
+
+                        // // Nếu có thông báo, đánh dấu tất cả là đã đọc
+                        // if (notifications.length > 0) {
+                        //     $.ajax({
+                        //         url: '/notifications/read',
+                        //         method: 'POST',
+                        //         headers: {
+                        //             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
+                        //                 'content') // CSRF token
+                        //         },
+                        //         success: function() {
+                        //             notificationCount.text(
+                        //                 '0'); // Reset số thông báo
+                        //         }
+                        //     });
+                        // }
+                    },
+                    error: function() {
+                        alert('Không thể lấy thông báo!');
+                    }
+                });
+            });
+        });
+    </script>
     {{-- @yield('js') --}}
     @stack('js')
 </body>

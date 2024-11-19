@@ -562,6 +562,7 @@ class ApiController extends Controller
 
         foreach ($warehouses as $warehouse) {
             $warehouseLocation = $warehouse->location;
+
             try {
                 $response = $client->post('https://api.openrouteservice.org/v2/directions/driving-car', [
                     'headers' => [
@@ -582,8 +583,8 @@ class ApiController extends Controller
                     $distance = $data['routes'][0]['summary']['distance'] / 1000;
 
                     $warehousesWithDistance[] = [
-                        'warehouse' => $warehouse,
-                        'distance' => $distance
+                        'warehouse' => $warehouse, // Trả về cả đối tượng Warehouse
+                        'distance' => round($distance, 2), // Làm tròn khoảng cách đến 2 chữ số thập phân
                     ];
                 }
             } catch (\GuzzleHttp\Exception\RequestException $e) {
@@ -593,10 +594,19 @@ class ApiController extends Controller
             }
         }
 
+        // Sắp xếp danh sách nhà kho theo khoảng cách (tăng dần)
         usort($warehousesWithDistance, function ($a, $b) {
             return $a['distance'] <=> $b['distance'];
         });
-        info($warehousesWithDistance);
+
+        // Ghi log danh sách nhà kho và khoảng cách (gọn gàng)
+        info('Warehouses with distances:', array_map(function ($item) {
+            return [
+                'warehouse_name' => $item['warehouse']->name,
+                'distance' => $item['distance'],
+            ];
+        }, $warehousesWithDistance));
+
         return $warehousesWithDistance;
     }
 
@@ -610,21 +620,32 @@ class ApiController extends Controller
             $requiredQuantity = $productData['quantity'];
             $customerLocationId = $productData['locationId'];
             $unitPrice = $productData['unitPrice'];
-            info($unitPrice);
             $discount = $productData['discount'];
-            info($discount);
             $totalPrice = $productData['totalPrice'];
-            info($totalPrice);
+
             $customerLocation = $this->fetchLocationById($customerLocationId);
             $warehouses = $this->fetchAllWarehouseWithLocation();
 
-            $warehousesByProximity = $this->getClosestWarehouses($customerLocation, $warehouses); // Pass both arguments
-            info($warehousesByProximity);
+            // Tìm nhà kho gần nhất
+            $warehousesByProximity = $this->getClosestWarehouses($customerLocation, $warehouses);
+
+            // Ghi log danh sách nhà kho gần nhất (đơn giản hóa)
+            info('Closest warehouses:', array_map(function ($warehouseData) {
+                return [
+                    'warehouse' => $warehouseData['warehouse']->name,
+                    'distance' => $warehouseData['distance']
+                ];
+            }, $warehousesByProximity));
+
             $selectedBatches = [];
             $totalSelectedQuantity = 0;
 
             foreach ($warehousesByProximity as $warehouseData) {
                 $warehouse = $warehouseData['warehouse'];
+                if (!is_object($warehouse)) {
+                    info('Invalid warehouse data:', $warehouseData);
+                    continue;
+                }
                 $batches = Product::select(
                     'products.id as product_id',
                     'products.name',
@@ -660,9 +681,7 @@ class ApiController extends Controller
                         'unitPrice' => $unitPrice,
                         'discount' => $discount,
                         'totalPrice' => $totalPrice
-
                     ];
-                    info($selectedBatches);
 
                     $totalSelectedQuantity += $quantityToTake;
 

@@ -26,7 +26,7 @@ class AdminGoodsIssueController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request->all());
+        dd($request->all());
         DB::beginTransaction();
         $goodsIssueId = $request->input('goods-issue');
         $goodsIssue = $this->goods_issue->findOrFail($goodsIssueId);
@@ -68,4 +68,24 @@ class AdminGoodsIssueController extends Controller
         DB::commit();
         return to_route("admin.goodsissues.index")->with("message", "Đơn hàng được phân kho thành công!");
     }
+
+    //     public function store(Request $request)
+    // {
+    //     // Giả sử bạn lấy thông tin từ form gửi lên
+    //     $product = Product::find($request->product_id);
+    //     $stockOutQuantity = $request->quantity;
+
+    //     // Cập nhật số lượng tồn kho của sản phẩm
+    //     $product->decrement('quantity', $stockOutQuantity);
+
+    //     // Kiểm tra nếu số lượng tồn kho dưới mức stock_level
+    //     if ($product->quantity < $product->stock_level) {
+    //         // Tạo thông báo cảnh báo
+    //         StockAlert::create([
+    //             'product_id' => $product->id,
+    //             'message' => 'Sản phẩm "' . $product->name . '" hiện tại dưới mức tồn kho tối thiểu.'
+    //         ]);
+    //     }
+
+    //     return redirect()->back()->with('success', 'Phiếu xuất kho đã được tạo thành công.');
 }

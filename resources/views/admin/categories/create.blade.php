@@ -22,7 +22,7 @@
                     <div class="error-message">{{ $message }}</div>
                 @enderror
             </div>
-            <div class="form-group input-div">
+            {{-- <div class="form-group input-div">
                 <h4 for="">Danh mục cha</h4>
                 <div class="row">
                     <select name="parent_id" id="" class="form-control">
@@ -34,7 +34,7 @@
                     </select>
 
                 </div>
-            </div>
+            </div> --}}
             <div class="btn-controls">
                 <div class="btn-cs btn-save"><button type="submit">Lưu thay đổi</button></div>
                 <div class="btn-cs btn-delete"><a href="{{ route('categories.index') }}">Quay lại </a></div>

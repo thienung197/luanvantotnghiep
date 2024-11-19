@@ -172,60 +172,49 @@ class AdminGoodsReceiptController extends Controller
     public function storeReceipt(Request $request)
     {
         // dd($request->all());
-        // DB::beginTransaction();
+        DB::beginTransaction();
 
         try {
-            // Lấy mã phiếu nhận hàng cuối cùng và tạo mã mới (mã sẽ tự động tăng)
             $lastGoodsReceipt = GoodsReceipt::latest('id')->first();
             $lastCode = $lastGoodsReceipt ? $lastGoodsReceipt->code : 'PNH0000';
             $nextCodeNumber = intval(substr($lastCode, 3)) + 1;
 
-            // Lặp qua từng phân phối và tạo phiếu nhận hàng tương ứng
-            foreach ($request->distributions as $productId => $distributions) {
-                // Kiểm tra xem $distributions có phải là mảng không
-                if (!is_array($distributions)) {
-                    throw new \Exception("Dữ liệu phân phối không hợp lệ.");
+            foreach ($request->distributions as $distribution) {
+                if (!is_array($distribution)) {
+                    throw new \Exception("Dữ liệu phân phối không hợp lệ. Giá trị phân phối không phải là mảng.");
                 }
 
-                // Tạo mã phiếu nhận hàng cho mỗi phân phối (tăng số tự động)
+                if (!isset($distribution['warehouse_id'], $distribution['quantity'], $distribution['product_id'], $distribution['unit_price'], $distribution['discount'])) {
+                    throw new \Exception("Thông tin chi tiết phân phối không hợp lệ.");
+                }
+
                 $newCode = 'PNH' . str_pad($nextCodeNumber, 4, '0', STR_PAD_LEFT);
                 $nextCodeNumber++;
 
-                // Tạo phiếu nhận hàng cho từng kho (mỗi phân phối tạo một phiếu nhận hàng)
-                foreach ($distributions as $distribution) {
-                    // Kiểm tra nếu distribution là mảng và có đầy đủ dữ liệu
-                    if (is_array($distribution) && isset($distribution['warehouse_id'], $distribution['quantity'], $distribution['product_id'], $distribution['unit_price'], $distribution['discount'])) {
-                        // Tạo GoodsReceipt mới cho mỗi kho
-                        $goodsReceipt = GoodsReceipt::create([
-                            'code' => $newCode, // Mã tự động tăng
-                            'provider_id' => $request->provider_id,
-                            'creator_id' => $request->user_id,  // Lấy ID người tạo từ request
-                            'warehouse_id' => $distribution['warehouse_id'],  // Lấy warehouse_id từ phân phối
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ]);
+                $goodsReceipt = GoodsReceipt::create([
+                    'code' => $newCode,
+                    'provider_id' => $request->provider_id,
+                    'creator_id' => $request->user_id,
+                    'warehouse_id' => $distribution['warehouse_id'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
 
-                        // Lưu chi tiết phiếu nhận hàng cho từng phân phối
-                        GoodsReceiptDetail::create([
-                            'goods_receipt_id' => $goodsReceipt->id,  // ID phiếu nhận hàng
-                            'product_id' => $distribution['product_id'],
-                            'warehouse_id' => $distribution['warehouse_id'], // Lấy warehouse_id từ phân phối
-                            'quantity' => $distribution['quantity'],
-                            'unit_price' => $distribution['unit_price'],
-                            'discount' => $distribution['discount'],
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ]);
-                    } else {
-                        throw new \Exception("Thông tin phân phối không hợp lệ.");
-                    }
-                }
+                GoodsReceiptDetail::create([
+                    'goods_receipt_id' => $goodsReceipt->id,
+                    'product_id' => $distribution['product_id'],
+                    'quantity' => $distribution['quantity'],
+                    'unit_price' => $distribution['unit_price'],
+                    'discount' => $distribution['discount'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
             }
 
-            // DB::commit();
+            DB::commit();
             return redirect()->route('goodsreceipts.index')->with('success', 'Phiếu nhận hàng đã được tạo thành công.');
         } catch (\Exception $e) {
-            DB::rollBack(); // Nếu có lỗi, rollback lại transaction
+            DB::rollBack();
             return back()->with('error', 'Đã xảy ra lỗi khi tạo phiếu nhận hàng: ' . $e->getMessage());
         }
     }
@@ -259,8 +248,8 @@ class AdminGoodsReceiptController extends Controller
             )
             ->get();
         $warehouses = $this->warehouse->all();
-        info($purchaseOrders);
-        info($distributionData);
+        // info($purchaseOrders);
+        // info($distributionData);
 
         return view('admin.goods-receipts.display', compact('purchaseOrders', 'distributionData', 'warehouses'));
     }

@@ -38,7 +38,7 @@
         </div>
         <table class="table" id="table-list">
             <tr>
-                <th>Danh mục cha</th>
+                {{-- <th>Danh mục cha</th> --}}
                 <th>Tên danh mục</th>
                 <th>Thao tác</th>
             </tr>
@@ -47,7 +47,7 @@
             @endphp
             @foreach ($categories as $category)
                 <tr>
-                    <td>{{ $category->getParentName() }}</td>
+                    {{-- <td>{{ $category->getParentName() }}</td> --}}
                     <td>{{ $category->name }}</td>
                     <td class="btn-cell">
                         <a href="{{ route('categories.edit', $category->id) }}"><img src="{{ asset('img/edit.png') }}"

@@ -8,6 +8,7 @@ use App\Models\GoodsIssue;
 use App\Models\GoodsIssueDetail;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Str;
@@ -28,8 +29,36 @@ class CustomerDashboardController extends Controller
         $categoriesWithProducts = Category::with(['products' => function ($query) {
             $query->paginate(16);
         }])->get();
-        $allProducts = Product::paginate(16);
-        return view('customers.dashboard', compact('categoriesWithProducts', 'allProducts'));
+        $allProducts = Product::with(['batches.inventories', 'images'])
+            ->paginate(16);
+
+        // Dùng items() để lấy collection các sản phẩm
+        $allProductsWithStock = $allProducts->items();
+
+        $allProductsWithStock = collect($allProductsWithStock)->map(function ($product) {
+            $totalStock = $product->batches->sum(function ($batch) {
+                return $batch->inventories->sum('quantity_available');
+            });
+
+            return (object)[
+                'id' => $product->id,
+                'name' => $product->name,
+                'selling_price' => $product->selling_price,
+                'images' => $product->images, // Thêm images vào dữ liệu
+                'totalStock' => $totalStock,
+            ];
+        });
+
+        $paginatedProducts = new LengthAwarePaginator(
+            $allProductsWithStock,
+            $allProducts->total(),
+            $allProducts->perPage(),
+            $allProducts->currentPage(),
+            ['path' => $allProducts->path()]
+        );
+        info($paginatedProducts);
+
+        return view('customers.dashboard', compact('categoriesWithProducts', 'paginatedProducts'));
     }
 
     public function addToCart(Request $request)
