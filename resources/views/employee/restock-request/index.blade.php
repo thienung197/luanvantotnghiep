@@ -40,10 +40,9 @@
             <tr>
                 <th>Mã đơn hàng</th>
                 <th>Người gửi </th>
-                {{-- <th>Tổng tiền hàng</th> --}}
                 <th>Trạng thái</th>
                 <th>Ngày tạo </th>
-                <th>Thao tác</th>
+                {{-- <th>Thao tác</th> --}}
             </tr>
 
             @foreach ($restockRequests as $restockRequest)
@@ -60,7 +59,7 @@
                         @endif
                     </td>
                     <td>{{ $restockRequest->created_at }}</td>
-                    <td class="btn-cell">
+                    {{-- <td class="btn-cell">
                         <a href="{{ route('restock-request.edit', $restockRequest->id) }}">
                             <img src="{{ asset('img/edit.png') }}" alt="">
                         </a>
@@ -72,7 +71,7 @@
                         <button type="submit" class="btn-delete" data-id="{{ $restockRequest->id }}">
                             <img src="{{ asset('img/delete.png') }}" alt="">
                         </button>
-                    </td>
+                    </td> --}}
                 </tr>
 
                 <tr class="goods-issue-details" id="details-{{ $restockRequest->id }}" style="display: none;">

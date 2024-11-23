@@ -41,7 +41,7 @@
                 <th>Thời gian</th>
                 <th>Nhà cung cấp</th>
                 <th>Trạng thái</th>
-                <th>Thao tác</th>
+                {{-- <th>Thao tác</th> --}}
             </tr>
 
             @foreach ($purchaseOrders as $purchaseOrder)
@@ -56,9 +56,9 @@
                             Đã tạo phiếu nhập kho
                         @endif
                     </td>
-                    <td>
+                    {{-- <td>
                         <button>Tạo phiếu nhập kho</button>
-                    </td>
+                    </td> --}}
                     {{-- <td class="btn-cell">
                         <a href="{{ route('goodsissues.edit', $purchaseOrder->id) }}">
                             <img src="{{ asset('img/edit.png') }}" alt="">

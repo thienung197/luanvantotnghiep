@@ -191,33 +191,6 @@
 
 @push('css')
     <style>
-        .content-10 h3 {
-            text-transform: uppercase;
-            color: var(--color-black);
-            font-weight: 600;
-            font-size: 26px;
-            text-align: center;
-            margin: 15px 0;
-        }
-
-        .content-10 h6 {
-            font-size: 22px;
-            font-weight: 400;
-            display: flex;
-        }
-
-        .content-10 h6 span {
-            color: var(--color-black);
-            font-size: 22px;
-            font-style: italic;
-            font-weight: 600;
-            width: 15%;
-        }
-
-        .content-10 table {
-            margin: 40px 0;
-        }
-
         tr th {
             text-align: center;
         }

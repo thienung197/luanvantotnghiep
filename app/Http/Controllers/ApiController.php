@@ -338,7 +338,6 @@ class ApiController extends Controller
     //nha kho dung de de xuat hang hoa de nhap hang(do ton kho thap)
     public function getSuggestedProducts(Request $request)
     {
-        $reasonId = $request->reason_id;
         $warehouseId = $request->warehouse_id;
         operator:
         $products = DB::table('products')
@@ -600,12 +599,12 @@ class ApiController extends Controller
         });
 
         // Ghi log danh sách nhà kho và khoảng cách (gọn gàng)
-        info('Warehouses with distances:', array_map(function ($item) {
-            return [
-                'warehouse_name' => $item['warehouse']->name,
-                'distance' => $item['distance'],
-            ];
-        }, $warehousesWithDistance));
+        // info('Warehouses with distances:', array_map(function ($item) {
+        //     return [
+        //         'warehouse_name' => $item['warehouse']->name,
+        //         'distance' => $item['distance'],
+        //     ];
+        // }, $warehousesWithDistance));
 
         return $warehousesWithDistance;
     }
@@ -614,7 +613,7 @@ class ApiController extends Controller
     {
         $productsData = json_decode($request->input('productsData'), true);
         $batchesByProduct = [];
-
+        $groupedBatchDetails = [];
         foreach ($productsData as $productData) {
             $productId = $productData['productId'];
             $requiredQuantity = $productData['quantity'];
@@ -626,26 +625,71 @@ class ApiController extends Controller
             $customerLocation = $this->fetchLocationById($customerLocationId);
             $warehouses = $this->fetchAllWarehouseWithLocation();
 
-            // Tìm nhà kho gần nhất
             $warehousesByProximity = $this->getClosestWarehouses($customerLocation, $warehouses);
 
-            // Ghi log danh sách nhà kho gần nhất (đơn giản hóa)
-            info('Closest warehouses:', array_map(function ($warehouseData) {
+            // info('Closest warehouses:', array_map(function ($warehouseData) {
+            //     return [
+            //         'warehouse' => $warehouseData['warehouse']->name,
+            //         'distance' => $warehouseData['distance']
+            //     ];
+            // }, $warehousesByProximity));
+            $warehouseDetails = array_map(function ($warehouseData) {
                 return [
-                    'warehouse' => $warehouseData['warehouse']->name,
+                    'name' => $warehouseData['warehouse']->name,
+                    'location' => $warehouseData['warehouse']->location,
                     'distance' => $warehouseData['distance']
                 ];
-            }, $warehousesByProximity));
+            }, $warehousesByProximity);
 
             $selectedBatches = [];
             $totalSelectedQuantity = 0;
+            $batchDetails = Product::select(
+                'products.id as product_id',
+                'products.name as product_name',
+                'batches.id as batch_id',
+                'batches.code as batch_code',
+                'batches.expiry_date',
+                'batches.manufacturing_date',
+                'inventories.quantity_available',
+                'warehouses.id as warehouse_id',
+                'warehouses.name as warehouse_name'
+            )
+                ->join('batches', 'products.id', '=', 'batches.product_id')
+                ->join('inventories', 'batches.id', '=', 'inventories.batch_id')
+                ->join('warehouses', 'inventories.warehouse_id', '=', 'warehouses.id')
+                ->where('products.id', $productId)
+                ->where('inventories.quantity_available', '>', 0) // Lọc các lô hàng có số lượng > 0
+                ->orderBy('batches.expiry_date', 'asc')
+                ->get();
+            foreach ($batchDetails as $batch) {
+                $productName = $batch['product_name']; // Lấy tên sản phẩm
 
+                // Nếu sản phẩm chưa tồn tại trong mảng, khởi tạo nó
+                if (!isset($groupedBatchDetails[$productName])) {
+                    $groupedBatchDetails[$productName] = [];
+                }
+
+                // Thêm thông tin lô hàng vào mảng của sản phẩm tương ứng
+                $groupedBatchDetails[$productName][] = [
+                    'batch_id' => $batch['batch_id'],
+                    'batch_code' => $batch['batch_code'],
+                    'expiry_date' => $batch['expiry_date'],
+                    'manufacturing_date' => $batch['manufacturing_date'],
+                    'quantity_available' => $batch['quantity_available'],
+                    'warehouse_id' => $batch['warehouse_id'],
+                    'warehouse_name' => $batch['warehouse_name']
+                ];
+            }
+
+            // Kết quả sẽ nằm trong $groupedBatchDetails
+            info($groupedBatchDetails);
             foreach ($warehousesByProximity as $warehouseData) {
                 $warehouse = $warehouseData['warehouse'];
-                if (!is_object($warehouse)) {
-                    info('Invalid warehouse data:', $warehouseData);
-                    continue;
-                }
+                // if (!is_object($warehouse)) {
+                //     info('Invalid warehouse data:', $warehouseData);
+                //     continue;
+                // }
+
                 $batches = Product::select(
                     'products.id as product_id',
                     'products.name',
@@ -671,13 +715,17 @@ class ApiController extends Controller
                     if ($quantityToTake <= 0) {
                         break;
                     }
-
+                    $warehouseName = Warehouse::where('id', $batch->warehouse_id)->firstOrFail()->name;
+                    $batchCode = Batch::where('id', $batch->batch_id)->firstOrFail()->code;
                     $selectedBatches[] = [
                         'batch_id' => $batch->batch_id,
-                        'quantity' => $quantityToTake,
+                        'batch_code' => $batchCode,
+                        'quantityAvailable' => $availableQuantity,
+                        'quantityToTake' => $quantityToTake,
                         'expiry_date' => $batch->expiry_date,
                         'manufacturing_date' => $batch->manufacturing_date,
-                        'warehouse' => $batch->warehouse_id,
+                        'warehouse' => $warehouseName,
+                        'warehouseId' => $batch->warehouse_id,
                         'unitPrice' => $unitPrice,
                         'discount' => $discount,
                         'totalPrice' => $totalPrice
@@ -693,10 +741,11 @@ class ApiController extends Controller
 
             $batchesByProduct[] = [
                 'productId' => $productId,
+                // 'totalQuantityRequired' => ,
                 'batches' => $selectedBatches,
             ];
         }
 
-        return response()->json(['batches' => $batchesByProduct]);
+        return response()->json(['batches' => $batchesByProduct, 'warehouseDetails' => $warehouseDetails, 'batchDetails' => $groupedBatchDetails]);
     }
 }

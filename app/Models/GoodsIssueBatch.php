@@ -9,6 +9,7 @@ class GoodsIssueBatch extends Model
 {
     use HasFactory;
     protected $fillable = [
+        'code',
         'goods_issue_id',
         'warehouse_id',
         'batch_id',

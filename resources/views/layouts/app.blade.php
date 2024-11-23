@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"
         integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
+    {{-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> --}}
     <link rel="stylesheet" href="{{ asset('css/variables.css') }}">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     @stack('css')
@@ -277,7 +278,7 @@
                             </li>
                         @endcan
 
-                        @can('is-manager')
+                        {{-- @can('is-manager')
                             <li class="{{ request()->routeIs('issue-report.index') ? 'bg-blue' : '' }}">
                                 <a href="{{ route('issue-report.index') }}">
                                     <div class="flex-left-content">
@@ -286,7 +287,7 @@
                                     </div>
                                 </a>
                             </li>
-                        @endcan
+                        @endcan --}}
 
                         @can('is-customer')
                             <li class="{{ request()->routeIs('goodsissues.create') ? 'bg-blue' : '' }}">
@@ -441,6 +442,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"
         integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    {{-- <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script> --}}
     <script src="{{ asset('js/app.js') }}"></script>
     <script>
         $(document).ready(function() {

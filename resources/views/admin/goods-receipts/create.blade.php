@@ -39,7 +39,7 @@
                 <div class="error message">{{ $message }}</div>
             @enderror
         </div>
-        <button id="show-products" class="btn btn-primary">Các sản phẩm được đề xuất</button>
+        {{-- <button id="show-products" class="btn btn-primary">Các sản phẩm được đề xuất</button> --}}
         <div class="ajax-table-container">
 
         </div>

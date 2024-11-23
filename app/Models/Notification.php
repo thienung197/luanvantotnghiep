@@ -11,7 +11,8 @@ class Notification extends Model
     protected $fillable = [
         'title',
         'message',
-        'read_status'
+        'read_status',
+        'warehouse_id'
     ];
 
     public static function markAsRead($notificationId)

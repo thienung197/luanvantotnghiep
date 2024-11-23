@@ -3,7 +3,7 @@
 @section('content')
     <div class="content_header">
         <div class="content_header--title">
-            Danh sách yêu cầu xuất hàng
+            Phiếu xuất kho
         </div>
         <div class="content_header--path">
             <img src="{{ asset('img/home.png') }}" alt="">
@@ -15,17 +15,17 @@
     </div> --}}
     <div class="table_container">
         <div class="table_title">
-            Danh sách phiếu yêu cầu
+            Danh sách phiếu xuất kho
         </div>
         <div class="table_filter-controls">
             <form action="{{ route('goodsissues.index') }}" method="GET">
-                <label for="">Hiển thị </label>
+                {{-- <label for="">Hiển thị </label>
                 <select name="entries" id="entries" onchange="this.form.submit()">
                     <option value="5" {{ request('entries') == 5 ? 'selected' : '' }}>5</option>
                     <option value="10" {{ request('entries') == 10 ? 'selected' : '' }}>10</option>
                     <option value="25" {{ request('entries') == 25 ? 'selected' : '' }}>25</option>
                 </select>
-                mục
+                mục --}}
             </form>
             <div class="table_search-box">
                 <form action="{{ route('goodsissues.index') }}" method="GET">
@@ -40,9 +40,10 @@
                 <tr>
                     <th>Mã đơn hàng</th>
                     <th>Thời gian</th>
+                    <th>Tên khách hàng</th>
                     <th>Tổng tiền hàng</th>
                     <th>Trạng thái</th>
-                    <th>Thao tác</th>
+                    {{-- <th>Thao tác</th> --}}
                 </tr>
             </thead>
             <tbody>
@@ -53,6 +54,7 @@
                     <tr class="goods-issue-row" data-id="{{ $goodsIssueId }}">
                         <td>{{ $goodsIssue->code }}</td>
                         <td>{{ $goodsIssue->created_at }}</td>
+                        <td>{{ $goodsIssue->getCustomerName() }}</td>
                         <td>{{ number_format($totals[$goodsIssueId], 2) }}</td>
                         <!-- Hiển thị tổng tiền hàng cho đơn hàng này -->
                         <td>
@@ -62,7 +64,7 @@
                                 Đơn hàng của bạn đang được vận chuyển
                             @endif
                         </td>
-                        <td class="btn-cell">
+                        {{-- <td class="btn-cell">
                             <a href="{{ route('goodsissues.edit', $goodsIssue->id) }}"><img
                                     src="{{ asset('img/edit.png') }}" alt="Edit"></a>
                             <form action="{{ route('goodsissues.destroy', $goodsIssue->id) }}" method="POST"
@@ -72,7 +74,7 @@
                             </form>
                             <button type="submit" class="btn-delete" data-id="{{ $goodsIssue->id }}"><img
                                     src="{{ asset('img/delete.png') }}" alt="Delete"></button>
-                        </td>
+                        </td> --}}
                     </tr>
 
                     <!-- Chi tiết đơn hàng -->
@@ -80,11 +82,17 @@
                         <td colspan="5">
                             <div class="details-container">
                                 <strong>Thông tin đơn hàng</strong>
-                                <p>Tên khách hàng: {{ $goodsIssue->customer->name ?? 'N/A' }}</p>
-                                <p>Điện thoại: {{ $goodsIssue->customer->phone ?? 'N/A' }}</p>
-                                <p>Địa chỉ: {{ $goodsIssue->customer->address ?? 'N/A' }}</p>
+                                <div class="customer-info-container">
+                                    <p><span>Tên khách hàng:</span>{{ $goodsIssue->getCustomerName() }}</p>
+                                    <p><span>Điện thoại:</span> {{ $goodsIssue->getCustomerPhone() }}</p>
+                                    <p><span>Địa chỉ:</span> {{ $goodsIssue->getCustomerAddress() }}</p>
+                                    <p style="display: none" id="customer_location_id">
+                                        {{ $goodsIssue->getCustomerLocationId() }}
 
-                                <strong>Thông tin đơn hàng (Batch)</strong>
+
+                                    </p>
+                                </div>
+                                <strong>Danh sách các sản phẩm</strong>
                                 <table class="table table-bordered">
                                     <thead>
                                         <tr>
@@ -110,6 +118,7 @@
                                         @endforeach
                                     </tbody>
                                 </table>
+                                <p><span>Tổng tiền hàng: </span>{{ $goodsIssue->getTotalAmount() }}</p>
                             </div>
                         </td>
                     </tr>

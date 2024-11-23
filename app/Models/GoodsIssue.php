@@ -26,6 +26,11 @@ class GoodsIssue extends Model
         return optional($this->customer)->location->id ?? '';
     }
 
+    public function getCustomerCode()
+    {
+        return $this->customer ? $this->customer->code : '';
+    }
+
     public function getCustomerName()
     {
         return $this->customer ? $this->customer->name : '';
@@ -39,28 +44,19 @@ class GoodsIssue extends Model
     public function getCustomerAddress()
     {
         $customer = $this->customer;
-        $street = '';
-        $ward = '';
-        $district = '';
-        $city = '';
-        $address = '';
-        if ($customer->location) {
-            $street = $customer->location->street_address;
-            $ward = $customer->location->ward;
-            $district = $customer->location->district;
-            $city = $customer->location->city;
-        } else {
+
+        if (!$customer || !$customer->location) {
             return '';
         }
 
-        if ($street) {
-            $street_address = $customer->location->street_address . ',';
-        } else {
-            $street_address = '';
-        }
+        $street = $customer->location->street_address ?? '';
+        $ward = $customer->location->ward ?? '';
+        $district = $customer->location->district ?? '';
+        $city = $customer->location->city ?? '';
 
-        return  $street_address . ', ' . $ward
-            . ',' . $district . ',' . $city;
+        $addressParts = array_filter([$street, $ward, $district, $city]);
+
+        return   implode(', ', $addressParts);
     }
 
     public function warehouse()

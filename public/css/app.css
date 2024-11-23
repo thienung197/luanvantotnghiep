@@ -450,6 +450,11 @@ img.avatar {
     color: var(--color-default-light);
 }
 
+.table > :not(caption) > * > * {
+    background-color: transparent !important;
+    box-shadow: none !important;
+}
+
 /* .btn-cell {
     display: flex;
     align-items: center;
@@ -707,4 +712,62 @@ img.avatar {
 
 .notification-item.read {
     background-color: #f5f5f5;
+}
+
+/* hien thi don hang  */
+
+.details-container p {
+    text-align: left;
+    font-style: italic;
+    color: var(--color-black);
+}
+
+.details-container p span {
+    font-style: italic;
+    color: var(--color-black);
+    font-weight: 500;
+    margin-right: 20px;
+}
+
+.batch-table tr td {
+    text-align: center;
+}
+
+.batch-table tr th {
+    text-align: center;
+}
+
+.goods-issue-row:hover {
+    background-color: rgb(230, 247, 236);
+}
+
+.restock-request-row:hover {
+    background-color: rgb(230, 247, 236);
+}
+
+.content-10 h3 {
+    text-transform: uppercase;
+    color: var(--color-black);
+    font-weight: 600;
+    font-size: 26px;
+    text-align: center;
+    margin: 15px 0;
+}
+
+.content-10 h6 {
+    font-size: 22px;
+    font-weight: 400;
+    display: flex;
+}
+
+.content-10 h6 span {
+    color: var(--color-black);
+    font-size: 22px;
+    font-style: italic;
+    font-weight: 600;
+    width: 15%;
+}
+
+.content-10 table {
+    margin: 40px 0;
 }

@@ -8,50 +8,22 @@
         <div class="content_header--path">
             <img src="{{ asset('img/home.png') }}" alt="">
             <p><a href="">Home</a> > <a href="{{ route('stocktakes.index') }}">Phiếu yêu cầu nhập hàng</a> > <a
-                    href="">Thêm phiếu yêu cầu nhập hàng</a>
+                    href="">Thêm phiếu </a>
             </p>
         </div>
     </div>
-
     <div class="content-10">
-        @csrf
-        <div class="form-group input-div">
-            <h4>Người tạo </h4>
-            <input type="hidden" name="warehouse_id" value="{{ Auth::user()->warehouse_id }}" id="warehouse_id">
-            <input type="hidden" name="creator_id" value="{{ Auth::user()->id }}" id="creator_id">
-            <input type="text" value="{{ Auth::user()->name }}" readonly class="form-control">
-            @error('creator_id')
-                <div class="error message">{{ $message }}</div>
-            @enderror
-        </div>
-        <div class="form-group input-div">
-            <h4>Mã phiếu yêu cầu nhập hàng </h4>
-            <input type="text" name="code" value="{{ old('code', $newCode) }}" id="submit_code" class="form-control"
-                readonly>
-            @error('code')
-                <div class="error message">{{ $message }}</div>
-            @enderror
-        </div>
-        <div class="form-group input-div">
-            <h4>Ngày yêu cầu nhập hàng</h4>
+        <h3>Thông tin phiếu yêu cầu</h3>
+        <input type="hidden" name="creator_id" value="{{ Auth::user()->id }}" id="creator_id">
+        <input type="hidden" name="warehouse_id" value="{{ Auth::user()->warehouse_id }}" id="warehouse_id">
+        <h6><span>Tên người tạo :</span> {{ $user->name }}</h6>
+        <h6><span>Mã phiếu</span> <input type="text" name="code" value="{{ old('code', $newCode) }}" id="submit_code"
+                class="form-control" readonly></h6>
+        <h6><span>Mã phiếu yêu cầu nhập hàng</span>
             <input type="date" name="date" class="form-control"
                 value="{{ old('date', \Carbon\Carbon::now()->format('Y-m-d')) }}">
-        </div>
-
-        <div class="form-group input-div">
-            <h4>Lý do yêu cầu nhập hàng</h4>
-            <select name="restock_request_reason_id" id="restock_request_reason_id" class="form-control">
-                <option value="">---Chọn yêu cầu nhập hàng---</option>
-                @foreach ($restockRequestReasons as $restockRequestReason)
-                    <option value="{{ $restockRequestReason->id }}"
-                        {{ old('restock_request_reason_id ') == $restockRequestReason->id ? 'selected' : '' }}>
-                        {{ $restockRequestReason->name }}</option>
-                @endforeach
-            </select>
-            @error('warehouse_id')
-                <div class="error message">{{ $message }}</div>
-            @enderror
-        </div>
+        </h6>
+        <button id="fetch-suggested-products" class="btn btn-primary">Đề xuất</button>
     </div>
 
     <div class="content-10">
@@ -77,33 +49,39 @@
         </form>
     </div>
 
-    {{-- <div class="content-10">
-      
-
-            <form action="{{ route('stocktakes.store') }}" method="POST"> --}}
-
-    {{-- <table id="product-table" class="table ">
-                    <thead>
-                        <th>Mã hàng</th>
-                        <th>Tên hàng</th>
-                        <th>Lô hàng</th>
-                        <th>Đơn vị tính</th>
-                        <th>Tồn kho</th>
-                        <th>Thực tế</th>
-                        <th>Số lượng lệch</th>
-                        <th>Giá trị lệch</th>
-                        <th>Xóa</th>
-                    </thead>
-                    <tbody id="body-product-table">
-
-                    </tbody>
-                </table> --}}
-    {{-- </div>
-    </div> --}}
 
 
 @endsection
 
+@push('css')
+    <style>
+        .product-suggestions {
+            min-height: 120px;
+        }
+
+        #submit-request-btn {
+            padding: 8px;
+            color: var(--color-white);
+            background-color: var(--color-green);
+            border-radius: 20px;
+        }
+
+        .delete-btn {
+            background-color: var(--color-red);
+            padding: 3px;
+            border-radius: 5px;
+            color: var(--color-white);
+        }
+
+        .content-10 h6 span {
+            color: var(--color-black);
+            font-size: 22px;
+            font-style: italic;
+            font-weight: 600;
+            width: 30%;
+        }
+    </style>
+@endpush
 @push('js')
     <script>
         $(document).ready(function() {
@@ -123,90 +101,89 @@
         });
 
 
-        $('select[name="restock_request_reason_id"]').on('change', function() {
-            let reasonId = $(this).val();
+        $('#fetch-suggested-products').on('click', function() {
             let warehouseId = $('#warehouse_id').val();
-            console.log(warehouseId);
+            console.log();
+            ('Warehouse ID:', warehouseId);
 
-            if (reasonId == 3) {
-                $.ajax({
-                    url: "{{ route('restock.suggested-products') }}",
-                    type: "GET",
-                    data: {
-                        reason_id: reasonId,
-                        warehouse_id: warehouseId
-                    },
-                    success: function(products) {
-                        console.log(products);
+            $.ajax({
+                url: "{{ route('restock.suggested-products') }}",
+                type: "GET",
+                data: {
+                    warehouse_id: warehouseId
+                },
+                success: function(products) {
+                    console.log(products);
 
-                        const table = document.createElement("table");
-                        table.classList.add("product-table");
-                        table.classList.add("table");
-                        const thead = document.createElement("thead");
-                        const tbody = document.createElement("tbody");
-                        const headerRow = document.createElement("tr");
-                        const headers = ["Mã sản phẩm", "Tên sản phẩm", "Đơn vị", "Số lượng tồn kho",
-                            "Số lượng đặt dự kiến", "Xóa"
-                        ];
-                        headers.forEach(headerText => {
-                            const th = document.createElement("th");
-                            th.textContent = headerText;
-                            headerRow.appendChild(th);
+                    const table = document.createElement("table");
+                    table.classList.add("product-table");
+                    table.classList.add("table");
+                    const thead = document.createElement("thead");
+                    const tbody = document.createElement("tbody");
+                    const headerRow = document.createElement("tr");
+                    const headers = ["Mã sản phẩm", "Tên sản phẩm", "Đơn vị", "Số lượng tồn kho",
+                        "Số lượng đặt dự kiến", "Xóa"
+                    ];
+                    headers.forEach(headerText => {
+                        const th = document.createElement("th");
+                        th.textContent = headerText;
+                        headerRow.appendChild(th);
+                    })
+                    thead.appendChild(headerRow);
+
+                    products.forEach((product, index) => {
+                        const row = document.createElement("tr");
+
+                        const idCell = document.createElement("td");
+                        idCell.style.display = "none";
+                        idCell.textContent = product.id;
+                        row.appendChild(idCell);
+
+                        const codeCell = document.createElement("td");
+                        codeCell.textContent = product.code;
+                        row.appendChild(codeCell);
+
+                        const nameCell = document.createElement("td");
+                        nameCell.textContent = product.name;
+                        row.appendChild(nameCell);
+
+                        const unitIdCell = document.createElement("td");
+                        unitIdCell.textContent = product.unit_name;
+                        row.appendChild(unitIdCell);
+
+                        const availableQtyCell = document.createElement("td");
+                        availableQtyCell.textContent = product.available_quantity;
+                        row.appendChild(availableQtyCell);
+
+                        const suggestedQtyCell = document.createElement("td");
+                        suggestedQtyInput = document.createElement("input");
+                        suggestedQtyInput.classList.add("form-control");
+                        suggestedQtyInput.value = product.suggested_quantity || 0;
+                        suggestedQtyCell.appendChild(suggestedQtyInput);
+                        row.appendChild(suggestedQtyCell)
+
+                        const actionCell = document.createElement("td");
+                        const deleteBtn = document.createElement("button");
+                        deleteBtn.textContent = "Delete";
+                        deleteBtn.classList.add("delete-btn");
+                        actionCell.appendChild(deleteBtn);
+                        row.appendChild(actionCell);
+
+                        deleteBtn.addEventListener("click", () => {
+                            row.remove();
+                            // products.splice(index, 1);
                         })
-                        thead.appendChild(headerRow);
 
-                        products.forEach((product, index) => {
-                            const row = document.createElement("tr");
+                        tbody.appendChild(row);
+                    })
 
-                            const idCell = document.createElement("td");
-                            idCell.style.display = "none";
-                            idCell.textContent = product.id;
-                            row.appendChild(idCell);
+                    table.appendChild(thead);
+                    table.appendChild(tbody);
+                    $("#product-suggestions").html(table);
 
-                            const codeCell = document.createElement("td");
-                            codeCell.textContent = product.code;
-                            row.appendChild(codeCell);
+                }
+            })
 
-                            const nameCell = document.createElement("td");
-                            nameCell.textContent = product.name;
-                            row.appendChild(nameCell);
-
-                            const unitIdCell = document.createElement("td");
-                            unitIdCell.textContent = product.unit_name;
-                            row.appendChild(unitIdCell);
-
-                            const availableQtyCell = document.createElement("td");
-                            availableQtyCell.textContent = product.available_quantity;
-                            row.appendChild(availableQtyCell);
-
-                            const suggestedQtyCell = document.createElement("td");
-                            suggestedQtyCell.textContent = product.suggested_quantity;
-                            row.appendChild(suggestedQtyCell)
-
-                            const actionCell = document.createElement("td");
-                            const deleteBtn = document.createElement("button");
-                            deleteBtn.textContent = "Delete";
-                            deleteBtn.classList.add("delete-btn");
-                            actionCell.appendChild(deleteBtn);
-                            row.appendChild(actionCell);
-
-                            deleteBtn.addEventListener("click", () => {
-                                row.remove();
-                                // products.splice(index, 1);
-                            })
-
-                            tbody.appendChild(row);
-                        })
-
-                        table.appendChild(thead);
-                        table.appendChild(tbody);
-                        $("#product-suggestions").html(table);
-
-                    }
-                })
-            } else {
-                $("#product-suggestions").html('');
-            }
         })
 
         $(document).on("input", ".search-input", function() {
@@ -247,7 +224,7 @@
                 $(".product-table tbody tr").each(function() {
                     let product = {
                         id: $(this).find("td:nth-child(1)").text(),
-                        suggested_quantity: $(this).find("td:nth-child(6)").text()
+                        suggested_quantity: $(this).find("td:nth-child(6) input").val()
                     };
                     products.push(product);
 
@@ -287,6 +264,7 @@
                 // imgCell.appendChild(imgElement);
 
                 let idCell = document.createElement("td");
+                idCell.style.display = "none";
                 idCell.textContent = productId;
 
                 let codeCell = document.createElement('td');
@@ -305,7 +283,10 @@
                 inventoryCell.textContent = inventoryQuantity;
 
                 let suggestedCell = document.createElement('td');
-                suggestedCell.textContent = suggestedQuantity;
+                let suggestedInput = document.createElement("input");
+                suggestedInput.classList.add("form-control");
+                suggestedInput.value = suggestedQuantity || 0;
+                suggestedCell.appendChild(suggestedInput);
 
                 const actionCell = document.createElement("td");
                 const deleteBtn = document.createElement("button");
@@ -318,7 +299,7 @@
                     // products.splice(index, 1);
                 })
 
-                // newRow.appendChild(imgCell);
+                newRow.appendChild(idCell);
                 newRow.appendChild(codeCell);
                 newRow.appendChild(nameCell);
                 newRow.appendChild(unitCell);

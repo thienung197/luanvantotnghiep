@@ -43,7 +43,7 @@
                 <th>Ngày kết thúc</th>
                 <th>Người gửi </th>
                 <th>Ngày tạo </th>
-                <th>Thao tác</th>
+                {{-- <th>Thao tác</th> --}}
             </tr>
 
             @foreach ($comprehensiveStockReports as $comprehensiveStockReport)
@@ -54,7 +54,7 @@
                     <td>{{ $comprehensiveStockReport->getUserName() }}</td>
 
                     <td>{{ $comprehensiveStockReport->created_at }}</td>
-                    <td class="btn-cell">
+                    {{-- <td class="btn-cell">
                         <a href="{{ route('comprehensive-stock-report.edit', $comprehensiveStockReport->id) }}">
                             <img src="{{ asset('img/edit.png') }}" alt="">
                         </a>
@@ -66,7 +66,7 @@
                         <button type="submit" class="btn-delete" data-id="{{ $comprehensiveStockReport->id }}">
                             <img src="{{ asset('img/delete.png') }}" alt="">
                         </button>
-                    </td>
+                    </td> --}}
                 </tr>
 
                 <tr class="goods-issue-details" id="details-{{ $comprehensiveStockReport->id }}" style="display: none;">

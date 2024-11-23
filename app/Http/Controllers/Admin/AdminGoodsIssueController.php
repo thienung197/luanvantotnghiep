@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\GoodsIssue;
 use App\Models\GoodsIssueBatch;
+use App\Models\Inventory;
+use App\Models\Notification;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -26,14 +29,21 @@ class AdminGoodsIssueController extends Controller
 
     public function store(Request $request)
     {
-        dd($request->all());
+        // dd($request->all());
         DB::beginTransaction();
         $goodsIssueId = $request->input('goods-issue');
         $goodsIssue = $this->goods_issue->findOrFail($goodsIssueId);
+        $user = auth()->user();
+        $userId = $user->id;
+        $warehouseId = $user->warehouse_id;
         $goodsIssue->status = 'approved';
+        $goodsIssue->approved_by = $userId;
         $goodsIssue->save();
         $batchData = $request->input('batchData');
+        $latestGoodsIssue = GoodsIssue::where('id', $goodsIssueId)->first();
+        $baseCode = $latestGoodsIssue->code ?? 'DH00000'; // Nếu không có, mặc định là DH00000
 
+        $batchSuffix = 'A'; // Bắt đầu từ ký tự 'A'
         foreach ($batchData as $batch) {
             $productId = $batch['product_id'];
             $totalQuantityRequired = $batch['total_quantity_required'];
@@ -44,18 +54,11 @@ class AdminGoodsIssueController extends Controller
                 $quantity = $batchItem['quantity'];
                 $unitPrice = str_replace(',', '', $batchItem['unit_price']);
                 $discount = $batchItem['discount'];
-                $lastBatch = GoodsIssueBatch::where('goods_issue_id', $goodsIssueId)
-                    ->latest('id')
-                    ->first();
-
-                if ($lastBatch && str_starts_with($lastBatch->code, $goodsIssue->code)) {
-                    $lastSuffix = substr($lastBatch->code, -1);
-                    $codeSuffix = chr(ord($lastSuffix) + 1);
-                }
+                $batchCode = $baseCode . $batchSuffix;
 
                 GoodsIssueBatch::create([
                     'goods_issue_id' => $goodsIssueId,
-                    // 'code' => $goodsIssueId,
+                    'code' => $batchCode,
                     'warehouse_id' => $warehouseId,
                     'batch_id' => $batchId,
                     'quantity' => $quantity,
@@ -63,6 +66,42 @@ class AdminGoodsIssueController extends Controller
                     'discount' => $discount,
                     'status' => 'processing'
                 ]);
+                $batchSuffix++;
+
+                $inventory = Inventory::where('batch_id', $batchId)->first();
+                info($inventory);
+                if ($inventory) {
+                    if ($inventory->quantity_available >= $quantity) {
+                        info($inventory->quantity);
+                        info($quantity);
+                        $inventory->quantity_available -= $quantity;
+                        $inventory->save();
+                    } else {
+                        return response()->json([
+                            'error' => 'Not enough quantity available for batch ID ' . $batchId
+                        ], 400);
+                    }
+                } else {
+                    return response()->json([
+                        'error' => 'Inventory not found for batch ID ' . $batchId
+                    ], 404);
+                }
+                // Kiểm tra tổng số lượng tại kho sau mỗi lô hàng
+                $totalQuantityInWarehouse = DB::table('inventories')
+                    ->join('batches', 'inventories.batch_id', '=', 'batches.id') // join bảng batches để lấy product_id
+                    ->where('batches.product_id', $productId) // Lọc theo product_id từ bảng batches
+                    ->where('inventories.warehouse_id', $warehouseId)
+                    ->sum('inventories.quantity_available');
+
+                $product = Product::find($productId);
+                if ($product && $totalQuantityInWarehouse < $product->minimum_stock_level) {
+                    // Tạo thông báo nếu mức tồn kho dưới ngưỡng
+                    Notification::create([
+                        'message' => "Nguồn hàng cho sản phẩm {$product->code} - {$product->name} tại kho {$warehouseId} dưới mức tồn kho tối thiểu.",
+                        'warehouse_id' => $warehouseId,
+                        'read_status' => 0 // 0: chưa đọc
+                    ]);
+                }
             }
         }
         DB::commit();

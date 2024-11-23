@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Batch;
 use App\Models\GoodsIssue;
 use App\Models\GoodsReceipt;
 use App\Models\GoodsReceiptDetail;
+use App\Models\Inventory;
 use App\Models\Product;
 use App\Models\Provider;
 use App\Models\PurchaseOrder;
@@ -134,7 +136,7 @@ class AdminGoodsReceiptController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request->all());
+        // dd($request->all());
         DB::beginTransaction();
         $user_id = $request->creator_id;
         $provider_id = $request->provider_id;
@@ -209,6 +211,41 @@ class AdminGoodsReceiptController extends Controller
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
+                $latestCode = Batch::orderByDesc('id')->first();
+                if ($latestCode) {
+                    $lastNumber = (int)substr($latestCode->code, 2);
+                    $newNumber = $lastNumber + 1;
+                } else {
+                    $newNumber = 1;
+                }
+                $newCode = 'LH' . str_pad($newNumber, 5, '0', STR_PAD_LEFT);
+                $batch = Batch::create([
+                    'code' => $newCode,
+                    'product_id' => $distribution['product_id'],
+                    'price' => $distribution['unit_price'],
+
+                ]);
+                $batchId = $batch->id;
+                $inventory = Inventory::where('batch_id', $batchId)->first();
+                info($inventory);
+                if ($inventory) {
+                    // if ($inventory->quantity_available >= $distribution['quantity']) {
+                    info($inventory->quantity);
+                    info($distribution['quantity']);
+                    $inventory->quantity_available += $distribution['quantity'];
+                    $inventory->save();
+                    // } else {
+                    //     return response()->json([
+                    //         'error' => 'Not enough quantity available for batch ID ' . $batchId
+                    //     ], 400);
+                    // }
+                } else {
+                    Inventory::create([
+                        'batch_id' => $batchId,
+                        'warehouse_id' => $distribution['warehouse_id'],
+                        'quantity_available' => $distribution['quantity'],
+                    ]);
+                }
             }
 
             DB::commit();

@@ -74,7 +74,7 @@ class ComprehensiveStockReportController extends Controller
      */
     public function store(Request $request)
     {
-
+        // dd($request->all());
         DB::beginTransaction();
         $lastestCode = ComprehensiveStockReport::latest('id')->first();
         if ($lastestCode) {
