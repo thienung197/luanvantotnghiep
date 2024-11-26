@@ -32,7 +32,7 @@
             {{-- Sidebar start  --}}
             <aside id="aside">
                 <div id="logo-container">
-                    <img src="{{ asset('/ware-master-high-resolution-logo.png') }}" alt="">
+                    <img src="{{ asset('img/ware-master-high-resolution-logo.png') }}" alt="">
                     <div class="slogan">
                         <span>Ware Master</span>
                         <span>Warehouse Management</span>

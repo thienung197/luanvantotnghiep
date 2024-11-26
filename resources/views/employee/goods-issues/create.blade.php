@@ -20,9 +20,9 @@
         <h6><span>Địa chỉ:</span>
             @if ($user->location)
                 @if ($user->location->street_address)
-                    {{ $user->location->street_address }}-
+                    {{ $user->location->street_address }},
                 @endif
-                {{ $user->location->ward }}-{{ $user->location->district }}-{{ $user->location->city }}
+                {{ $user->location->ward }}, {{ $user->location->district }}, {{ $user->location->city }}
             @endif
         </h6>
     </div>
@@ -73,7 +73,7 @@
                             </td>
                             <td>
                                 <span id="total-{{ $product->id }}">
-                                    {{ number_format(($product->selling_price - $product->discount) * 1, 0, ',', '.') }}
+                                    {{ ($product->selling_price - $product->discount) * 1 }}
                                     VNĐ
                                 </span>
                             </td>
@@ -130,7 +130,7 @@
 
             let total = (price - discount) * quantity;
 
-            document.getElementById('total-' + productId).innerText = formatCurrency(total);
+            document.getElementById('total-' + productId).innerText = total + ' VNĐ';
 
             updateTotalAmount();
         }
@@ -146,7 +146,7 @@
                 }
             @endforeach
             console.log(totalAmount);
-            document.getElementById('total-amount').innerText = 'Tổng tiền hàng: ' + totalAmount + '000 VND';
+            document.getElementById('total-amount').innerText = 'Tổng tiền hàng: ' + totalAmount + ' VNĐ';
         }
 
         document.addEventListener("DOMContentLoaded", function() {

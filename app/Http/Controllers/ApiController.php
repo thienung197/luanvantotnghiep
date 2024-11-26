@@ -206,7 +206,6 @@ class ApiController extends Controller
             ])
             ->get()
             ->map(function ($product) {
-                // Calculate total available quantity across all batches for each product
                 $totalQuantityAvailable = $product->batches->sum(function ($batch) {
                     return $batch->inventories->sum('quantity_available');
                 });
@@ -341,8 +340,12 @@ class ApiController extends Controller
         $warehouseId = $request->warehouse_id;
         operator:
         $products = DB::table('products')
-            ->join('batches', 'products.id', '=', 'batches.product_id')
-            ->join('inventories', 'batches.id', '=', 'inventories.batch_id')
+            ->leftJoin('batches', 'products.id', '=', 'batches.product_id')
+            ->leftJoin('inventories', function ($join) use ($warehouseId) {
+                $join->on('batches.id', '=', 'inventories.batch_id')
+                    ->where('inventories.warehouse_id', '=', $warehouseId)
+                    ->orWhere('inventories.warehouse_id', '=', 0);
+            })
             ->join('units', 'products.unit_id', '=', 'units.id')
             ->select(
                 'products.id',
@@ -350,15 +353,14 @@ class ApiController extends Controller
                 'products.code',
                 'units.name as unit_name',
                 'inventories.warehouse_id',
-                // 'batches.price as unit_price',
-                DB::raw('SUM(inventories.quantity_available) as available_quantity'),
-                DB::raw('products.target_stock_level - SUM(inventories.quantity_available) as suggested_quantity'),
-                // 'products.minimum_stock_level'
+                DB::raw('COALESCE(SUM(inventories.quantity_available), 0) as available_quantity'),
+                DB::raw('products.target_stock_level - COALESCE(SUM(inventories.quantity_available), 0) as suggested_quantity')
             )
-            ->where('inventories.warehouse_id', $warehouseId)
             ->groupBy('products.id', 'products.code', 'products.name', 'units.name', 'inventories.warehouse_id', 'products.target_stock_level', 'products.minimum_stock_level')
-            ->havingRaw('SUM(inventories.quantity_available) < products.minimum_stock_level')
+            ->havingRaw('COALESCE(SUM(inventories.quantity_available), 0) < products.minimum_stock_level')
+            ->orHavingRaw('available_quantity IS NULL')
             ->get();
+
         info($products);
         return response($products);
     }

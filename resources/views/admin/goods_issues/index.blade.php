@@ -19,20 +19,20 @@
         </div>
         <div class="table_filter-controls">
             <form action="{{ route('goodsissues.index') }}" method="GET">
-                <label for="">Hiển thị </label>
+                {{-- <label for="">Hiển thị </label>
                 <select name="entries" id="entries" onchange="this.form.submit()">
                     <option value="5" {{ request('entries') == 5 ? 'selected' : '' }}>5</option>
                     <option value="10" {{ request('entries') == 10 ? 'selected' : '' }}>10</option>
                     <option value="25" {{ request('entries') == 25 ? 'selected' : '' }}>25</option>
                 </select>
-                mục
+                mục --}}
             </form>
             <div class="table_search-box">
-                <form action="{{ route('goodsissues.index') }}" method="GET">
+                {{-- <form action="{{ route('goodsissues.index') }}" method="GET">
                     <input type="text" name="search" id="search" value="{{ request('search') }}"
                         placeholder="Nhập tên phiếu xuất hàng">
                     <button type="submit">Tìm </button>
-                </form>
+                </form> --}}
             </div>
         </div>
         <table class="table" id="table-list">
@@ -43,6 +43,7 @@
                 <th>Thời gian</th>
                 <th>Tổng tiền hàng</th>
                 <th>Trạng thái</th>
+                <th>Người duyệt</th>
                 {{-- <th>Thao tác</th> --}}
             </tr>
 
@@ -64,6 +65,13 @@
                             Đơn hàng đang được vận chuyển
                         @elseif($goodsIssue->status == 'delivered')
                             Đơn hàng đã được giao thành công
+                        @endif
+                    </td>
+                    <td>
+                        @if ($goodsIssue->approvedByUser)
+                            {{ $goodsIssue->approvedByUser->name }}
+                        @else
+                            Chưa có người phê duyệt
                         @endif
                     </td>
                     {{-- <td class="btn-cell">

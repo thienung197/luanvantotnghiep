@@ -16,6 +16,13 @@ class GoodsIssue extends Model
         'discount',
     ];
 
+
+
+    public function approvedByUser()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
     public function customer()
     {
         return $this->belongsTo(User::class, 'customer_id');

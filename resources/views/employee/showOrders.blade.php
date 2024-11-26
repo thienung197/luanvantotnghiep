@@ -28,11 +28,11 @@
                 mục --}}
             </form>
             <div class="table_search-box">
-                <form action="{{ route('goodsissues.index') }}" method="GET">
+                {{-- <form action="{{ route('goodsissues.index') }}" method="GET">
                     <input type="text" name="search" id="search" value="{{ request('search') }}"
                         placeholder="Nhập tên phiếu xuất hàng">
                     <button type="submit">Tìm </button>
-                </form>
+                </form> --}}
             </div>
         </div>
         <table class="table" id="table-list">
@@ -55,7 +55,7 @@
                         <td>{{ $goodsIssue->code }}</td>
                         <td>{{ $goodsIssue->created_at }}</td>
                         <td>{{ $goodsIssue->getCustomerName() }}</td>
-                        <td>{{ number_format($totals[$goodsIssueId], 2) }}</td>
+                        <td>{{ number_format($totals[$goodsIssueId], 2) }} VNĐ</td>
                         <!-- Hiển thị tổng tiền hàng cho đơn hàng này -->
                         <td>
                             @if ($goodsIssue->status == 'approved')
@@ -110,15 +110,15 @@
                                                 <td>{{ $batch->batch->code ?? 'N/A' }}</td>
                                                 <td>{{ $batch->batch->product->name ?? 'N/A' }}</td>
                                                 <td>{{ $batch->quantity }}</td>
-                                                <td>{{ number_format($batch->unit_price, 2) }}</td>
-                                                <td>{{ number_format($batch->discount, 2) }}</td>
+                                                <td>{{ number_format($batch->unit_price, 2) }} VNĐ</td>
+                                                <td>{{ number_format($batch->discount, 2) }} VNĐ</td>
                                                 <td>{{ number_format($batch->quantity * $batch->unit_price - $batch->discount, 2) }}
-                                                </td>
+                                                    VNĐ</td>
                                             </tr>
                                         @endforeach
                                     </tbody>
                                 </table>
-                                <p><span>Tổng tiền hàng: </span>{{ $goodsIssue->getTotalAmount() }}</p>
+                                <p><span>Tổng tiền hàng: </span>{{ number_format($totals[$goodsIssueId], 2) }} VNĐ</p>
                             </div>
                         </td>
                     </tr>

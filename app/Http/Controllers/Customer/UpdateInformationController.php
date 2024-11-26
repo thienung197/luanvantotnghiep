@@ -26,16 +26,37 @@ class UpdateInformationController extends Controller
     {
         $roles = $this->role->all();
         $user = Auth::user();
-        return view('customers.update.index', compact('roles', 'user'));
+        $location = \App\Models\Location::find($user->location_id);
+
+        $addressParts = [];
+
+        if ($location) {
+            if ($location->street_address) {
+                $addressParts[] = $location->street_address;
+            }
+
+            if ($location->ward) {
+                $addressParts[] = $location->ward;
+            }
+
+            if ($location->district) {
+                $addressParts[] = $location->district;
+            }
+
+            if ($location->city) {
+                $addressParts[] = $location->city;
+            }
+        }
+
+        $fullAddress = implode(', ', $addressParts);
+        return view('customers.update.index', compact('roles', 'user', 'fullAddress'));
     }
 
     public function update(Request $request)
     {
-        // dd($request->all());
         $user = $this->user->findOrFail($request->user_id);
         $locationData = [];
 
-        // Chỉ thêm địa chỉ nếu có giá trị từ request
         if ($request->street_address) {
             $locationData['street_address'] = $request->street_address;
         }
@@ -55,39 +76,42 @@ class UpdateInformationController extends Controller
             $locationData['longitude'] = $request->longitude;
         }
 
-        // Chỉ tạo mới địa điểm nếu có ít nhất một trường được cung cấp
+        if ($locationData) {
+            $user->update(['location_id' => null]);
+            $this->location->destroy($user->location_id);
+        }
+
         if (!empty($locationData)) {
             $location = $this->location->create($locationData);
             $locationId = $location->id;
         } else {
-            // Nếu không có thông tin location mới, có thể xử lý logic khác như giữ nguyên thông tin cũ hoặc không cập nhật gì cả
-            $locationId = $user->location_id; // Lấy ID địa điểm hiện tại
+            $locationId = $user->location_id;
         }
 
-        // Cập nhật thông tin khách hàng
         $dataUpdate = [
             'name' => $request->name,
             'gender' => $request->gender,
             'birth_date' => $request->birth_date,
             'phone' => $request->phone,
             'email' => $request->email,
-            'status' => 'active', // Nếu bạn muốn giữ nguyên trạng thái hoặc có thể thay đổi
+            'status' => 'active',
             'location_id' => $locationId,
             'warehouse_id' => $request->warehouse_id,
-            // Không cần mật khẩu nếu không thay đổi
-            'image' => $this->user->saveImage($request) // Nếu hình ảnh không cần cập nhật, có thể kiểm tra trước
+            'image' => $this->user->saveImage($request)
         ];
 
+        if (!empty($request->password)) {
+            $dataUpdate['password'] = Hash::make($request->password);
+        }
 
         if ($user) {
-            $user->update($dataUpdate); // Cập nhật thông tin người dùng
+            $user->update($dataUpdate);
 
-            // Nếu hình ảnh được cập nhật, tạo mới liên kết hình ảnh
             if ($dataUpdate['image']) {
                 $user->images()->create(['url' => $dataUpdate['image']]);
             }
 
-            return to_route('customer.dashboard')->with(['message' => 'Cập nhật thông tin khách hàng thành công!']);
+            return to_route('customers.update.index')->with(['message' => 'Cập nhật thông tin khách hàng thành công!']);
         } else {
             return back()->withErrors(['user' => 'Không tìm thấy người dùng.']);
         }

@@ -50,10 +50,8 @@ class EmployeeController extends Controller
             ->orderBy('id', 'desc')
             ->get();
 
-        // Nhóm các goodsIssueBatches theo goods_issue_id
         $groupedGoodsIssues = $goodsIssueBatches->groupBy('goods_issue_id');
 
-        // Tính tổng tiền hàng cho từng đơn hàng
         $totals = [];
         foreach ($groupedGoodsIssues as $goodsIssueId => $batches) {
             $totalAmount = 0;

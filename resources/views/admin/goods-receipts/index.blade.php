@@ -11,13 +11,13 @@
         </div>
     </div>
 
-    <div class="table_container">
+    <div class="table_container" style="min-height:400px">
         <div class="table_title">
             Danh sách phiếu nhập hàng
         </div>
         <p>Danh sách các sản phẩm được yêu cầu nhập hàng, phân loại theo nhà cung cấp</p>
         @foreach ($approvedProducts as $provider)
-            <h3>Tên nhà cung cấp:{{ $provider['provider_name'] }}</h3>
+            <h3 class="provider-name">Tên nhà cung cấp:{{ $provider['provider_name'] }}</h3>
             <div class="suggested-products-container">
                 <table class="table table-bordered">
                     <thead>
@@ -74,30 +74,18 @@
             </form>
         @endforeach
 
-        {{-- <div class="table_filter-controls">
-            <form action="{{ route('goodsreceipts.index') }}" method="GET">
-                <label for="">Hiển thị </label>
-                <select name="entries" id="entries" onchange="this.form.submit()">
-                    <option value="5" {{ request('entries') == 5 ? 'selected' : '' }}>5</option>
-                    <option value="10" {{ request('entries') == 10 ? 'selected' : '' }}>10</option>
-                    <option value="25" {{ request('entries') == 25 ? 'selected' : '' }}>25</option>
-                </select>
-                mục
-            </form>
-            <div class="btn-cs btn-add">
-                <a href="{{ route('goodsreceipts.create') }}">Thêm phiếu nhập hàng </a>
-            </div>
-            <div class="table_search-box">
-                <form action="{{ route('goodsreceipts.index') }}" method="GET">
-                    <input type="text" name="search" id="search" value="{{ request('search') }}"
-                        placeholder="Nhập tên phiếu nhập hàng">
-                    <button type="submit">Tìm </button>
-                </form>
-            </div>
-        </div>
-
-    </div> --}}
     @endsection
+
+    @push('css')
+        <style>
+            .provider-name {
+                color: #000;
+                text-align: center;
+                margin: 17px 0;
+                font-weight: 500;
+            }
+        </style>
+    @endpush
 
     @push('js')
         <script>

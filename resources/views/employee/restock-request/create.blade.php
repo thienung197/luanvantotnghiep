@@ -13,15 +13,13 @@
         </div>
     </div>
     <div class="content-10">
-        <h3>Thông tin phiếu yêu cầu</h3>
+        <h3>Thông tin phiếu đề nghị</h3>
         <input type="hidden" name="creator_id" value="{{ Auth::user()->id }}" id="creator_id">
         <input type="hidden" name="warehouse_id" value="{{ Auth::user()->warehouse_id }}" id="warehouse_id">
         <h6><span>Tên người tạo :</span> {{ $user->name }}</h6>
-        <h6><span>Mã phiếu</span> <input type="text" name="code" value="{{ old('code', $newCode) }}" id="submit_code"
-                class="form-control" readonly></h6>
-        <h6><span>Mã phiếu yêu cầu nhập hàng</span>
-            <input type="date" name="date" class="form-control"
-                value="{{ old('date', \Carbon\Carbon::now()->format('Y-m-d')) }}">
+        <h6><span>Mã phiếu</span> {{ $newCode }}</h6>
+        <h6><span>Ngày tạo phiếu:</span>
+            {{ \Carbon\Carbon::now()->format('Y-m-d') }}
         </h6>
         <button id="fetch-suggested-products" class="btn btn-primary">Đề xuất</button>
     </div>
@@ -38,13 +36,14 @@
             </form>
         </div>
         <div id="product-suggestions" class="product-suggestions mt-4">
-
+            <p>Chưa có sản phẩm</p>
         </div>
         <form action="{{ route('restock-request.store') }}" method="POST" id="form-submit">
             @csrf
             <button type="submit" id="submit-request-btn">Gửi yêu cầu</button>
             <input type="hidden" value="{{ $user->id }}" name="user_id" id="user_id">
             <input type="hidden" value="{{ $user->warehouse_id }}" name="warehouse_id" id="warehouse_id">
+            <input type="hidden" value="{{ $newCode }}" name="code">
             <input type="hidden" name="data" id="data-submit">
         </form>
     </div>
@@ -56,6 +55,17 @@
 @push('css')
     <style>
         .product-suggestions {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+        }
+
+        .product-suggestions p {
+            padding: 85px 0;
+        }
+
+        .product-suggestions {
             min-height: 120px;
         }
 
@@ -63,12 +73,17 @@
             padding: 8px;
             color: var(--color-white);
             background-color: var(--color-green);
-            border-radius: 20px;
+            /* border-radius: 20px; */
+        }
+
+        #fetch-suggested-products {
+            font-size: 20px;
+            margin-top: 20px
         }
 
         .delete-btn {
             background-color: var(--color-red);
-            padding: 3px;
+            padding: 5px 10px;
             border-radius: 5px;
             color: var(--color-white);
         }
@@ -79,6 +94,14 @@
             font-style: italic;
             font-weight: 600;
             width: 30%;
+        }
+
+        .content-10 h6 {
+            margin-bottom: 15px;
+        }
+
+        .content-10 table {
+            margin: 80px 0;
         }
     </style>
 @endpush
@@ -164,7 +187,7 @@
 
                         const actionCell = document.createElement("td");
                         const deleteBtn = document.createElement("button");
-                        deleteBtn.textContent = "Delete";
+                        deleteBtn.textContent = "Xóa";
                         deleteBtn.classList.add("delete-btn");
                         actionCell.appendChild(deleteBtn);
                         row.appendChild(actionCell);
@@ -290,7 +313,7 @@
 
                 const actionCell = document.createElement("td");
                 const deleteBtn = document.createElement("button");
-                deleteBtn.textContent = "Delete";
+                deleteBtn.textContent = "Xóa";
                 deleteBtn.classList.add("delete-btn");
                 actionCell.appendChild(deleteBtn);
 
@@ -440,8 +463,8 @@
             position: absolute;
             display: block;
             min-width: 500px;
-            background: var(--color-white);
-            border: 1px solid var(--color-default-light);
+            background: rgb(229, 225, 221);
+            /* border: 1px solid var(--color-default-light); */
         }
 
         .search-result-item {

@@ -3,7 +3,7 @@
 @section('content')
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-md-8">
+            <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">{{ __(' Đăng ký') }}</div>
 
@@ -15,7 +15,7 @@
                                 <label for="name"
                                     class="col-md-4 col-form-label text-md-end">{{ __('Tên khách hàng') }}</label>
 
-                                <div class="col-md-6">
+                                <div class="col-md-8">
                                     <input id="name" type="text"
                                         class="form-control @error('name') is-invalid @enderror" name="name"
                                         value="{{ old('name') }}" required autocomplete="name" autofocus>
@@ -32,7 +32,7 @@
                                 <label for="email"
                                     class="col-md-4 col-form-label text-md-end">{{ __('Email') }}</label>
 
-                                <div class="col-md-6">
+                                <div class="col-md-8">
                                     <input id="email" type="email"
                                         class="form-control @error('email') is-invalid @enderror" name="email"
                                         value="{{ old('email') }}" required autocomplete="email">
@@ -49,7 +49,7 @@
                                 <label for="password"
                                     class="col-md-4 col-form-label text-md-end">{{ __('Mật khẩu') }}</label>
 
-                                <div class="col-md-6">
+                                <div class="col-md-8">
                                     <input id="password" type="password"
                                         class="form-control @error('password') is-invalid @enderror" name="password"
                                         required autocomplete="new-password">
@@ -66,7 +66,7 @@
                                 <label for="password-confirm"
                                     class="col-md-4 col-form-label text-md-end">{{ __('Nhập lại mật khẩu') }}</label>
 
-                                <div class="col-md-6">
+                                <div class="col-md-8">
                                     <input id="password-confirm" type="password" class="form-control"
                                         name="password_confirmation" required autocomplete="new-password">
                                 </div>
@@ -74,9 +74,14 @@
 
                             <div class="row mb-0">
                                 <div class="col-md-6 offset-md-4">
-                                    <button type="submit" class="btn btn-primary">
-                                        {{ __('Register') }}
+                                    <button type="submit" class="btn btn-primary register-btn">
+                                        {{ __('Đăng ký') }}
                                     </button>
+                                    @if (Route::has('login'))
+                                        <a class="btn btn-link login-link"
+                                            href="{{ route('login') }}">{{ __('Đăng nhập ngay') }}</a>
+                                    @endif
+
                                 </div>
                             </div>
                         </form>
@@ -84,9 +89,15 @@
                 </div>
             </div>
         </div>
+        <div class=" img-container">
+            <img src="{{ asset('/img/ware-master-high-resolution-logo.png') }}" alt="">
+            <p>Hệ thống quản lý nhà kho</p>
+            <p>WareMaster</p>
+            <img src="{{ asset('/img/login.webp') }}" alt="">
+        </div>
     </div>
 @endsection
-@section('content')
+{{-- @section('content')
     <div class="content-10">
         <form action="{{ route('users.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
@@ -179,9 +190,110 @@
             </div>
         </form>
     </div>
-@endsection
+@endsection --}}
 @push('css')
     <style>
+        .card {
+            border: none;
+            margin-bottom: 20px;
+            width: 850px;
+        }
+
+        .register-btn {
+            font-size: 20px;
+            padding: 8px 18px;
+        }
+
+        .login-link {
+            margin-left: 10px;
+            font-size: 20px;
+        }
+
+        label {
+            font-size: 28px !important;
+            color: var(--color-black);
+            font-weight: 500;
+        }
+
+        .form-control {
+            border: unset;
+            border-radius: unset;
+            font-size: 20px;
+            color: #000;
+        }
+
+
+        input {
+            border: none;
+            border-bottom: 1px solid var(--color-black) !important;
+        }
+
+        .form-control:focus {
+            box-shadow: unset;
+            color: #000;
+            font-size: 20px;
+
+        }
+
+        .card-header {
+            border: none;
+            color: var(--color-black);
+            font-weight: 600;
+            font-size: 56px;
+            background: var(--color-white);
+            margin: 42px 128px 42px 331px;
+        }
+
+        .card-body .row {
+            margin-right: 300px;
+            width: 100%;
+
+        }
+
+        .img-container {
+            background: rgb(46, 32, 248);
+            padding: 380px 0;
+            border-radius: 25px;
+            padding: 60px 10px;
+        }
+
+        .img-container img:last-child {
+            border-radius: unset;
+            width: 90%;
+        }
+
+        .img-container img {
+            width: 150px;
+            margin-left: 50%;
+            transform: translateX(-50%);
+            border-radius: 30px;
+        }
+
+        .img-container p {
+            color: var(--color-white);
+            font-size: 42px;
+            margin-left: 206px;
+            font-weight: 600;
+        }
+
+        .img-container p:nth-child(3) {
+            margin-left: 340px;
+        }
+
+        .container {
+            min-width: 100%;
+            display: flex;
+            align-items: center;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            background-color: var(--color-white);
+        }
+
+        .container>div {
+            width: 50%;
+        }
+
         #aside {
             display: none;
         }

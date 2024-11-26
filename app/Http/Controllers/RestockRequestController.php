@@ -70,7 +70,7 @@ class RestockRequestController extends Controller
         $data = json_decode($request->data, true);
         // DB::beginTransaction();
         $restockRequest = RestockRequest::create([
-            'code' => $data['code'],
+            'code' => $request->code,
             'user_id' => $data['user_id'],
             'warehouse_id' => $data['warehouse_id'],
             'status' => 'pending',
@@ -80,6 +80,7 @@ class RestockRequestController extends Controller
                 'restock_request_id' => $restockRequest->id,
                 'product_id' => $product['id'],
                 'quantity' => $product['suggested_quantity'],
+                'status' => 'pending'
             ]);
         }
         return to_route('restock-request.index')->with(['message' => 'Tạo yêu cầu nhập hàng thành công!']);

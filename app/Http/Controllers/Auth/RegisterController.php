@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -72,9 +73,13 @@ class RegisterController extends Controller
             'type' => 'admin'
         ]);
 
-        $customerRole = Role::where('name', 'Customer')->first();
+        $customerRole = Role::where('code', 'customer')->first();
         if ($customerRole) {
-            $user->assignRole($customerRole);
+            DB::table('model_has_roles')->insert([
+                'role_id' => $customerRole->id,
+                'model_type' => 'App\\Models\\User',
+                'model_id' => $user->id,
+            ]);
         }
         return $user;
     }

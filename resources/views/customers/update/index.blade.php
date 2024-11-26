@@ -61,6 +61,13 @@
                 @enderror
             </div>
             <div class="form-group input-div">
+                <h4>Địa chỉ</h4>
+                <input type="text" value="{{ $fullAddress }}" id="phone" class="form-control" readonly>
+            </div>
+            <button type="button" id="changeAddressBtn" class="btn btn-primary">
+                Đổi địa chỉ
+            </button>
+            <div class="form-group input-div" id="addressSection" style="display:none;">
                 <h4>Chọn địa chỉ</h4>
                 <select id='provinces' onchange='getProvinces(event)'>
                     <option value=''>-- Chọn tỉnh / thành phố --</option>
@@ -72,7 +79,7 @@
                     <option value=''>-- Chọn phường / xã --</option>
                 </select>
             </div>
-            <div class="form-group input-div">
+            <div class="form-group input-div" id="addressSection2" style="display:none;">
                 <h4>Địa chỉ cụ thể</h4>
                 <input type="text" name="street_address" value="{{ old('street_address') }}" id="street_address"
                     class="form-control">
@@ -93,16 +100,20 @@
                     <div class="error message">{{ $message }}</div>
                 @enderror
             </div>
-            <div class="form-group input-div">
-                <h4>Mật khẩu</h4>
-                <input type="password" name="password" value="{{ old('password') }}" id="password" class="form-control">
+            <button type="button" id="changePasswordBtn" class="btn btn-primary">
+                Đổi mật khẩu
+            </button>
+            <div class="form-group input-div" id="passwordSection" style="display:none;">
+                <h4>Mật khẩu mới</h4>
+                <input type="password" name="password" value="{{ old('password') }}" id="password"
+                    class="form-control">
                 @error('password')
                     <div class="error message">{{ $message }}</div>
                 @enderror
             </div>
             <div class="btn-controls">
                 <div class="btn-cs btn-save"><button type="submit">Lưu thay đổi</button></div>
-                <div class="btn-cs btn-back"><a href="{{ route('users.index') }}">Quay lại </a></div>
+                {{-- <div class="btn-cs btn-back"><a href="{{ route('users.index') }}">Quay lại </a></div> --}}
             </div>
         </form>
     </div>
@@ -111,6 +122,23 @@
 
 @push('js')
     <script>
+        document.getElementById('changeAddressBtn').addEventListener('click', function() {
+            const addressSection = document.getElementById('addressSection');
+            const addressSection2 = document.getElementById('addressSection2');
+            addressSection.style.display = (addressSection.style.display === 'none' || addressSection.style
+                .display === '') ? 'block' : 'none';
+            addressSection2.style.display = (addressSection2.style.display === 'none' || addressSection2.style
+                .display === '') ? 'block' : 'none';
+        });
+
+        document.getElementById('changePasswordBtn').addEventListener('click', function() {
+            const passwordSection = document.getElementById('passwordSection');
+            passwordSection.style.display = (passwordSection.style.display === 'none' || passwordSection.style
+                .display === '') ? 'block' : 'none';
+        });
+        @if (Session::has('message'))
+            toastr.success("{{ Session::get('message') }}");
+        @endif
         const apiKey = "5b3ce3597851110001cf6248b3a0553228e34d53b6a25e785eb04563";
 
         fetch('https://vn-public-apis.fpo.vn/provinces/getAll?limit=-1')
@@ -226,7 +254,7 @@
                 })
                 .catch((error) => {
                     console.error("Lỗi:", error);
-                    alert(error.message);
+                    // alert(error.message);
                 });
         }
     </script>

@@ -758,10 +758,10 @@ img.avatar {
     font-size: 22px;
     font-weight: 400;
     display: flex;
+    color: #000;
 }
 
 .content-10 h6 span {
-    color: var(--color-black);
     font-size: 22px;
     font-style: italic;
     font-weight: 600;
@@ -770,4 +770,12 @@ img.avatar {
 
 .content-10 table {
     margin: 40px 0;
+}
+
+.form-control {
+    color: #000;
+}
+
+.form-control:focus {
+    color: #000;
 }

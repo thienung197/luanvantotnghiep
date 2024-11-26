@@ -12,44 +12,21 @@
             </p>
         </div>
     </div>
-
     <div class="content-10">
-
-        <div class="form-group input-div">
-            <h4>Người tạo</h4>
-
-            <input type="text" value="{{ Auth::user()->name }}" readonly class="form-control">
-            @error('creator_id')
-                <div class="error message">{{ $message }}</div>
-            @enderror
-        </div>
-        <div class="form-group input-div">
-            <h4>Mã phiếu nhập </h4>
-            <input type="text" name="code" value="{{ old('code', $newCode) }}" id="code" class="form-control"
-                readonly>
-            @error('code')
-                <div class="error message">{{ $message }}</div>
-            @enderror
-        </div>
-        <div class="form-group input-div">
-            <h4>Gửi đến nhà cung cấp </h4>
-            <input type="text" name="provider_id" value="{{ old('provider_id', $provider->name) }}" id="provider_id"
-                class="form-control" readonly>
-            @error('provider_id')
-                <div class="error message">{{ $message }}</div>
-            @enderror
-        </div>
-        {{-- <button id="show-products" class="btn btn-primary">Các sản phẩm được đề xuất</button> --}}
-        <div class="ajax-table-container">
-
-        </div>
+        <h3>Thông tin phiếu đặt hàng nhà cung cấp</h3>
+        <h6><span>Tên người tạo :</span> {{ Auth::user()->name }}</h6>
+        <h6><span>Mã phiếu:</span> {{ $newCode }}</h6>
+        <h6><span>Ngày tạo phiếu: </span>
+            {{ \Carbon\Carbon::now()->format('Y-m-d') }}
+        </h6>
+        <h6><span>Gửi đến nhà cung cấp: </span>{{ $provider->name }}</h6>
     </div>
     <div class="content-10">
         <div class="search-result-container">
             <form action="" role="search">
                 <div class="form-group input-div">
                     <input type="text" name="key" class="form-control search-input" placeholder="Nhập tên sản phẩm">
-                    <div class="search-result" style="z-index:1">
+                    <div class="search-result" style="z-index:1" style="border: 1px solid red">
 
                     </div>
                 </div>
@@ -57,8 +34,8 @@
             <form action="{{ route('goodsreceipts.store') }}" method="POST">
                 @csrf
                 <input type="hidden" name="creator_id" value="{{ Auth::user()->id }}" id="creator_id">
-                <input type="hidden" name="code" value="{{ old('code', $newCode) }}" id="code"
-                    class="form-control" readonly>
+                <input type="hidden" name="code" value="{{ old('code', $newCode) }}" id="code" class="form-control"
+                    readonly>
                 <input type="hidden" name="provider_id" value="{{ old('provider_id', $provider->id) }}" id="provider_id"
                     class="form-control" readonly>
                 <table id="product-table" class="table ">
@@ -122,7 +99,13 @@
     </div>
 
 @endsection
-
+@push('css')
+    <style>
+        .content-10 h6 span {
+            width: 20%;
+        }
+    </style>
+@endpush
 @push('js')
     <script>
         $(document).ready(function() {
@@ -607,7 +590,6 @@
             display: block;
             min-width: 500px;
             background: var(--color-white);
-            border: 1px solid var(--color-default-light);
         }
 
         .search-result-item {
