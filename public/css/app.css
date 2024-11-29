@@ -202,27 +202,12 @@ ul.sub-menu li {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 40px;
+    padding: 0 10px;
 }
 
 #navbar-left {
     flex-grow: 1;
 }
-
-/* #navbar-left {
-    color: var(--color-default);
-}
-
-#navbar-left p:last-child {
-    font-size: 21px;
-    color: var(--color-black);
-    font-weight: 600;
-}
-
-#navbar-left span {
-    color: var(--color-black);
-    font-weight: 500;
-} */
 
 #navbar-right {
     display: flex;
@@ -250,6 +235,24 @@ img.avatar {
     height: 60px;
     border-radius: 50%;
     object-fit: cover;
+}
+
+#navbar-right {
+    background-color: #fff;
+    padding: 13px 18px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-info-container {
+    margin-left: 20px;
+}
+
+.user-info-container span {
+    margin-left: 5px;
+    font-weight: 500;
+    font-size: 18px;
+    color: #000;
 }
 
 /* end of navbar  */
@@ -346,7 +349,8 @@ img.avatar {
 /* Custom btn  */
 
 .btn-cs a,
-.btn-cs button {
+.btn-cs button,
+.btn-custom {
     text-decoration: none;
     margin: 30px 20px;
     height: 60px;
@@ -360,6 +364,20 @@ img.avatar {
     width: auto;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     cursor: pointer;
+}
+
+.table_container .btn-cs a,
+.table_container .btn-cs button,
+.btn-custom {
+    font-size: 19px;
+    height: 52px;
+    border-radius: 3px;
+    background-color: var(--color-green);
+    margin: 20px;
+}
+
+.btn-custom.btn-add {
+    background-color: var(--color-blue);
 }
 
 .btn-cs.btn-add a,
@@ -650,11 +668,11 @@ img.avatar {
 .notification-count {
     position: absolute;
     top: -5px;
-    right: -5px;
+    right: -3px;
     background-color: red;
     color: white;
     border-radius: 50%;
-    padding: 5px;
+    padding: 5px 8px;
     font-size: 12px;
 }
 
@@ -662,7 +680,7 @@ img.avatar {
     display: none;
     position: absolute;
     top: 65px;
-    right: 180px;
+    right: 259px;
     width: 500px;
     border: 1px solid #ccc;
     background-color: white;
@@ -702,7 +720,8 @@ img.avatar {
 }
 
 .notification-item {
-    padding: 8px 0;
+    padding: 8px 10px;
+    color: #000;
     border-bottom: 1px solid #eee;
 }
 
@@ -712,6 +731,13 @@ img.avatar {
 
 .notification-item.read {
     background-color: #f5f5f5;
+}
+
+.no-notification {
+    color: #000;
+    font-weight: 500;
+    text-align: center;
+    margin-top: 18px;
 }
 
 /* hien thi don hang  */
@@ -778,4 +804,45 @@ img.avatar {
 
 .form-control:focus {
     color: #000;
+}
+
+.table_title div {
+    margin-left: 20px;
+}
+
+.table_title div a {
+    font-size: 20px;
+    padding: 0 10px;
+}
+
+input[type="date"] {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: #f4f9ff;
+    border: 1px solid #8fbff4;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 16px;
+    color: #333;
+    outline: none;
+    width: 250px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+input[type="date"]:hover {
+    border-color: #68a7f3;
+    background-color: #eef7ff;
+}
+
+input[type="date"]:focus {
+    border-color: #0044cc;
+    box-shadow: 0 0 5px rgba(0, 68, 204, 0.5);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: invert(45%) sepia(30%) saturate(150%) hue-rotate(190deg)
+        brightness(90%) contrast(85%);
 }

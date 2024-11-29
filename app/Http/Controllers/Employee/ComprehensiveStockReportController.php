@@ -7,8 +7,11 @@ use App\Models\ComprehensiveStockReportDetail;
 use App\Models\ComprehensiveStockReport;
 
 use App\Models\Product;
+use DateInterval;
+use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Str;
 
 class ComprehensiveStockReportController extends Controller
 {
@@ -34,8 +37,25 @@ class ComprehensiveStockReportController extends Controller
         $user = auth()->user();
         $warehouse_id = $user->warehouse_id;
         $user_id = $user->id;
-        $start_date = '2024-11-01 00:00:00';
-        $end_date = '2024-11-30 23:59:59';
+
+        $currentDate = now()->endOfDay()->toDateTimeString();
+
+        $lastReport = ComprehensiveStockReport::where('warehouse_id', $warehouse_id)
+            // ->where('end_date', '<', $currentDate)
+            // ->orderBy('end_date', 'desc')
+            ->latest('id')->first();
+
+        if ($lastReport) {
+            $end_date = new DateTime($lastReport->end_date);
+            $start_date = $end_date->add(new DateInterval('P1D'));
+        } else {
+            $start_date = now()->startOfYear()->toDateTimeString();
+        }
+
+        $end_date = $currentDate;
+
+
+
         $products = Product::select(
             'products.id as product_id',
             'products.name as product_name',
@@ -66,7 +86,18 @@ class ComprehensiveStockReportController extends Controller
             ->groupBy('products.id', 'products.name', 'products.code', 'units.name')
             ->get();
         info($products);
-        return view('employee.comprehensive-stock-report.create', compact('warehouse_id', 'user_id', 'products'));
+        $start_date_formatted = \Carbon\Carbon::parse($start_date)->format('Y-m-d');
+        $end_date_formatted = \Carbon\Carbon::parse($end_date)->format('Y-m-d');
+        return view(
+            'employee.comprehensive-stock-report.create',
+            compact(
+                'warehouse_id',
+                'user_id',
+                'products',
+                'start_date_formatted',
+                'end_date_formatted'
+            )
+        );
     }
 
     /**

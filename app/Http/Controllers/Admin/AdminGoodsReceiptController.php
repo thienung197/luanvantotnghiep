@@ -102,13 +102,6 @@ class AdminGoodsReceiptController extends Controller
         // dd($request->all());
         $provider = $this->provider->findOrFail($request->provider_id);
         $approvedProduct = $request->products;
-        // $approvedProduct = $this->product
-        //     ->whereIn('id', $products)
-        //     ->whereHas('restockRequestDetails', function ($query) {
-        //         $query->where('status', 'approved');
-        //     })
-        //     ->select('id', 'code', 'name', 'unit_id')
-        //     ->with(['unit:id,name', 'restockRequestDetails'])->get();
         info($approvedProduct);
         $warehouses = $this->warehouse->all();
         $providers = $this->provider->all();
@@ -146,7 +139,7 @@ class AdminGoodsReceiptController extends Controller
             'code' => $code,
             'provider_id' => $provider_id,
             'user_id' => $user_id,
-            'status' => 'created'
+            'status' => 'pending'
         ]);
         $orderedProducIds = [];
         foreach ($products as $productId => $productData) {
@@ -156,8 +149,6 @@ class AdminGoodsReceiptController extends Controller
                     'purchase_order_id' => $purchase_order->id,
                     'product_id' => $product->id,
                     'quantity' => $productData['quantity'],
-                    'unit_price' => $productData['unit_price'],
-                    'discount' => $productData['discount']
                 ]);
                 $orderedProducIds[] = $product->id;
             }
@@ -176,84 +167,87 @@ class AdminGoodsReceiptController extends Controller
         // dd($request->all());
         DB::beginTransaction();
 
-        try {
-            $lastGoodsReceipt = GoodsReceipt::latest('id')->first();
-            $lastCode = $lastGoodsReceipt ? $lastGoodsReceipt->code : 'PNH0000';
-            $nextCodeNumber = intval(substr($lastCode, 3)) + 1;
+        // try {
+        $lastGoodsReceipt = GoodsReceipt::latest('id')->first();
+        $lastCode = $lastGoodsReceipt ? $lastGoodsReceipt->code : 'PNH0000';
+        $nextCodeNumber = intval(substr($lastCode, 3)) + 1;
 
-            foreach ($request->distributions as $distribution) {
-                if (!is_array($distribution)) {
-                    throw new \Exception("Dữ liệu phân phối không hợp lệ. Giá trị phân phối không phải là mảng.");
-                }
+        foreach ($request->distributions as $distribution) {
+            // if (!is_array($distribution)) {
+            //     throw new \Exception("Dữ liệu phân phối không hợp lệ. Giá trị phân phối không phải là mảng.");
+            // }
 
-                if (!isset($distribution['warehouse_id'], $distribution['quantity'], $distribution['product_id'], $distribution['unit_price'], $distribution['discount'])) {
-                    throw new \Exception("Thông tin chi tiết phân phối không hợp lệ.");
-                }
+            // if (!isset($distribution['warehouse_id'], $distribution['quantity'], $distribution['product_id'], $distribution['unit_price'], $distribution['discount'])) {
+            //     throw new \Exception("Thông tin chi tiết phân phối không hợp lệ.");
+            // }
 
-                $newCode = 'PNH' . str_pad($nextCodeNumber, 4, '0', STR_PAD_LEFT);
-                $nextCodeNumber++;
+            $newCode = 'PNHNCC' . str_pad($nextCodeNumber, 5, '0', STR_PAD_LEFT);
+            $nextCodeNumber++;
 
-                $goodsReceipt = GoodsReceipt::create([
-                    'code' => $newCode,
-                    'provider_id' => $request->provider_id,
-                    'creator_id' => $request->user_id,
-                    'warehouse_id' => $distribution['warehouse_id'],
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+            $goodsReceipt = GoodsReceipt::create([
+                'code' => $newCode,
+                'provider_id' => $request->provider_id,
+                'creator_id' => $request->user_id,
+                'warehouse_id' => $distribution['warehouse_id'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
 
-                GoodsReceiptDetail::create([
-                    'goods_receipt_id' => $goodsReceipt->id,
-                    'product_id' => $distribution['product_id'],
-                    'quantity' => $distribution['quantity'],
-                    'unit_price' => $distribution['unit_price'],
-                    'discount' => $distribution['discount'],
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-                $latestCode = Batch::orderByDesc('id')->first();
-                if ($latestCode) {
-                    $lastNumber = (int)substr($latestCode->code, 2);
-                    $newNumber = $lastNumber + 1;
-                } else {
-                    $newNumber = 1;
-                }
-                $newCode = 'LH' . str_pad($newNumber, 5, '0', STR_PAD_LEFT);
-                $batch = Batch::create([
-                    'code' => $newCode,
-                    'product_id' => $distribution['product_id'],
-                    'price' => $distribution['unit_price'],
-
-                ]);
-                $batchId = $batch->id;
-                $inventory = Inventory::where('batch_id', $batchId)->first();
-                info($inventory);
-                if ($inventory) {
-                    // if ($inventory->quantity_available >= $distribution['quantity']) {
-                    info($inventory->quantity);
-                    info($distribution['quantity']);
-                    $inventory->quantity_available += $distribution['quantity'];
-                    $inventory->save();
-                    // } else {
-                    //     return response()->json([
-                    //         'error' => 'Not enough quantity available for batch ID ' . $batchId
-                    //     ], 400);
-                    // }
-                } else {
-                    Inventory::create([
-                        'batch_id' => $batchId,
-                        'warehouse_id' => $distribution['warehouse_id'],
-                        'quantity_available' => $distribution['quantity'],
-                    ]);
-                }
+            GoodsReceiptDetail::create([
+                'goods_receipt_id' => $goodsReceipt->id,
+                'product_id' => $distribution['product_id'],
+                'quantity' => $distribution['quantity'],
+                'unit_price' => $request->unit_price,
+                'discount' => $request->discount,
+                'manufacturing_date' => $request->nsx,
+                'expiry_date' => $request->hsd,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            $latestCode = Batch::orderByDesc('id')->first();
+            if ($latestCode) {
+                $lastNumber = (int)substr($latestCode->code, 2);
+                $newNumber = $lastNumber + 1;
+            } else {
+                $newNumber = 1;
             }
-
-            DB::commit();
-            return redirect()->route('goodsreceipts.index')->with('success', 'Phiếu nhận hàng đã được tạo thành công.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'Đã xảy ra lỗi khi tạo phiếu nhận hàng: ' . $e->getMessage());
+            $newCode = 'LH' . str_pad($newNumber, 5, '0', STR_PAD_LEFT);
+            $batch = Batch::create([
+                'code' => $newCode,
+                'product_id' => $distribution['product_id'],
+                'price' => $request->unit_price,
+                'manufacturing_date' => $request->nsx,
+                'expiry_date' => $request->hsd,
+            ]);
+            $batchId = $batch->id;
+            $inventory = Inventory::where('batch_id', $batchId)->first();
+            info($inventory);
+            if ($inventory) {
+                // if ($inventory->quantity_available >= $distribution['quantity']) {
+                info($inventory->quantity);
+                info($distribution['quantity']);
+                $inventory->quantity_available += $distribution['quantity'];
+                $inventory->save();
+                // } else {
+                //     return response()->json([
+                //         'error' => 'Not enough quantity available for batch ID ' . $batchId
+                //     ], 400);
+                // }
+            } else {
+                Inventory::create([
+                    'batch_id' => $batchId,
+                    'warehouse_id' => $distribution['warehouse_id'],
+                    'quantity_available' => $distribution['quantity'],
+                ]);
+            }
         }
+
+        DB::commit();
+        return redirect()->route('goodsreceipts.index')->with('message', 'Phiếu nhận hàng đã được tạo thành công.');
+        // } catch (\Exception $e) {
+        //     DB::rollBack();
+        //     return back()->with('error', 'Đã xảy ra lỗi khi tạo phiếu nhận hàng: ' . $e->getMessage());
+        // }
     }
 
     /**
@@ -263,6 +257,7 @@ class AdminGoodsReceiptController extends Controller
 
     public function display()
     {
+        // dd(route('goodsreceipts.display'));
         $purchaseOrders = $this->purchaseOrder::with([
             'purchaseOrderDetails.product' => function ($query) {
                 $query->select('id', 'code', 'name', 'unit_id')->with('unit:id,name');

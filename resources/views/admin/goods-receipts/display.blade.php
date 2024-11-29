@@ -1,9 +1,9 @@
 @extends('layouts.app')
-@section('title', 'Quản lý phiếu mua hàng')
+@section('title', 'Phiếu đặt hàng')
 @section('content')
     <div class="content_header">
         <div class="content_header--title">
-            Quản lý phiếu mua hàng
+            Phiếu đặt hàng và phân phối hàng hóa
         </div>
         <div class="content_header--path">
             <img src="{{ asset('img/home.png') }}" alt="">
@@ -15,24 +15,24 @@
     </div> --}}
     <div class="table_container">
         <div class="table_title">
-            Danh sách phiếu mua hàng
+            Danh sách phiếu đặt hàng
         </div>
         <div class="table_filter-controls">
             <form action="{{ route('goodsissues.index') }}" method="GET">
-                <label for="">Hiển thị </label>
+                {{-- <label for="">Hiển thị </label>
                 <select name="entries" id="entries" onchange="this.form.submit()">
                     <option value="5" {{ request('entries') == 5 ? 'selected' : '' }}>5</option>
                     <option value="10" {{ request('entries') == 10 ? 'selected' : '' }}>10</option>
                     <option value="25" {{ request('entries') == 25 ? 'selected' : '' }}>25</option>
                 </select>
-                mục
+                mục --}}
             </form>
             <div class="table_search-box">
-                <form action="{{ route('goodsissues.index') }}" method="GET">
+                {{-- <form action="{{ route('goodsissues.index') }}" method="GET">
                     <input type="text" name="search" id="search" value="{{ request('search') }}"
                         placeholder="Nhập tên phiếu xuất hàng">
                     <button type="submit">Tìm </button>
-                </form>
+                </form> --}}
             </div>
         </div>
         <table class="table" id="table-list">
@@ -56,28 +56,12 @@
                             Đã tạo phiếu nhập kho
                         @endif
                     </td>
-                    {{-- <td>
-                        <button>Tạo phiếu nhập kho</button>
-                    </td> --}}
-                    {{-- <td class="btn-cell">
-                        <a href="{{ route('goodsissues.edit', $purchaseOrder->id) }}">
-                            <img src="{{ asset('img/edit.png') }}" alt="">
-                        </a>
-                        <form action="{{ route('goodsissues.destroy', $purchaseOrder->id) }}" method="POST"
-                            id="form-delete{{ $purchaseOrder->id }}">
-                            @csrf
-                            @method('delete')
-                        </form>
-                        <button type="submit" class="btn-delete" data-id="{{ $purchaseOrder->id }}">
-                            <img src="{{ asset('img/delete.png') }}" alt="">
-                        </button>
-                    </td> --}}
                 </tr>
 
                 <tr class="goods-issue-details" id="details-{{ $purchaseOrder->id }}" style="display: none;">
                     <td colspan="5">
                         <div class="details-container">
-                            <strong>Thông tin phiếu mua hàng</strong>
+                            <strong>Ghi nhận và phân phối hàng hóa</strong>
                             <table class="table table-bordered" id="product-table-{{ $purchaseOrder->id }}">
                                 <thead>
                                     <tr>
@@ -85,9 +69,10 @@
                                         <th>Tên hàng</th>
                                         <th>Đơn vị tính</th>
                                         <th>Số lượng</th>
-                                        <th>Giá bán</th>
-                                        <th>Giảm giá</th>
-                                        <th>Thành tiền</th>
+                                        <th>NSX- HSD (nếu có)</th>
+                                        <th>Giá bán<br> (Đơn vị VNĐ)</th>
+                                        <th>Giảm giá <br> (Đơn vị VNĐ)</th>
+                                        <th>Thành tiền <br> (Đơn vị VNĐ)</th>
                                         <th>Phân phối hàng hóa</th>
                                         <th>Thao tác</th>
                                     </tr>
@@ -105,14 +90,41 @@
                                                 <td>{{ $detail->product->code }}</td>
                                                 <td>{{ $detail->product->name ?? 'N/A' }}</td>
                                                 <td>{{ $detail->product->unit->name }}</td>
-                                                <td>{{ $detail->quantity }}</td>
-                                                <td class="goods-issue-unit-price">
-                                                    {{ number_format($detail->unit_price, 2) }}</td>
-                                                <td class="goods-issue-discount">{{ number_format($detail->discount, 2) }}
-                                                </td>
-                                                <td>{{ number_format($detail->quantity * $detail->unit_price - $detail->discount, 2) }}
+                                                <td class="order-details">
+                                                    Số lượng đặt: <span class="quantity">{{ $detail->quantity }}</span><br>
+                                                    Số lượng giao:
+                                                    <input type="number" class="quantity-input" name="delivered_quantity"
+                                                        value="{{ $detail->delivered_quantity }}" min="0">
                                                 </td>
                                                 <td>
+                                                    <div class="date-group">
+                                                        <div class="date-field">
+                                                            <label for="nsx">Ngày sản xuất:</label>
+                                                            <input type="date" name="nsx" id="nsx"
+                                                                class="form-control">
+                                                        </div>
+                                                        <div class="date-field">
+                                                            <label for="hsd">Hạn sử dụng:</label>
+                                                            <input type="date" name="hsd" id="hsd"
+                                                                class="form-control">
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <input type="number" class="unit-price" name="unit_price"
+                                                        value="{{ $detail->unit_price }}" min="0">
+                                                </td>
+
+                                                <td>
+                                                    <input type="number" class="discount" name="discount"
+                                                        value="{{ $detail->discount }}" min="0">
+                                                </td>
+
+                                                <td>
+                                                    <input type="number" class="total-price" name="total_price"
+                                                        value="0" readonly>
+                                                </td>
+                                                <td class="distribution-details">
                                                     @php
                                                         $filteredDistributions = $distributionData->where(
                                                             'product_id',
@@ -120,18 +132,23 @@
                                                         );
                                                     @endphp
                                                     @if ($filteredDistributions->isNotEmpty())
-                                                        <ul>
+                                                        <ul class="distribution-list">
                                                             @foreach ($filteredDistributions as $distribution)
-                                                                <li>
-                                                                    {{ $warehouses->firstWhere('id', $distribution->warehouse_id)->name ?? 'N/A' }}:
-                                                                    <br />
-                                                                    Yêu cầu: {{ $distribution->quantity }}
-                                                                    Phân phối:
-                                                                    <input type="number" style="width: 80px"
-                                                                        value="{{ $distribution->quantity }}"
-                                                                        name="distributions[{{ $distribution->warehouse_id }}][quantity]">
-
-                                                                    <!-- Tạo các input ẩn cho warehouse_id, unit_price, discount -->
+                                                                <li class="distribution-item">
+                                                                    <span class="warehouse-name">
+                                                                        {{ $warehouses->firstWhere('id', $distribution->warehouse_id)->name ?? 'N/A' }}:
+                                                                    </span>
+                                                                    <div class="distribution-info">
+                                                                        <span class="distribution-request">
+                                                                            Yêu cầu nhập: {{ $distribution->quantity }}
+                                                                        </span>
+                                                                        <span class="distribution-allocated">
+                                                                            Phân phối: {{ $distribution->quantity }}
+                                                                        </span>
+                                                                    </div>
+                                                                    <input type="hidden"
+                                                                        name="distributions[{{ $distribution->warehouse_id }}][quantity]"
+                                                                        value="{{ $distribution->quantity }}">
                                                                     <input type="hidden"
                                                                         name="distributions[{{ $distribution->warehouse_id }}][warehouse_id]"
                                                                         value="{{ $distribution->warehouse_id }}">
@@ -148,7 +165,7 @@
                                                             @endforeach
                                                         </ul>
                                                     @else
-                                                        Không có dữ liệu phân phối
+                                                        <p class="no-distribution-data">Không có dữ liệu phân phối</p>
                                                     @endif
                                                 </td>
                                                 <td>
@@ -178,11 +195,164 @@
         .suggestion-container {
             display: none;
         }
+
+        table input {
+            max-width: 120px;
+            padding: 4px;
+            border-radius: 5px;
+        }
+
+        .order-details {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .quantity {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .quantity-input {
+            width: 80px;
+            padding: 5px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            outline: none;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        .quantity-input:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        .distribution-details {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            padding: 10px;
+            color: #333;
+        }
+
+        .distribution-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .distribution-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .warehouse-name {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .distribution-info {
+            margin-top: 5px;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .distribution-request,
+        .distribution-allocated {
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .no-distribution-data {
+            font-style: italic;
+            color: #999;
+        }
+
+        .distribution-details input[type="hidden"] {
+            display: none;
+        }
+
+        /* Gộp hai trường ngày vào cùng một nhóm */
+        .date-group {
+            display: flex;
+            /* Sắp xếp ngang */
+            flex-wrap: wrap;
+            /* Đảm bảo không tràn dòng */
+            gap: 15px;
+            /* Khoảng cách giữa các trường */
+            align-items: center;
+        }
+
+        /* Trường ngày sản xuất và hạn sử dụng */
+        .date-field {
+            display: flex;
+            flex-direction: column;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .date-field label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .date-field input {
+            width: 160px;
+            /* Độ rộng vừa đủ */
+            padding: 5px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .date-field input:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
     </style>
 @endpush
 
 @push('js')
     <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const rows = document.querySelectorAll("tr");
+
+            rows.forEach(row => {
+                const quantityInput = row.querySelector(".quantity-input");
+                const unitPriceInput = row.querySelector(".unit-price");
+                const discountInput = row.querySelector(".discount");
+                const totalPriceInput = row.querySelector(".total-price");
+                if (!quantityInput || !unitPriceInput || !discountInput || !totalPriceInput) {
+                    console.warn("Bỏ qua hàng vì thiếu phần tử cần thiết");
+                    return;
+                }
+
+                function calculateTotal() {
+                    const quantity = parseFloat(quantityInput.value) || 0;
+                    const unitPrice = parseFloat(unitPriceInput.value) || 0;
+                    const discount = parseFloat(discountInput.value) || 0;
+
+                    const total = (quantity * unitPrice) - discount;
+
+                    totalPriceInput.value = total > 0 ? total.toFixed(2) : 0;
+                }
+
+                quantityInput.addEventListener("input", calculateTotal);
+                discountInput.addEventListener("input", calculateTotal);
+
+                calculateTotal();
+            });
+        });
+
         @if (Session::has('message'))
             toastr.success("{{ Session::get('message') }}");
         @endif

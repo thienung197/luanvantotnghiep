@@ -191,10 +191,10 @@
                                 <ul class="sub-menu">
                                     <li
                                         class="{{ request()->routeIs('goodsreceipts.index') || request()->routeIs('goodsreceipts.create') ? 'bg-blue' : '' }}">
-                                        <a href="{{ route('goodsreceipts.index') }}">Mua Hàng</a>
+                                        <a href="{{ route('goodsreceipts.index') }}">Đặt hàng</a>
                                     </li>
                                     <li class="{{ request()->routeIs('goodsreceipts.display') ? 'bg-blue' : '' }}">
-                                        <a href="{{ route('goodsreceipts.display') }}">Danh sách phiếu mua hàng</a>
+                                        <a href="{{ route('goodsreceipts.display') }}">Danh sách phiếu đặt hàng</a>
                                     </li>
                                 </ul>
                             </li>
@@ -228,6 +228,17 @@
                                     <div class="flex-left-content">
                                         <img src="{{ asset('img/product.png') }}" alt="">
                                         <span>Phiếu xuất kho</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endcan
+
+                        @can('is-manager')
+                            <li class="{{ request()->routeIs('view-goods-receipts.*') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('view-goods-receipts.index') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/product.png') }}" alt="">
+                                        <span>Phiếu nhập kho</span>
                                     </div>
                                 </a>
                             </li>
@@ -370,13 +381,11 @@
             <main id="main">
                 <div id="navbar">
                     <div id="navbar-left">
-                        {{-- <p>Pages / <span>@yield('route1')</span></p>
-                        <p>@yield('route2')</p> --}}
                     </div>
                     <div id="navbar-right" class="notification-container">
                         <div class="notification" id="notification-icon">
                             <img src="{{ asset('img/bell.png') }}" alt="" id="notification-bell">
-                            <span class="notification-count" id="notification-count">0</span>
+                            <span class="notification-count" id="notification-count" style="display: none">0</span>
                         </div>
                         <div class="notification-dropdown" id="notification-dropdown">
                             <div class="notification-header">
@@ -389,8 +398,8 @@
                                 @endif
                                 <div class="notification-status">
                                     <div class="notification-status--left">
-                                        <button>Xem tất cả</button>
-                                        <button>Chưa xem</button>
+                                        {{-- <button>Xem tất cả</button>
+                                        <button>Chưa xem</button> --}}
                                     </div>
                                     {{-- <div class="notification-status--right">
                                         <p>Đánh giá là đã đọc</p>
@@ -451,22 +460,41 @@
             const notificationDropdown = $('#notification-dropdown');
             const notificationList = $('#notification-list');
             const notificationCount = $('#notification-count');
+            const warehouseId = $("#warehouse_id").val();
 
-            // Khi click vào icon thông báo
-            notificationIcon.click(function() {
-                notificationDropdown.toggle(); // Hiển thị/ẩn dropdown
-                const warehouseId = $("#warehouse_id").val();
 
-                // Gọi AJAX để lấy thông báo
+            function loadUnreadNotificationCount() {
                 $.ajax({
-                    url: '/notifications/unread',
+                    url: '{{ route('notifications.unread.count') }}',
+                    method: 'GET',
+                    data: {
+                        warehouse_id: warehouseId
+                    },
+                    success: function(count) {
+                        console.log(count);
+                        if (count > 0) {
+                            notificationCount.css("display", "block");
+                            notificationCount.text(count);
+                        } else {
+                            notificationCount.css("display", "none");
+                        }
+                    },
+                    error: function() {
+                        console.log('Không thể lấy số lượng thông báo chưa đọc!');
+                    }
+                });
+            }
+
+            function loadUnreadNotifications() {
+                $.ajax({
+                    url: '{{ route('notifications.unread') }}',
                     method: 'GET',
                     data: {
                         warehouse_id: warehouseId
                     },
                     success: function(notifications) {
 
-                        notificationList.empty(); // Xóa các thông báo cũ
+                        notificationList.empty();
 
                         if (notifications.length > 0) {
                             notifications.forEach(notification => {
@@ -477,32 +505,45 @@
                                 );
                             });
                         } else {
-                            notificationList.append('<li>Không có thông báo mới</li>');
+                            notificationList.append(
+                                '<li class="no-notification">Không có thông báo</li>');
                         }
 
-                        // Cập nhật số lượng thông báo
-                        notificationCount.text(notifications.length);
-
-                        // // Nếu có thông báo, đánh dấu tất cả là đã đọc
-                        // if (notifications.length > 0) {
-                        //     $.ajax({
-                        //         url: '/notifications/read',
-                        //         method: 'POST',
-                        //         headers: {
-                        //             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
-                        //                 'content') // CSRF token
-                        //         },
-                        //         success: function() {
-                        //             notificationCount.text(
-                        //                 '0'); // Reset số thông báo
-                        //         }
-                        //     });
-                        // }
+                        // notificationCount.text(notifications.length);
+                        notificationCount.css("display", "none");
+                        if (notifications.length > 0) {
+                            markAllNotificationsAsRead();
+                        }
                     },
                     error: function() {
-                        alert('Không thể lấy thông báo!');
+                        console.log('Không thể lấy thông báo!');
                     }
                 });
+            }
+
+            function markAllNotificationsAsRead() {
+                $.ajax({
+                    url: '{{ route('notifications.read') }}',
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    data: {
+                        warehouse_id: warehouseId
+                    },
+                    success: function() {
+                        notificationCount.text('0');
+                    }
+                });
+            }
+
+            loadUnreadNotificationCount();
+
+            notificationIcon.click(function() {
+                notificationDropdown.toggle();
+                if (notificationDropdown.is(':visible')) {
+                    loadUnreadNotifications();
+                }
             });
         });
     </script>

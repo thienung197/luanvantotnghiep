@@ -1,14 +1,14 @@
 @extends('layouts.app')
-@section('title', 'Phiếu yêu cầu nhập hàng')
+@section('title', 'Báo cáo xuất nhập tồn')
 @section('content')
     <div class="content_header">
         <div class="content_header--title">
-            Thêm phiếu yêu cầu nhập hàng
+            Thêm báo cáo
         </div>
         <div class="content_header--path">
             <img src="{{ asset('img/home.png') }}" alt="">
-            <p><a href="">Home</a> > <a href="{{ route('stocktakes.index') }}">Phiếu yêu cầu nhập hàng</a> > <a
-                    href="">Thêm phiếu yêu cầu nhập hàng</a>
+            <p><a href="">Home</a> > <a href="{{ route('stocktakes.index') }}">Báo cáo xuất nhập tồn</a> > <a
+                    href="">Thêm báo cáo</a>
             </p>
         </div>
     </div>
@@ -17,15 +17,15 @@
         <h2>Báo cáo xuất nhập tồn</h2>
         <form action="{{ route('comprehensive-stock-report.store') }}" method="POST">
             @csrf
-            <input type="hidden" name="warehouse_id" value="{{ $warehouse_id }}">
+            <input type="hidden" name="warehouse_id" value="{{ $warehouse_id }}" id="warehouse_id">
             <input type="hidden" name="user_id" value="{{ $user_id }}">
             <p>
-                Từ ngày:
-                <input type="date" name="start_date" value="2024-11-01">
+                <span class="date"> Từ ngày:</span>
+                <input type="date" name="start_date" value="{{ $start_date_formatted }}">
             </p>
             <p>
-                Đến ngày:
-                <input type="date" name="end_date" value="2024-11-30">
+                <span class="date">Đến ngày:</span>
+                <input type="date" name="end_date" value="{{ $end_date_formatted }}">
             </p>
             <div class="content">
                 <table class="table table-bordered">
@@ -65,38 +65,80 @@
                     </tbody>
                 </table>
             </div>
-            <button type="submit" class="btn btn-primary">Lưu báo cáo</button>
+            <div style="text-align: end">
+                <button type="submit" class="btn btn-primary btn-custom btn-add">Lưu báo cáo</button>
+            </div>
         </form>
     </div>
-
-    {{-- <div class="content-10">
-      
-
-            <form action="{{ route('stocktakes.store') }}" method="POST"> --}}
-
-    {{-- <table id="product-table" class="table ">
-                    <thead>
-                        <th>Mã hàng</th>
-                        <th>Tên hàng</th>
-                        <th>Lô hàng</th>
-                        <th>Đơn vị tính</th>
-                        <th>Tồn kho</th>
-                        <th>Thực tế</th>
-                        <th>Số lượng lệch</th>
-                        <th>Giá trị lệch</th>
-                        <th>Xóa</th>
-                    </thead>
-                    <tbody id="body-product-table">
-
-                    </tbody>
-                </table> --}}
-    {{-- </div>
-    </div> --}}
 
 
 @endsection
 
 @push('js')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const startDateInput = document.querySelector('input[name="start_date"]');
+            const endDateInput = document.querySelector('input[name="end_date"]');
+
+            startDateInput.addEventListener('change', fetchReportData);
+            endDateInput.addEventListener('change', fetchReportData);
+
+            function fetchReportData() {
+                const start_date = startDateInput.value;
+                const end_date = endDateInput.value;
+                const warehouseId = document.getElementById("warehouse_id").value;
+
+                if (start_date && end_date) {
+
+                    if (start_date && end_date) {
+                        $.ajax({
+                            url: "{{ route('stock-report') }}",
+                            method: 'GET',
+                            data: {
+                                start_date: start_date,
+                                end_date: end_date,
+                                warehouse_id: warehouseId
+                            },
+                            success: function(data) {
+                                console.log(data);
+
+                                updateTable(data);
+                            },
+                            error: function(error) {
+                                console.error('Error fetching data:', error);
+                            }
+                        });
+                    }
+                }
+            }
+
+            function updateTable(data) {
+                const tbody = document.querySelector('.table tbody');
+                tbody.innerHTML = '';
+
+                data.forEach(product => {
+                    const row = `
+                    <tr>
+                        <input type="hidden" name="products[${product.product_id}][product_id]" value="${product.product_id}">
+                        <input type="hidden" name="products[${product.product_id}][beginning_inventory]" value="${product.beginning_inventory}">
+                        <input type="hidden" name="products[${product.product_id}][stock_in]" value="${product.total_received}">
+                        <input type="hidden" name="products[${product.product_id}][stock_out]" value="${product.total_issued}">
+                        <input type="hidden" name="products[${product.product_id}][ending_inventory]" value="${product.ending_inventory}">
+                        <td>${product.product_code}</td>
+                        <td>${product.product_name}</td>
+                        <td>${product.unit_name}</td>
+                        <td>${product.beginning_inventory}</td>
+                        <td>${product.total_received}</td>
+                        <td>${product.total_issued}</td>
+                        <td>${product.ending_inventory}</td>
+                    </tr>
+                `;
+                    tbody.insertAdjacentHTML('beforeend', row);
+                });
+            }
+        });
+    </script>
+
     <script>
         $(document).ready(function() {
 
@@ -485,6 +527,20 @@
         tr th,
         tr td {
             text-align: center;
+        }
+
+        h2 {
+            font-weight: 600;
+            color: #000;
+            text-align: center;
+            margin: 20px;
+        }
+
+        .date {
+            color: #000;
+            font-weight: 400;
+            display: inline-block;
+            min-width: 120px;
         }
     </style>
 @endpush

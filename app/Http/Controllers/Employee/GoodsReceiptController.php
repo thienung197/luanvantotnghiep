@@ -11,6 +11,7 @@ use App\Models\Provider;
 use App\Models\User;
 use App\Models\Warehouse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class GoodsReceiptController extends Controller
 {
@@ -43,7 +44,9 @@ class GoodsReceiptController extends Controller
      */
     public function index()
     {
-        $goodsReceipts = $this->goodsReceipt->all();
+        $user = Auth::user();
+        $warehouseId = $user->warehouse_id;
+        $goodsReceipts = GoodsReceipt::where('warehouse_id', $warehouseId)->get();
         return view('employee.goods-receipts.index', compact('goodsReceipts'));
     }
 

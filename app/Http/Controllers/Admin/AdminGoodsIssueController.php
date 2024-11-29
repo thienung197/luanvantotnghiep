@@ -8,6 +8,7 @@ use App\Models\GoodsIssueBatch;
 use App\Models\Inventory;
 use App\Models\Notification;
 use App\Models\Product;
+use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -41,9 +42,9 @@ class AdminGoodsIssueController extends Controller
         $goodsIssue->save();
         $batchData = $request->input('batchData');
         $latestGoodsIssue = GoodsIssue::where('id', $goodsIssueId)->first();
-        $baseCode = $latestGoodsIssue->code ?? 'DH00000'; // Nếu không có, mặc định là DH00000
+        $baseCode = $latestGoodsIssue->code ?? 'DH00000';
 
-        $batchSuffix = 'A'; // Bắt đầu từ ký tự 'A'
+        $batchSuffix = 'A';
         foreach ($batchData as $batch) {
             $productId = $batch['product_id'];
             $totalQuantityRequired = $batch['total_quantity_required'];
@@ -55,7 +56,7 @@ class AdminGoodsIssueController extends Controller
                 $unitPrice = str_replace(',', '', $batchItem['unit_price']);
                 $discount = $batchItem['discount'];
                 $batchCode = $baseCode . $batchSuffix;
-
+                $warehouseName = Warehouse::where('id', $warehouseId)->value('name');
                 GoodsIssueBatch::create([
                     'goods_issue_id' => $goodsIssueId,
                     'code' => $batchCode,
@@ -86,20 +87,18 @@ class AdminGoodsIssueController extends Controller
                         'error' => 'Inventory not found for batch ID ' . $batchId
                     ], 404);
                 }
-                // Kiểm tra tổng số lượng tại kho sau mỗi lô hàng
                 $totalQuantityInWarehouse = DB::table('inventories')
-                    ->join('batches', 'inventories.batch_id', '=', 'batches.id') // join bảng batches để lấy product_id
-                    ->where('batches.product_id', $productId) // Lọc theo product_id từ bảng batches
+                    ->join('batches', 'inventories.batch_id', '=', 'batches.id')
+                    ->where('batches.product_id', $productId)
                     ->where('inventories.warehouse_id', $warehouseId)
                     ->sum('inventories.quantity_available');
 
                 $product = Product::find($productId);
                 if ($product && $totalQuantityInWarehouse < $product->minimum_stock_level) {
-                    // Tạo thông báo nếu mức tồn kho dưới ngưỡng
                     Notification::create([
-                        'message' => "Nguồn hàng cho sản phẩm {$product->code} - {$product->name} tại kho {$warehouseId} dưới mức tồn kho tối thiểu.",
+                        'message' => "Sản phẩm {$product->code} - {$product->name} tại kho {$warehouseName} còn {$totalQuantityInWarehouse} sản phẩm.Vui lòng nhập thêm hàng!",
                         'warehouse_id' => $warehouseId,
-                        'read_status' => 0 // 0: chưa đọc
+                        'read_status' => 0
                     ]);
                 }
             }

@@ -59,6 +59,33 @@ class ApiController extends Controller
         }
     }
 
+    public function ajaxSearchProductByProvider(Request $request)
+    {
+        $key = $request->input('key');
+        $providerId = $request->input('provider_id');
+        $products = $this->product->where('name', 'like', '%' . $key . '%')->where('provider_id', $providerId)->get();
+        if ($products->count() > 0) {
+            $html = '';
+            foreach ($products as $item) {
+                $imageUrl = $item->images->isNotEmpty() ? asset('upload/' . $item->images->first()->url) : asset('upload/no-image.png');
+                $html .= '<div class="search-result-item">';
+                $html .= '<img src="' . $imageUrl . '" alt="">';
+                $html .= '<div>';
+                $html .= '<h6 data-id ="' . $item->id . '" style="display:none"></h6>';
+                $html .= '<h4 data-name="' . $item->name . '">' . 'Tên sản phẩm: ' . $item->name . '</h4>'; // Sử dụng e() để escape các ký tự đặc biệt
+                $html .= '<p data-code="' . $item->code . '">' . 'Mã sản phẩm: ' . $item->code . '</p>';
+                $html .= '<p class="ajax-product-unit" style="display:none" data-unit="' . $item->getUnitName() . '">' . 'Đơn vị tính: ' . $item->getUnitName() . '</p>';
+                $html .= '<p class="ajax-product-price" style="display:none" data-price="' . $item->selling_price . '">' . 'Giá sản phẩm : ' . $item->selling_price . '</p>';
+
+                $html .= '</div>';
+                $html .= '</div>';
+            }
+            return response($html);
+        } else {
+            return response(`<p>Không tìm thấy sản phẩm!</p>`);
+        }
+    }
+
     public function ajaxSearchProductTable(Request $request)
     {
         $key = $request->input('key');
@@ -338,13 +365,13 @@ class ApiController extends Controller
     public function getSuggestedProducts(Request $request)
     {
         $warehouseId = $request->warehouse_id;
-        operator:
+        info($warehouseId);
+
         $products = DB::table('products')
             ->leftJoin('batches', 'products.id', '=', 'batches.product_id')
             ->leftJoin('inventories', function ($join) use ($warehouseId) {
                 $join->on('batches.id', '=', 'inventories.batch_id')
-                    ->where('inventories.warehouse_id', '=', $warehouseId)
-                    ->orWhere('inventories.warehouse_id', '=', 0);
+                    ->where('inventories.warehouse_id', '=', $warehouseId);
             })
             ->join('units', 'products.unit_id', '=', 'units.id')
             ->select(
@@ -352,18 +379,63 @@ class ApiController extends Controller
                 'products.name',
                 'products.code',
                 'units.name as unit_name',
-                'inventories.warehouse_id',
                 DB::raw('COALESCE(SUM(inventories.quantity_available), 0) as available_quantity'),
                 DB::raw('products.target_stock_level - COALESCE(SUM(inventories.quantity_available), 0) as suggested_quantity')
             )
-            ->groupBy('products.id', 'products.code', 'products.name', 'units.name', 'inventories.warehouse_id', 'products.target_stock_level', 'products.minimum_stock_level')
+            ->groupBy('products.id', 'products.code', 'products.name', 'units.name', 'products.target_stock_level', 'products.minimum_stock_level')
             ->havingRaw('COALESCE(SUM(inventories.quantity_available), 0) < products.minimum_stock_level')
-            ->orHavingRaw('available_quantity IS NULL')
             ->get();
 
+        $products = $products->map(function ($product) {
+            $product->suggested_quantity = (int)$product->suggested_quantity;
+            $product->available_quantity = (int)$product->available_quantity;
+            return $product;
+        });
+
         info($products);
-        return response($products);
+        return response()->json($products);
     }
+
+    public function getStockReportData(Request $request)
+    {
+        $start_date = $request->input('start_date');
+        $end_date = $request->input('end_date');
+        $warehouse_id = $request->input('warehouse_id');
+        info($warehouse_id);
+        $products = Product::select(
+            'products.id as product_id',
+            'products.name as product_name',
+            'products.code as product_code',
+            'units.name as unit_name'
+        )
+            ->join('units', 'products.unit_id', '=', 'units.id')
+            ->join('batches', 'products.id', '=', 'batches.product_id')
+            ->join('inventories', 'batches.id', '=', 'inventories.batch_id')
+            ->leftJoin('goods_receipt_details', function ($join) use ($start_date, $end_date, $warehouse_id) {
+                $join->on('products.id', '=', 'goods_receipt_details.product_id')
+                    ->join('goods_receipts', 'goods_receipt_details.goods_receipt_id', '=', 'goods_receipts.id')
+                    ->where('goods_receipts.warehouse_id', '=', $warehouse_id)
+                    ->whereBetween('goods_receipt_details.created_at', [$start_date, $end_date]);
+            })
+            ->leftJoin('goods_issue_batches', function ($join) use ($start_date, $end_date, $warehouse_id) {
+                $join->on('batches.id', '=', 'goods_issue_batches.batch_id')
+                    ->where('goods_issue_batches.warehouse_id', '=', $warehouse_id)
+                    ->whereBetween('goods_issue_batches.created_at', [$start_date, $end_date]);
+            })
+            ->where('inventories.warehouse_id', $warehouse_id)
+            ->selectRaw('
+            0 as beginning_inventory, 
+            SUM(DISTINCT inventories.quantity_available) as ending_inventory, 
+            COALESCE(SUM(DISTINCT goods_receipt_details.quantity), 0) as total_received, 
+            COALESCE(SUM(DISTINCT goods_issue_batches.quantity), 0) as total_issued 
+        ')
+            ->groupBy('products.id', 'products.name', 'products.code', 'units.name')
+            ->get();
+
+        return response()->json($products);
+    }
+
+
     //cap nhat trang thai khi admin danh gia de nghi nhap hang
     public function updateRestockRequestStatus(Request $request, $id)
     {
@@ -399,12 +471,6 @@ class ApiController extends Controller
 
     public function loadApprovedProducts()
     {
-
-        // $approvedProducts = Product::whereHas('restockRequestDetails', function ($query) {
-        //     $query->whereHas('restockRequest', function ($query) {
-        //         $query->where('status', 'approved');
-        //     });
-        // })->get();
         $approvedProducts = Product::whereHas('restockRequestDetails', function ($query) {
             $query->whereHas('restockRequest', function ($query) {
                 $query->where('status', 'approved');
@@ -660,18 +726,16 @@ class ApiController extends Controller
                 ->join('inventories', 'batches.id', '=', 'inventories.batch_id')
                 ->join('warehouses', 'inventories.warehouse_id', '=', 'warehouses.id')
                 ->where('products.id', $productId)
-                ->where('inventories.quantity_available', '>', 0) // Lọc các lô hàng có số lượng > 0
+                ->where('inventories.quantity_available', '>', 0)
                 ->orderBy('batches.expiry_date', 'asc')
                 ->get();
             foreach ($batchDetails as $batch) {
-                $productName = $batch['product_name']; // Lấy tên sản phẩm
+                $productName = $batch['product_name'];
 
-                // Nếu sản phẩm chưa tồn tại trong mảng, khởi tạo nó
                 if (!isset($groupedBatchDetails[$productName])) {
                     $groupedBatchDetails[$productName] = [];
                 }
 
-                // Thêm thông tin lô hàng vào mảng của sản phẩm tương ứng
                 $groupedBatchDetails[$productName][] = [
                     'batch_id' => $batch['batch_id'],
                     'batch_code' => $batch['batch_code'],
@@ -683,14 +747,10 @@ class ApiController extends Controller
                 ];
             }
 
-            // Kết quả sẽ nằm trong $groupedBatchDetails
             info($groupedBatchDetails);
             foreach ($warehousesByProximity as $warehouseData) {
                 $warehouse = $warehouseData['warehouse'];
-                // if (!is_object($warehouse)) {
-                //     info('Invalid warehouse data:', $warehouseData);
-                //     continue;
-                // }
+
 
                 $batches = Product::select(
                     'products.id as product_id',
@@ -743,7 +803,6 @@ class ApiController extends Controller
 
             $batchesByProduct[] = [
                 'productId' => $productId,
-                // 'totalQuantityRequired' => ,
                 'batches' => $selectedBatches,
             ];
         }

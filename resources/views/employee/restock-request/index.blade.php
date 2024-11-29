@@ -10,23 +10,25 @@
             <p><a href="">Home</a> > <a href="">Phiếu đề nghị nhập hàng</a></p>
         </div>
     </div>
-    <div class="btn-cs btn-add">
-        <a href="{{ route('restock-request.create') }}">Thêm phiếu</a>
-    </div>
+
     <div class="table_container">
         <div class="table_title">
-            Danh sách phiếu
+            Danh sách phiếu <div class="btn-cs btn-add"><a href="{{ route('restock-request.create') }}">Thêm phiếu</a></div>
         </div>
+
         <div class="table_filter-controls">
-            {{-- <form action="{{ route('goodsissues.index') }}" method="GET">
-                <label for="">Hiển thị </label>
+            <form action="{{ route('goodsissues.index') }}" method="GET">
+                {{-- <label for="">Hiển thị </label>
                 <select name="entries" id="entries" onchange="this.form.submit()">
                     <option value="5" {{ request('entries') == 5 ? 'selected' : '' }}>5</option>
                     <option value="10" {{ request('entries') == 10 ? 'selected' : '' }}>10</option>
                     <option value="25" {{ request('entries') == 25 ? 'selected' : '' }}>25</option>
                 </select>
-                mục
-            </form> --}}
+                mục --}}
+                {{-- <div class="btn-cs btn-add">
+                    <a href="{{ route('restock-request.create') }}">Thêm phiếu</a>
+                </div> --}}
+            </form>
             <div class="table_search-box">
                 {{-- <form action="{{ route('goodsissues.index') }}" method="GET">
                     <input type="text" name="search" id="search" value="{{ request('search') }}"
@@ -52,26 +54,13 @@
                     <td>
                         @if ($restockRequest->status == 'pending')
                             Phiếu yêu cầu đã được gửi đi
-                        @elseif($restockRequest->status == 'approved')
-                            Phiếu yêu cầu được phê duyệt
-                        @elseif($restockRequest->status == 'rejected')
-                            Phiếu yêu cầu bị từ chối
+                        @elseif($restockRequest->status == 'in_review')
+                            Phiếu yêu cầu được được xem xét
+                        @elseif($restockRequest->status == 'reviewed')
+                            Phiếu yêu cầu đã được xem xét
                         @endif
                     </td>
                     <td>{{ $restockRequest->created_at }}</td>
-                    {{-- <td class="btn-cell">
-                        <a href="{{ route('restock-request.edit', $restockRequest->id) }}">
-                            <img src="{{ asset('img/edit.png') }}" alt="">
-                        </a>
-                        <form action="{{ route('restock-request.destroy', $restockRequest->id) }}" method="POST"
-                            id="form-delete{{ $restockRequest->id }}">
-                            @csrf
-                            @method('delete')
-                        </form>
-                        <button type="submit" class="btn-delete" data-id="{{ $restockRequest->id }}">
-                            <img src="{{ asset('img/delete.png') }}" alt="">
-                        </button>
-                    </td> --}}
                 </tr>
 
                 <tr class="goods-issue-details" id="details-{{ $restockRequest->id }}" style="display: none;">
@@ -84,9 +73,7 @@
                                         <th>Mã hàng</th>
                                         <th>Tên hàng</th>
                                         <th>Số lượng</th>
-                                        {{-- <th>Giá bán</th>
-                                        <th>Giảm giá</th>
-                                        <th>Thành tiền</th> --}}
+                                        <th>Trạng thái</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -95,6 +82,15 @@
                                             <td>{{ $detail->product->code }}</td>
                                             <td>{{ $detail->product->name }}</td>
                                             <td>{{ $detail->quantity }}</td>
+                                            <td>
+                                                @if ($detail->status == 'rejected')
+                                                    Sản phẩm bị từ chối
+                                                @elseif ($detail->status == 'pending')
+                                                    Sản phẩm đang chờ duyệt
+                                                @else
+                                                    Sản phẩm được duyệt
+                                                @endif
+                                            </td>
                     </td>
                 </tr>
             @endforeach

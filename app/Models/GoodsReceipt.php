@@ -43,6 +43,10 @@ class GoodsReceipt extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'creator_id');
+    }
+    public function getUserName()
+    {
+        return $this->user ? $this->user->name : '';
     }
 }

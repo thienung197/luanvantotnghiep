@@ -73,7 +73,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/attribute/{attribute}/update/{attributeValue}', [AttributeController::class, 'updateAttributeValue']);
     Route::resource('/products', ProductController::class);
     Route::get('product/set-price', [ProductController::class, 'setPrice'])->name('products.setPrice');
-    // Route::resource('/goodsreceipts', GoodsReceiptController::class);
+    Route::resource('view-goods-receipts', GoodsReceiptController::class);
     Route::resource('/goodsissues', GoodsIssueController::class);
     Route::resource('/stocktakes', StockTakeController::class);
     Route::resource('/issue-report', IssueReportController::class);
@@ -103,8 +103,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/cart/store-order', [GoodsIssueController::class, 'storeOrder'])->name('cart.storeOrder');
 });
 
-Route::get('/notifications/unread', [NotificationController::class, 'getUnReadNotifications']);
-Route::post('/notifications/read', [NotificationController::class, 'markAllAsRead']);
+// Route::get('/notifications/unread', [NotificationController::class, 'getUnReadNotifications']);
+// Route::post('/notifications/read', [NotificationController::class, 'markAllAsRead']);
 
 Route::post('/logout', [App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');

@@ -1,19 +1,19 @@
 @extends('layouts.app')
-@section('title', 'Phiếu nhập hàng')
+@section('title', 'Đặt hàng nhà cung cấp')
 @section('content')
     <div class="content_header">
         <div class="content_header--title">
-            Quản lý phiếu nhập hàng
+            Đặt hàng nhà cung cấp
         </div>
         <div class="content_header--path">
             <img src="{{ asset('img/home.png') }}" alt="">
-            <p><a href="">Home</a> > <a href="">Phiếu nhập hàng</a></p>
+            <p><a href="">Home</a> > <a href="">Phiếu đặt hàng</a></p>
         </div>
     </div>
 
     <div class="table_container" style="min-height:400px">
         <div class="table_title">
-            Danh sách phiếu nhập hàng
+            Danh sách phiếu đặt hàng
         </div>
         <p>Danh sách các sản phẩm được yêu cầu nhập hàng, phân loại theo nhà cung cấp</p>
         @foreach ($approvedProducts as $provider)
@@ -25,7 +25,7 @@
                             <th>Mã sản phẩm</th>
                             <th>Tên sản phẩm</th>
                             <th>Đơn vị tính</th>
-                            <th>Tổng số lượng đặt</th>
+                            <th>Đề xuất số lượng đặt</th>
                             <th>Yêu cầu nhập từ nhà kho</th>
                         </tr>
                     </thead>
@@ -51,7 +51,7 @@
                                         @else
                                         @endif
                                     </td>
-                                    <td>
+                                    <td style="display:none">
                                         <input type="hidden" name="products[{{ $product['id'] }}][product_id]"
                                             value="{{ $product['id'] }}">
                                         <input type="hidden" name="products[{{ $product['id'] }}][product_code]"
