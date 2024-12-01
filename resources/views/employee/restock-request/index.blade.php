@@ -53,11 +53,11 @@
                     <td>{{ $restockRequest->getUserName() }}</td>
                     <td>
                         @if ($restockRequest->status == 'pending')
-                            Phiếu yêu cầu đã được gửi đi
+                            <span class="order-status">Phiếu yêu cầu đã được gửi đi</span>
                         @elseif($restockRequest->status == 'in_review')
-                            Phiếu yêu cầu được được xem xét
+                            <span class="order-status">Phiếu yêu cầu được được xem xét</span>
                         @elseif($restockRequest->status == 'reviewed')
-                            Phiếu yêu cầu đã được xem xét
+                            <span class="order-status">Phiếu yêu cầu đã được xem xét</span>
                         @endif
                     </td>
                     <td>{{ $restockRequest->created_at }}</td>
@@ -66,13 +66,14 @@
                 <tr class="goods-issue-details" id="details-{{ $restockRequest->id }}" style="display: none;">
                     <td colspan="5">
                         <div class="details-container">
-                            <h4>Các sản phẩm được đề nghị nhập hàng</h4>
-                            <table class="table table-bordered">
+                            <h4 class="order-label">Các sản phẩm được đề nghị nhập hàng</h4>
+                            <table class="table table-bordered table-product">
                                 <thead>
                                     <tr>
                                         <th>Mã hàng</th>
                                         <th>Tên hàng</th>
                                         <th>Số lượng</th>
+                                        <th>Đơn vị tính</th>
                                         <th>Trạng thái</th>
                                     </tr>
                                 </thead>
@@ -82,13 +83,14 @@
                                             <td>{{ $detail->product->code }}</td>
                                             <td>{{ $detail->product->name }}</td>
                                             <td>{{ $detail->quantity }}</td>
+                                            <td>{{ $detail->product->unit->name }}</td>
                                             <td>
                                                 @if ($detail->status == 'rejected')
-                                                    Sản phẩm bị từ chối
+                                                    <span class="order-status"> Sản phẩm bị từ chối</span>
                                                 @elseif ($detail->status == 'pending')
-                                                    Sản phẩm đang chờ duyệt
+                                                    <span class="order-status">Sản phẩm đang chờ duyệt</span>
                                                 @else
-                                                    Sản phẩm được duyệt
+                                                    <span class="order-status">Sản phẩm được duyệt</span>
                                                 @endif
                                             </td>
                     </td>
@@ -110,38 +112,13 @@
         @if (Session::has('message'))
             toastr.success("{{ Session::get('message') }}");
         @endif
-
-        // document.addEventListener("DOMContentLoaded", function() {
-        //     const rows = document.querySelectorAll(".restock-request-row");
-
-        //     rows.forEach(row => {
-        //         row.addEventListener("click", function() {
-        //             const stockRequestId = this.getAttribute("data-id");
-        //             const detailsRow = document.getElementById(`details-${stockRequestId}`);
-
-        //             if (detailsRow.style.display === "none") {
-        //                 detailsRow.style.display = "table-row";
-        //             } else {
-        //                 detailsRow.style.display = "none";
-        //             }
-        //         });
-        //     });
-        // });
-        document.addEventListener("DOMContentLoaded", function() {
-            const rows = document.querySelectorAll(".restock-request-row");
-            rows.forEach(row => {
-                row.addEventListener("click", function() {
-                    const restockRequestId = this.getAttribute("data-id");
-                    const detailsRow = document.getElementById(`details-${restockRequestId}`);
-                    console.log(detailsRow);
-
-                    if (detailsRow.style.display === "none") {
-                        detailsRow.style.display = "table-row";
-                    } else {
-                        detailsRow.style.display = "none";
-                    }
-                })
-            });
-        })
     </script>
+@endpush
+
+@push('css')
+    <style>
+        .order-label {
+            font-size: 20px;
+        }
+    </style>
 @endpush

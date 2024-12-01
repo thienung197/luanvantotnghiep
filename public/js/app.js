@@ -109,3 +109,69 @@ toastr.options = {
     showMethod: "fadeIn", // Show animation method
     hideMethod: "fadeOut", // Hide animation method
 };
+
+//js cho don hang
+
+// document.addEventListener("DOMContentLoaded", function () {
+//     const rows = document.querySelectorAll(".goods-issue-row");
+
+//     rows.forEach((row) => {
+//         row.addEventListener("click", function () {
+//             const goodsIssueId = this.getAttribute("data-id");
+
+//             const detailsRow = document.getElementById(
+//                 `details-${goodsIssueId}`
+//             );
+
+//             if (detailsRow.style.display === "none") {
+//                 detailsRow.style.display = "table-row";
+//                 row.style.backgroundColor = "rgb(230, 247, 236)";
+//             } else {
+//                 detailsRow.style.display = "none";
+//                 row.style.backgroundColor = "#fff";
+//             }
+//         });
+//     });
+// });
+
+// document.addEventListener("DOMContentLoaded", function () {
+//     const rows = document.querySelectorAll(".restock-request-row");
+//     rows.forEach((row) => {
+//         row.addEventListener("click", function () {
+//             const restockRequestId = this.getAttribute("data-id");
+//             const detailsRow = document.getElementById(
+//                 `details-${restockRequestId}`
+//             );
+//             console.log(detailsRow);
+
+//             if (detailsRow.style.display === "none") {
+//                 detailsRow.style.display = "table-row";
+//                 row.style.backgroundColor = "rgb(230, 247, 236)";
+//             } else {
+//                 detailsRow.style.display = "none";
+//                 row.style.backgroundColor = "#fff";
+//             }
+//         });
+//     });
+// });
+
+// document.addEventListener("DOMContentLoaded", function () {
+//     const rows = document.querySelectorAll(".comprehensive-stock-report-row");
+//     rows.forEach((row) => {
+//         row.addEventListener("click", function () {
+//             const comprehensiveStockReportId = this.getAttribute("data-id");
+//             const detailsRow = document.getElementById(
+//                 `details-${comprehensiveStockReportId}`
+//             );
+//             console.log(detailsRow);
+
+//             if (detailsRow.style.display === "none") {
+//                 detailsRow.style.display = "table-row";
+//                 row.style.backgroundColor = "rgb(230, 247, 236)";
+//             } else {
+//                 detailsRow.style.display = "none";
+//                 row.style.backgroundColor = "#fff";
+//             }
+//         });
+//     });
+// });

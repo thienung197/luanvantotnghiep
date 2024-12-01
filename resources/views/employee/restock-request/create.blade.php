@@ -25,7 +25,7 @@
     </div>
 
     <div class="content-10">
-        <div class="search-result-container">
+        {{-- <div class="search-result-container">
             <form action="" role="search">
                 <div class="form-group input-div">
                     <input type="text" name="key" class="form-control search-input" placeholder="Nhập tên sản phẩm">
@@ -34,8 +34,8 @@
                     </div>
                 </div>
             </form>
-        </div>
-        <div id="product-suggestions" class="product-suggestions mt-4">
+        </div> --}}
+        <div id="product-suggestions" class="product-suggestions">
             <p>Chưa có sản phẩm</p>
         </div>
         <form action="{{ route('restock-request.store') }}" method="POST" id="form-submit">
@@ -54,6 +54,10 @@
 
 @push('css')
     <style>
+        input {
+            text-align: end;
+        }
+
         .product-suggestions {
             display: flex;
             align-items: center;
@@ -98,10 +102,6 @@
 
         .content-10 h6 {
             margin-bottom: 15px;
-        }
-
-        .content-10 table {
-            margin: 80px 0;
         }
     </style>
 @endpush

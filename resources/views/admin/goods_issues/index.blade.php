@@ -3,11 +3,11 @@
 @section('content')
     <div class="content_header">
         <div class="content_header--title">
-            Quản lý đơn hàng
+            Quản lý đơn hàng của khách hàng
         </div>
         <div class="content_header--path">
             <img src="{{ asset('img/home.png') }}" alt="">
-            <p><a href="">Home</a> > <a href="">Phiếu xuất hàng</a></p>
+            <p><a href="">Home</a> > <a href="">Đơn hàng của khách hàng</a></p>
         </div>
     </div>
     {{-- <div class="btn-cs btn-add">
@@ -15,7 +15,7 @@
     </div> --}}
     <div class="table_container">
         <div class="table_title">
-            Danh sách đơn hàng
+            Danh sách đơn hàng của khách hàng
         </div>
         <div class="table_filter-controls">
             <form action="{{ route('goodsissues.index') }}" method="GET">
@@ -56,15 +56,17 @@
                     <td>{{ $goodsIssue->getTotalAmount() }}</td>
                     <td>
                         @if ($goodsIssue->status == 'pending')
-                            Đơn hàng chưa được xử lý
+                            <span class="order-status">Đơn hàng chưa được xử lý</span>
                         @elseif($goodsIssue->status == 'approved')
-                            Đơn hàng đã được phê duyệt
+                            <span class="order-status">Đơn hàng đã được phê duyệt</span>
                         @elseif($goodsIssue->status == 'processing')
-                            Đơn hàng đang trong quá trình lấy hàng từ kho
+                            <span class="order-status">Đơn hàng đang trong quá trình lấy hàng từ kho</span>
                         @elseif($goodsIssue->status == 'shipping')
-                            Đơn hàng đang được vận chuyển
+                            <span class="order-status">Đơn hàng đang được vận chuyển</span>
                         @elseif($goodsIssue->status == 'delivered')
-                            Đơn hàng đã được giao thành công
+                            <span class="order-status">
+                                Đơn hàng đã được giao thành công
+                            </span>
                         @endif
                     </td>
                     <td>
@@ -92,7 +94,7 @@
                 <tr class="goods-issue-details" id="details-{{ $goodsIssue->id }}" style="display: none;">
                     <td colspan="7">
                         <div class="details-container">
-                            <strong>Thông tin đơn hàng</strong>
+                            <strong class="order-label">Thông tin đơn hàng</strong>
                             <div class="customer-info-container">
                                 <p><span>Tên khách hàng:</span>{{ $goodsIssue->getCustomerName() }}</p>
                                 <p><span>Điện thoại:</span> {{ $goodsIssue->getCustomerPhone() }}</p>
@@ -104,16 +106,17 @@
                                 </p>
                             </div>
                             <p style="display: none" id="goodIssueId">{{ $goodsIssue->id }}</p>
-                            <strong>Sản phẩm</strong>
-                            <table class="table table-bordered " id="product-table-{{ $goodsIssue->id }}">
+                            {{-- <strong>Sản phẩm</strong> --}}
+                            <table class="table table-bordered table-product" id="product-table-{{ $goodsIssue->id }}">
                                 <thead>
                                     <tr>
                                         <th>Mã hàng</th>
                                         <th>Tên hàng</th>
                                         <th>Số lượng</th>
-                                        <th>Giá bán</th>
-                                        <th>Giảm giá</th>
-                                        <th>Thành tiền</th>
+                                        <th>Đơn vị tính</th>
+                                        <th>Giá bán (VNĐ)</th>
+                                        <th>Giảm giá (VNĐ)</th>
+                                        <th>Thành tiền (VNĐ)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -125,6 +128,7 @@
                                             <td>{{ $detail->product->code }}</td>
                                             <td>{{ $detail->product->name ?? 'N/A' }}</td>
                                             <td>{{ $detail->quantity }}</td>
+                                            <td>{{ $detail->product->unit->name }}</td>
                                             <td class="goods-issue-unit-price">{{ number_format($detail->unit_price, 2) }}
                                             </td>
                                             <td class="goods-issue-discount">{{ number_format($detail->discount, 2) }}</td>
@@ -138,30 +142,34 @@
                                 <button id="btn-create">Đề xuất</button>
                                 <button id="btn-distribute">Phân kho </button>
                             </div>
+                            <strong class="order-label">Bảng khoảng cách từ nhà kho đến vị trí khách hàng, tính bằng
+                                km</strong>
                             <div id="warehouse-details-container">
-                                <strong>Bảng khoảng cách từ nhà kho đến vị trí khách hàng, tính bằng km</strong>
+
                             </div>
                             <div id="batch-details-container">
-                                <strong>Thông tin về các lô hàng tại có nhà kho</strong>
+                                <strong class="order-label">Thông tin về các lô hàng tại có nhà kho</strong>
                             </div>
                             <div class="suggestion-container">
-                                <strong>Đề xuất phân phối lô hàng từ nhà kho</strong>
+                                <strong class="order-label">Đề xuất phân phối lô hàng từ nhà kho</strong>
 
                                 <form action="{{ route('admin.goodsissue.store') }}" method="POST" id="distribution-form">
                                     @csrf
                                     <input type="hidden" name="goods-issue" id="goods-issue">
 
                                     {{-- <h6>Chọn <span id="batch-product-name"></span> sản phẩm từ lô hàng </h6> --}}
-                                    <table id="batch-table-{{ $goodsIssue->id }}" class="table table-border batch-table">
+                                    <table id="batch-table-{{ $goodsIssue->id }}"
+                                        class="table table-border batch-table table-product">
                                         <thead>
                                             <tr>
-                                                <th>Số lô</th>
+                                                <th>Lô hàng</th>
                                                 <th>Ngày sản xuất</th>
                                                 <th>Ngày hết hạn</th>
                                                 <th>Số lượng có sẵn</th>
                                                 <th>Số lượng chọn</th>
-                                                <th>Đơn giá</th>
-                                                <th>Giảm giá</th>
+                                                <th>Đơn giá (VNĐ)</th>
+                                                <th>Giảm giá (VNĐ)</th>
+                                                <th>Thành tiền</th>
                                                 <th>Xuất từ kho</th>
                                             </tr>
                                         </thead>
@@ -181,6 +189,11 @@
 
 @push('css')
     <style>
+        .form-control:disabled,
+        .form-control[readonly] {
+            background-color: #fff;
+        }
+
         .table-list tr td {
             padding: 0;
         }
@@ -214,6 +227,24 @@
             background-color: var(--color-green);
             color: var(--color-white);
             margin: 10px;
+        }
+
+        .table-product th,
+        .table-product td {
+            border: 1px solid #000 !important;
+        }
+
+        .nav-link.active {
+            border: 1px solid #000;
+            border-bottom: 1px solid #fff;
+            color: #000;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .nav-link {
+            font-weight: 600;
+            font-size: 18px;
         }
     </style>
 @endpush
@@ -283,7 +314,7 @@
             const tableContainer = document.getElementById("table-container");
 
             const table = document.createElement("table");
-            table.classList.add("table", "table-bordered");
+            table.classList.add("table", "table-bordered", "table-product");
 
             const thead = document.createElement("thead");
             const headerRow = document.createElement("tr");
@@ -391,17 +422,17 @@
 
                 // Tạo bảng
                 const table = document.createElement('table');
-                table.classList.add('table', 'table-bordered');
+                table.classList.add('table', 'table-bordered', 'table-product');
 
                 // Header của bảng
                 const thead = document.createElement('thead');
                 const headerRow = document.createElement('tr');
                 const headers = [
                     'Nhà kho',
-                    'Số lô',
+                    'Lô hàng',
                     'Ngày hết hạn',
                     'Ngày sản xuất',
-                    'Số lượng'
+                    'Số lượng tồn kho'
                 ];
                 headers.forEach(headerText => {
                     const th = document.createElement('th');
@@ -613,6 +644,20 @@
                             discountInput.setAttribute("value", discount);
                             discountCell.appendChild(discountInput);
                             batchRow.appendChild(discountCell);
+
+                            let totalAmountCell = document.createElement("td");
+                            let totalAmountInput = document.createElement("input");
+                            totalAmountInput.setAttribute("type", "number");
+                            //totalAmountInput.setAttribute("class", "batchtotalAmount");
+                            totalAmountInput.classList.add("form-control");
+                            totalAmountInput.style.textAlign = "right";
+                            totalAmountInput.setAttribute("name",
+                                `batchData[${productId}][batches][${index}]totalAmount]`);
+                            // let totalAmount = parseFloat(discount.replace(/,/g, '') ||
+                            //     0); // Loại bỏ dấu phẩy
+                            totalAmountInput.setAttribute("value", discount);
+                            totalAmountCell.appendChild(totalAmountInput);
+                            batchRow.appendChild(totalAmountCell);
 
                             // Warehouse ID Cell with Input
                             let warehouseCell = document.createElement("td");

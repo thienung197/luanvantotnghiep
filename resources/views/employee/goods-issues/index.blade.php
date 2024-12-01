@@ -28,11 +28,11 @@
                 mục --}}
             </form>
             <div class="table_search-box">
-                <form action="{{ route('goodsissues.index') }}" method="GET">
+                {{-- <form action="{{ route('goodsissues.index') }}" method="GET">
                     <input type="text" name="search" id="search" value="{{ request('search') }}"
                         placeholder="Nhập tên phiếu xuất hàng">
                     <button type="submit">Tìm </button>
-                </form>
+                </form> --}}
             </div>
         </div>
 
@@ -67,7 +67,7 @@
                 <tr class="goods-issue-details" id="details-{{ $goodsIssue->id }}">
                     <td colspan="5">
                         <div class="details-container">
-                            <p class="title">Thông tin đơn hàng</p>
+                            <p class="title ">Thông tin đơn hàng</p>
                             <div class="customer-order-info-container">
                                 <div class="customer-info-container">
                                     <p><span>Tên khách hàng:</span>{{ $goodsIssue->getCustomerName() }}</p>
@@ -77,31 +77,31 @@
                                 <div class="order-info-container">
                                     <p> <span>Tình trạng đơn hàng: </span>
                                         @if ($goodsIssue->status == 'pending')
-                                            Đơn hàng của bạn đã được tạo và đang chờ xử lý
+                                            <span class="order-status">Đơn hàng của bạn đã được tạo và đang chờ xử lý</span>
                                         @elseif($goodsIssue->status == 'approved')
-                                            Đơn hàng của bạn đã được phê duyệt
-                                        @elseif($goodsIssue->status == 'processing')
+                                            <span class="order-status">Đơn hàng của bạn đã được phê duyệt</span>
+                                            {{-- @elseif($goodsIssue->status == 'processing')
                                             Đơn hàng của bạn đang trong quá trình lấy hàng từ kho
                                         @elseif($goodsIssue->status == 'shipping')
                                             Đơn hàng của bạn đang được vận chuyển
                                         @elseif($goodsIssue->status == 'delivered')
-                                            Đơn hàng của bạn đã được giao thành công
+                                            Đơn hàng của bạn đã được giao thành công --}}
                                         @endif
                                     </p>
                                     <p><span>Thời gian đặt hàng: {{ $goodsIssue->created_at }}</span></p>
                                 </div>
                             </div>
 
-                            <strong>Sản phẩm</strong>
-                            <table class="table table-bordered">
+                            {{-- <strong>Sản phẩm</strong> --}}
+                            <table class="table table-bordered table-product">
                                 <thead>
                                     <tr>
                                         <th>Mã hàng</th>
                                         <th>Tên hàng</th>
                                         <th>Số lượng</th>
-                                        <th>Giá bán</th>
-                                        <th>Giảm giá</th>
-                                        <th>Thành tiền</th>
+                                        <th>Giá bán (VNĐ)</th>
+                                        <th>Giảm giá (VNĐ)</th>
+                                        <th>Thành tiền (VNĐ)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -110,15 +110,17 @@
                                             <td>{{ $detail->product->code }}</td>
                                             <td>{{ $detail->product->name ?? 'N/A' }}</td>
                                             <td>{{ $detail->quantity }}</td>
-                                            <td>{{ number_format($detail->unit_price, 2) }}</td>
-                                            <td>{{ number_format($detail->discount, 2) }}</td>
+                                            <td>{{ number_format($detail->unit_price, 2) }} </td>
+                                            <td>{{ number_format($detail->discount, 2) }} </td>
                                             <td>{{ number_format($detail->quantity * $detail->unit_price - $detail->discount, 2) }}
+
                                             </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                             </table>
-                            <p><span>Tổng tiền hàng: </span>{{ $goodsIssue->getTotalAmount() }}</p>
+                            <p><span class="total-money">Tổng tiền hàng:
+                                </span><span class="money">{{ $goodsIssue->getTotalAmount() }} VNĐ</span></p>
                         </div>
                     </td>
                 </tr>
@@ -138,6 +140,12 @@
 
 @push('css')
     <style>
+        .total-money span {
+            font-weight: 600 !important;
+        }
+
+
+
         .customer-order-info-container {
             display: flex;
             align-items: center;

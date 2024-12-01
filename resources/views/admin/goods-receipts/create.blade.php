@@ -1,14 +1,14 @@
 @extends('layouts.app')
-@section('title', 'Phiếu nhập hàng')
+@section('title', 'Đặt hàng nhà cung cấp')
 @section('content')
     <div class="content_header">
         <div class="content_header--title">
-            Thêm phiếu nhập hàng
+            Đặt hàng nhà cung cấp
         </div>
         <div class="content_header--path">
             <img src="{{ asset('img/home.png') }}" alt="">
-            <p><a href="">Home</a> > <a href="{{ route('goodsreceipts.create') }}">Phiếu nhập hàng</a> > <a
-                    href="">Thêm phiếu nhập hàng</a>
+            <p><a href="">Home</a> > <a href="{{ route('goodsreceipts.create') }}">Đặt hàng nhà cung cấp</a> > <a
+                    href="">Thêm phiếu </a>
             </p>
         </div>
     </div>
@@ -23,14 +23,14 @@
     </div>
     <div class="content-10">
         <div class="search-result-container">
-            <form action="" role="search">
+            {{-- <form action="" role="search">
                 <div class="form-group input-div">
                     <input type="text" name="key" class="form-control search-input" placeholder="Nhập tên sản phẩm">
                     <div class="search-result" style="z-index:1" style="border: 1px solid red">
 
                     </div>
                 </div>
-            </form>
+            </form> --}}
             <form action="{{ route('goodsreceipts.store') }}" method="POST">
                 @csrf
                 <input type="hidden" name="creator_id" value="{{ Auth::user()->id }}" id="creator_id">

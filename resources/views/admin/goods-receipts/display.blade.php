@@ -7,7 +7,7 @@
         </div>
         <div class="content_header--path">
             <img src="{{ asset('img/home.png') }}" alt="">
-            <p><a href="">Home</a> > <a href="">Phiếu xuất hàng</a></p>
+            <p><a href="">Home</a> > <a href="">Phân phối hàng hóa</a></p>
         </div>
     </div>
     {{-- <div class="btn-cs btn-add">
@@ -39,6 +39,7 @@
             <tr>
                 <th>Mã phiếu mua hàng</th>
                 <th>Thời gian</th>
+                <th>Người tạo</th>
                 <th>Nhà cung cấp</th>
                 <th>Trạng thái</th>
                 {{-- <th>Thao tác</th> --}}
@@ -48,12 +49,13 @@
                 <tr class="goods-issue-row" data-id="{{ $purchaseOrder->id }}">
                     <td>{{ $purchaseOrder->code }}</td>
                     <td>{{ $purchaseOrder->created_at }}</td>
+                    <td>{{ $purchaseOrder->user->name }}</td>
                     <td>{{ $purchaseOrder->provider->name }}</td>
                     <td>
-                        @if ($purchaseOrder->status == 'created')
-                            Đơn hàng đã được tạo và gửi đến nhà cung cấp
+                        @if ($purchaseOrder->status == 'pending')
+                            <span class="order-status"> Đơn hàng đã được tạo và gửi đến nhà cung cấp</span>
                         @elseif($purchaseOrder->status == 'fulfilled')
-                            Đã tạo phiếu nhập kho
+                            <span class="order-status">Đã tạo phiếu nhập kho</span>
                         @endif
                     </td>
                 </tr>
@@ -61,8 +63,8 @@
                 <tr class="goods-issue-details" id="details-{{ $purchaseOrder->id }}" style="display: none;">
                     <td colspan="5">
                         <div class="details-container">
-                            <strong>Ghi nhận và phân phối hàng hóa</strong>
-                            <table class="table table-bordered" id="product-table-{{ $purchaseOrder->id }}">
+                            <strong class="order-label">Ghi nhận và phân phối hàng hóa</strong>
+                            <table class="table table-bordered table-product" id="product-table-{{ $purchaseOrder->id }}">
                                 <thead>
                                     <tr>
                                         <th>Mã hàng</th>
@@ -122,7 +124,7 @@
 
                                                 <td>
                                                     <input type="number" class="total-price" name="total_price"
-                                                        value="0" readonly>
+                                                        value="" readonly>
                                                 </td>
                                                 <td class="distribution-details">
                                                     @php
@@ -140,10 +142,12 @@
                                                                     </span>
                                                                     <div class="distribution-info">
                                                                         <span class="distribution-request">
-                                                                            Yêu cầu nhập: {{ $distribution->quantity }}
+                                                                            Yêu cầu nhập: <span class="order-status">
+                                                                                {{ $distribution->quantity }}</span>
                                                                         </span>
                                                                         <span class="distribution-allocated">
-                                                                            Phân phối: {{ $distribution->quantity }}
+                                                                            Phân phối:<span class="order-status">
+                                                                                {{ $distribution->quantity }}</span>
                                                                         </span>
                                                                     </div>
                                                                     <input type="hidden"
@@ -169,14 +173,17 @@
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    <button type="submit" class="btn btn-primary">Phân phối</button>
+                                                    <button type="submit" class="btn btn-primary btn-custom">Phân
+                                                        phối</button>
                                                 </td>
                                             </tr>
                                         </form>
                                     @endforeach
                                 </tbody>
                             </table>
-                            <p>Tổng tiền hàng: {{ $purchaseOrder->total_amount }}</p>
+                            <p>Tổng tiền hàng:
+                                {{-- {{ $purchaseOrder->total_amount }}  --}}
+                            </p>
                         </div>
                     </td>
                 </tr>
@@ -188,6 +195,10 @@
 
 @push('css')
     <style>
+        .distribution-info .order-status {
+            padding: 1px 15px;
+        }
+
         .batch-table input {
             border: none;
         }
@@ -249,8 +260,8 @@
         .distribution-item {
             margin-bottom: 15px;
             padding: 10px;
-            background: #f9f9f9;
-            border: 1px solid #ddd;
+            /* background: #f9f9f9;
+                                    border: 1px solid #ddd; */
             border-radius: 5px;
         }
 
@@ -280,18 +291,14 @@
             display: none;
         }
 
-        /* Gộp hai trường ngày vào cùng một nhóm */
         .date-group {
             display: flex;
-            /* Sắp xếp ngang */
             flex-wrap: wrap;
-            /* Đảm bảo không tràn dòng */
+            flex-direction: column;
             gap: 15px;
-            /* Khoảng cách giữa các trường */
             align-items: center;
         }
 
-        /* Trường ngày sản xuất và hạn sử dụng */
         .date-field {
             display: flex;
             flex-direction: column;
@@ -306,7 +313,6 @@
 
         .date-field input {
             width: 160px;
-            /* Độ rộng vừa đủ */
             padding: 5px;
             font-size: 14px;
             border: 1px solid #ccc;
@@ -343,7 +349,7 @@
 
                     const total = (quantity * unitPrice) - discount;
 
-                    totalPriceInput.value = total > 0 ? total.toFixed(2) : 0;
+                    totalPriceInput.value = total > 0 ? total.toFixed(2) : '';
                 }
 
                 quantityInput.addEventListener("input", calculateTotal);
@@ -576,8 +582,10 @@
 
                     if (detailsRow.style.display === "none") {
                         detailsRow.style.display = "table-row";
+                        row.style.backgroundColor = "rgb(230, 247, 236)";
                     } else {
                         detailsRow.style.display = "none";
+                        row.style.backgroundColor = "#fff";
                     }
                 });
             });

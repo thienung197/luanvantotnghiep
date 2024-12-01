@@ -7,36 +7,37 @@
         </div>
         <div class="content_header--path">
             <img src="{{ asset('img/home.png') }}" alt="">
-            <p><a href="">Home</a> > <a href="">Người dùng</a></p>
+            <p><a href="">Home</a> > <a href="">Quản lý hàng hóa</a></p>
         </div>
     </div>
-    <div class="d-flex">
-        <div class="btn-cs btn-add">
-            <a href="{{ route('products.create') }}">Thêm hàng hóa</a>
-        </div>
-        <div class="btn-cs btn-add">
+    {{-- <div class="d-flex"> --}}
+
+    {{-- <div class="btn-cs btn-add">
             <a href="{{ route('products.setPrice') }}">Thiết lập giá</a>
-        </div>
-    </div>
+        </div> --}}
+    {{-- </div> --}}
     <div class="table_container">
         <div class="table_title">
             Danh sách hàng hóa
+            <div class="btn-cs btn-add">
+                <a href="{{ route('products.create') }}">Thêm hàng hóa</a>
+            </div>
         </div>
         <div class="table_filter-controls">
             <form action="{{ route('products.index') }}" method="GET">
-                <label for="">Hiển thị </label>
+                {{-- <label for="">Hiển thị </label>
                 <select name="entries" id="entries" onchange="this.form.submit()">
                     <option value="5" {{ request('entries') == 5 ? 'selected' : '' }}>5</option>
                     <option value="10" {{ request('entries') == 10 ? 'selected' : '' }}>10</option>
                     <option value="25" {{ request('entries') == 25 ? 'selected' : '' }}>25</option>
                 </select>
-                mục
+                mục --}}
             </form>
             <div class="table_search-box">
                 <form action="{{ route('products.index') }}" method="GET">
                     <input type="text" name="search" id="search" value="{{ request('search') }}"
                         placeholder="Nhập tên hàng hóa">
-                    <button type="submit">Tìm </button>
+                    {{-- <button type="submit">Tìm </button> --}}
                 </form>
             </div>
         </div>
@@ -64,9 +65,11 @@
                     <td>{{ $product->name }}</td>
                     <td>{{ $product->code }}</td>
                     <td>{{ $product->getUnitName() }}</td>
-                    <td>{{ $product->status == 'active' ? 'Còn hàng' : ($product->status == 'out_of_stock' ? 'Ngừng hoạt động' : 'Ngừng kinh doanh') }}
+                    <td><span
+                            class="order-status">{{ $product->status == 'active' ? 'Còn hàng' : ($product->status == 'out_of_stock' ? 'Ngừng hoạt động' : 'Ngừng kinh doanh') }}</span>
                     </td>
-                    <td>{{ $product->refrigerated === 1 ? 'Bảo quản lạnh' : 'Điều kiện thường' }}
+                    <td><span
+                            class="order-status">{{ $product->refrigerated === 1 ? 'Bảo quản lạnh' : 'Điều kiện thường' }}</span>
                     </td>
                     <td>{{ $product->created_at }}</td>
                     <td class="btn-cell">

@@ -7,7 +7,7 @@
         </div>
         <div class="content_header--path">
             <img src="{{ asset('img/home.png') }}" alt="">
-            <p><a href="">Home</a> > <a href="{{ route('employee.inventory') }}">Yêu cầu xuất hàng</a></p>
+            <p><a href="">Home</a> > <a href="{{ route('employee.inventory') }}">Hàng tồn kho</a></p>
         </div>
     </div>
     {{-- <div class="btn-cs btn-add">
@@ -19,20 +19,20 @@
         </div>
         <div class="table_filter-controls">
             <form action="{{ route('goodsissues.index') }}" method="GET">
-                <label for="">Hiển thị </label>
+                {{-- <label for="">Hiển thị </label>
                 <select name="entries" id="entries" onchange="this.form.submit()">
                     <option value="5" {{ request('entries') == 5 ? 'selected' : '' }}>5</option>
                     <option value="10" {{ request('entries') == 10 ? 'selected' : '' }}>10</option>
                     <option value="25" {{ request('entries') == 25 ? 'selected' : '' }}>25</option>
-                </select>
-                mục
+                </select> --}}
+                {{-- mục --}}
             </form>
             <div class="table_search-box">
-                <form action="{{ route('goodsissues.index') }}" method="GET">
+                {{-- <form action="{{ route('goodsissues.index') }}" method="GET">
                     <input type="text" name="search" id="search" value="{{ request('search') }}"
                         placeholder="Nhập tên phiếu xuất hàng">
                     <button type="submit">Tìm </button>
-                </form>
+                </form> --}}
             </div>
         </div>
         <table class="table" id="table-list">
@@ -43,9 +43,9 @@
                     <th>Tên sản phẩm</th>
                     <th>Đơn vị </th>
                     <th>Giá bán </th>
-                    <th>Tình trạng</th>
                     <th>Tồn kho</th>
-                    <th>Thao tác</th>
+                    <th>Tình trạng</th>
+                    {{-- <th>Thao tác</th> --}}
                 </tr>
             </thead>
             <tbody>
@@ -62,18 +62,20 @@
 
                     <tr class="goods-issue-row" data-id="{{ $product->id }}">
                         <td>
-                            <img src="{{ asset('upload/' . ($product->image ?? 'no-image.png')) }}" alt="Product Image"
-                                width="50">
+                            <img src="{{ $product->images->count() > 0 ? asset('upload/' . $product->images->first()->url) : asset('upload/no-image.png') }}"
+                                class="card-img-top" style="width: 50px">
                         </td>
                         <td>{{ $product->code }}</td>
                         <td>{{ $product->name }}</td>
                         <td>{{ $product->getUnitName() }}</td>
                         <td>{{ number_format($product->selling_price, 2) }}</td>
-                        <td>{{ $product->status }}</td>
                         <td>{{ $totalQuantityAvailable }}</td>
-                        <td class="btn-cell">
-                            <button type="button" class="btn-toggle-details">Chi tiết</button>
+                        <td><span
+                                class="order-status">{{ $totalQuantityAvailable > $product->minimum_stock_level ? 'Còn hàng' : ($totalQuantityAvailable > 0 ? 'Sắp hết hàng' : 'Hết hàng') }}</span>
                         </td>
+                        {{-- <td class="btn-cell">
+                            <button type="button" class="btn-toggle-details">Chi tiết</button>
+                        </td> --}}
                     </tr>
 
                     <!-- Dòng chi tiết của sản phẩm, hiển thị các lô hàng khi nhấn vào -->

@@ -7,7 +7,7 @@
         </div>
         <div class="content_header--path">
             <img src="{{ asset('img/home.png') }}" alt="">
-            <p><a href="">Home</a> > <a href="{{ route('products.index') }}">Người dùng</a> > <a href="">Thêm
+            <p><a href="">Home</a> > <a href="{{ route('products.index') }}">Hàng hóa</a> > <a href="">Thêm
                     hàng hóa</a>
             </p>
         </div>
@@ -94,8 +94,8 @@
                 </div>
             @endforeach --}}
             <div class="btn-controls">
-                <div class="btn-cs btn-save"><button type="submit">Lưu thay đổi</button></div>
-                <div class="btn-cs btn-delete"><a href="{{ route('products.index') }}">Quay lại </a></div>
+                <div class="btn-cs btn-save"><button type="submit">Tạo hàng hóa</button></div>
+                {{-- <div class="btn-cs btn-delete"><a href="{{ route('products.index') }}">Quay lại </a></div> --}}
             </div>
         </form>
     </div>

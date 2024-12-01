@@ -13,7 +13,9 @@
                             @csrf
 
                             <div class="row mb-3">
-                                <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('Email') }}</label>
+                                <div class="col-md-1"></div>
+
+                                <label for="email" class="col-md-3 col-form-label ">{{ __('Email') }}</label>
 
                                 <div class="col-md-8">
                                     <input id="email" type="email"
@@ -29,8 +31,8 @@
                             </div>
 
                             <div class="row mb-3">
-                                <label for="password"
-                                    class="col-md-4 col-form-label text-md-end">{{ __('Mật khẩu') }}</label>
+                                <div class="col-md-1"></div>
+                                <label for="password" class="col-md-3 col-form-label ">{{ __('Mật khẩu') }}</label>
 
                                 <div class="col-md-8">
                                     <input id="password" type="password"

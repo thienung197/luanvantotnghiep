@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Phiếu yêu cầu')
+@section('title', 'Phiếu xuất kho')
 @section('content')
     <div class="content_header">
         <div class="content_header--title">
@@ -56,49 +56,35 @@
                         <td>{{ $goodsIssue->created_at }}</td>
                         <td>{{ $goodsIssue->getCustomerName() }}</td>
                         <td>{{ number_format($totals[$goodsIssueId], 2) }} VNĐ</td>
-                        <!-- Hiển thị tổng tiền hàng cho đơn hàng này -->
                         <td>
                             @if ($goodsIssue->status == 'approved')
-                                Đơn hàng được phân bổ đến kho
-                            @elseif($goodsIssue->status == 'shipping')
-                                Đơn hàng của bạn đang được vận chuyển
+                                <span class="order-status">Đơn hàng được phân bổ đến kho</span>
+                                {{-- @elseif($goodsIssue->status == 'shipping')
+                                Đơn hàng của bạn đang được vận chuyển --}}
                             @endif
                         </td>
-                        {{-- <td class="btn-cell">
-                            <a href="{{ route('goodsissues.edit', $goodsIssue->id) }}"><img
-                                    src="{{ asset('img/edit.png') }}" alt="Edit"></a>
-                            <form action="{{ route('goodsissues.destroy', $goodsIssue->id) }}" method="POST"
-                                id="form-delete{{ $goodsIssue->id }}">
-                                @csrf
-                                @method('delete')
-                            </form>
-                            <button type="submit" class="btn-delete" data-id="{{ $goodsIssue->id }}"><img
-                                    src="{{ asset('img/delete.png') }}" alt="Delete"></button>
-                        </td> --}}
                     </tr>
 
-                    <!-- Chi tiết đơn hàng -->
                     <tr class="goods-issue-details" id="details-{{ $goodsIssueId }}" style="display: none;">
                         <td colspan="5">
                             <div class="details-container">
-                                <strong>Thông tin đơn hàng</strong>
+                                <strong class="order-label">Thông tin đơn hàng</strong>
                                 <div class="customer-info-container">
                                     <p><span>Tên khách hàng:</span>{{ $goodsIssue->getCustomerName() }}</p>
                                     <p><span>Điện thoại:</span> {{ $goodsIssue->getCustomerPhone() }}</p>
                                     <p><span>Địa chỉ:</span> {{ $goodsIssue->getCustomerAddress() }}</p>
                                     <p style="display: none" id="customer_location_id">
                                         {{ $goodsIssue->getCustomerLocationId() }}
-
-
                                     </p>
                                 </div>
-                                <strong>Danh sách các sản phẩm</strong>
-                                <table class="table table-bordered">
+                                {{-- <strong>Danh sách các sản phẩm</strong> --}}
+                                <table class="table table-bordered table-product">
                                     <thead>
                                         <tr>
                                             <th>Mã hàng</th>
                                             <th>Tên hàng</th>
                                             <th>Số lượng</th>
+                                            <th>Đơn vị tính</th>
                                             <th>Giá bán</th>
                                             <th>Giảm giá</th>
                                             <th>Thành tiền</th>
@@ -110,6 +96,7 @@
                                                 <td>{{ $batch->batch->code ?? 'N/A' }}</td>
                                                 <td>{{ $batch->batch->product->name ?? 'N/A' }}</td>
                                                 <td>{{ $batch->quantity }}</td>
+                                                <td>{{ $batch->batch->product->unit->name ?? 'N/A' }}</td>
                                                 <td>{{ number_format($batch->unit_price, 2) }} VNĐ</td>
                                                 <td>{{ number_format($batch->discount, 2) }} VNĐ</td>
                                                 <td>{{ number_format($batch->quantity * $batch->unit_price - $batch->discount, 2) }}
@@ -118,7 +105,8 @@
                                         @endforeach
                                     </tbody>
                                 </table>
-                                <p><span>Tổng tiền hàng: </span>{{ number_format($totals[$goodsIssueId], 2) }} VNĐ</p>
+                                <p><span>Tổng tiền hàng: </span><span
+                                        class="money">{{ number_format($totals[$goodsIssueId], 2) }} VNĐ</span></p>
                             </div>
                         </td>
                     </tr>
@@ -134,22 +122,5 @@
         @if (Session::has('message'))
             toastr.success("{{ Session::get('message') }}");
         @endif
-
-        document.addEventListener("DOMContentLoaded", function() {
-            const rows = document.querySelectorAll(".goods-issue-row");
-
-            rows.forEach(row => {
-                row.addEventListener("click", function() {
-                    const goodsIssueId = this.getAttribute("data-id");
-                    const detailsRow = document.getElementById(`details-${goodsIssueId}`);
-
-                    if (detailsRow.style.display === "none") {
-                        detailsRow.style.display = "table-row";
-                    } else {
-                        detailsRow.style.display = "none";
-                    }
-                });
-            });
-        });
     </script>
 @endpush

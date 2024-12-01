@@ -19,6 +19,11 @@ class PurchaseOrder extends Model
         return $this->belongsTo(Provider::class);
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function purchaseOrderDetails()
     {
         return $this->hasMany(PurchaseOrderDetail::class);

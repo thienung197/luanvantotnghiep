@@ -87,8 +87,26 @@ a:focus {
 #menu-container {
     padding: 40px;
     background-color: var(--color-white);
-    height: ;
-    overflow-y: scroll;
+    height: 100vh;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+}
+#menu-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+#menu-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+#menu-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+#menu-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 
 #menu-container ul {
@@ -473,6 +491,12 @@ img.avatar {
     box-shadow: none !important;
 }
 
+.table-product th,
+.table-product td {
+    border: 1px solid #000;
+    color: #000 !important;
+}
+
 /* .btn-cell {
     display: flex;
     align-items: center;
@@ -845,4 +869,32 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
     filter: invert(45%) sepia(30%) saturate(150%) hue-rotate(190deg)
         brightness(90%) contrast(85%);
+}
+
+.money {
+    font-weight: 700 !important;
+    color: blue !important;
+}
+
+.order-status {
+    font-weight: 400;
+    background-color: green;
+    color: #fff !important;
+    padding: 3px 9px;
+    border-radius: 15px;
+}
+
+.order-label {
+    color: #000;
+    font-size: 18px;
+}
+
+/* tr:hover {
+    background-color: rgb(230, 247, 236);
+} */
+
+.username {
+    margin-left: 9px;
+    color: #000;
+    font-weight: 600;
 }

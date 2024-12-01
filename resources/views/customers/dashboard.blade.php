@@ -47,10 +47,12 @@
                                     class="card-img-top">
                                 <div class="card-body">
                                     <h5 class="card-title">{{ $product->name }}</h5>
-                                    <h4>Tồn kho: {{ $product->totalStock }}</h4>
-                                    <p class="card-text">{{ number_format($product->selling_price, 0, ',', '.') }} VNĐ</p>
+                                    <h4><span>Tồn kho:</span> {{ $product->totalStock }}</h4>
+                                    <p class="card-text"><span>Giá:</span>
+                                        {{ number_format($product->selling_price, 0, ',', '.') }} VNĐ
+                                    </p>
                                     <button class="btn btn-primary add-to-cart-btn" data-product-id="{{ $product->id }}">
-                                        Đặt hàng
+                                        Thêm vào giỏ hàng
                                     </button>
                                 </div>
                             </div>
@@ -112,6 +114,36 @@
             right: 123px;
             font-size: 27px;
             padding: 20px 10px;
+        }
+
+        .card img {
+            height: 300px;
+            object-fit: cover;
+        }
+
+        .card-body {
+            height: 200px;
+        }
+
+        .card-body h5 {
+            font-weight: 600;
+            color: #000;
+            font-size: 20px;
+            text-align: center;
+        }
+
+        .card-body h4 {
+            color: #000;
+            font-size: 19px;
+        }
+
+        .card-body p {
+            color: #000;
+            font-size: 19px;
+        }
+
+        .card-body span {
+            width: 50px;
         }
     </style>
 @endpush

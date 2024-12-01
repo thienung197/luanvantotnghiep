@@ -10,9 +10,7 @@
             <p><a href="">Home</a> > <a href="">Nhà cung cấp</a></p>
         </div>
     </div>
-    <div class="btn-cs btn-add">
-        <a href="{{ route('providers.create') }}">Thêm nhà cung cấp</a>
-    </div>
+
     @if (Session::has('message'))
         <script>
             toastr.success("{{ Session::get('message') }}")
@@ -21,23 +19,26 @@
     <div class="table_container">
         <div class="table_title">
             Danh sách nhà cung cấp
+            <div class="btn-cs btn-add">
+                <a href="{{ route('providers.create') }}">Thêm nhà cung cấp</a>
+            </div>
         </div>
         <div class="table_filter-controls">
             <form action="{{ route('providers.index') }}" method="GET">
-                <label for="">Hiển thị </label>
+                {{-- <label for="">Hiển thị </label>
                 <select name="entries" id="entries" onchange="this.form.submit()">
                     <option value="5" {{ request('entries') == 5 ? 'selected' : '' }}>5</option>
                     <option value="10" {{ request('entries') == 10 ? 'selected' : '' }}>10</option>
                     <option value="25" {{ request('entries') == 25 ? 'selected' : '' }}>25</option>
                 </select>
-                mục
+                mục --}}
             </form>
             <div class="table_search-box">
-                <form action="{{ route('providers.index') }}" method="GET">
+                {{-- <form action="{{ route('providers.index') }}" method="GET">
                     <input type="text" name="search" id="search" value="{{ request('search') }}"
                         placeholder="Nhập tên nhà cung cấp">
                     <button type="submit">Tìm </button>
-                </form>
+                </form> --}}
             </div>
         </div>
         <table class="table" id="table-list">

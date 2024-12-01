@@ -322,6 +322,16 @@
                             </li>
                         @endcan
 
+                        @can('is-manager')
+                            <li class="{{ request()->routeIs('customers.update.index') ? 'bg-blue' : '' }}">
+                                <a href="{{ route('customers.update.index') }}">
+                                    <div class="flex-left-content">
+                                        <img src="{{ asset('img/product.png') }}" alt="">
+                                        <span>Cập nhật thông tin</span>
+                                    </div>
+                                </a>
+                            </li>
+                        @endcan
 
 
                         {{-- @can('is-manager')

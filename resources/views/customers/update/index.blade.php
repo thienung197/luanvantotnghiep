@@ -112,13 +112,37 @@
                 @enderror
             </div>
             <div class="btn-controls">
-                <div class="btn-cs btn-save"><button type="submit">Lưu thay đổi</button></div>
+                <div class="btn-custom btn-add"><button type="submit">Lưu thay đổi</button></div>
                 {{-- <div class="btn-cs btn-back"><a href="{{ route('users.index') }}">Quay lại </a></div> --}}
             </div>
         </form>
     </div>
 
 @endsection
+
+@push('css')
+    <style>
+        .btn-primary {
+            background-color: green;
+            padding: 10px 12px;
+        }
+
+        .btn-primary:hover {
+            background-color: green;
+        }
+
+        .btn-custom.btn-add {
+            margin: 30px 0 30px 50%;
+            transform: translateX(-50%);
+        }
+
+        button[type="submit"] {
+            border: unset;
+            background-color: transparent;
+            color: #fff;
+        }
+    </style>
+@endpush
 
 @push('js')
     <script>

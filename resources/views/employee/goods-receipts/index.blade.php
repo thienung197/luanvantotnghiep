@@ -41,6 +41,7 @@
                 <th>Người phân phối</th>
                 <th>Sản phẩm</th>
                 <th>Số lượng</th>
+                <th>Đơn vị tính</th>
                 <th>Ngày phân phối </th>
             </tr>
             {{-- @php
@@ -52,8 +53,8 @@
                     <td>{{ $goodsReceipt->getUserName() }}</td>
                     <td>{{ $goodsReceipt->goodsReceiptDetails->first()->product->name }}</td>
                     <td>{{ $goodsReceipt->goodsReceiptDetails->first()->quantity }}</td>
+                    <td>{{ $goodsReceipt->goodsReceiptDetails->first()->product->unit->name }}</td>
                     <td>{{ $goodsReceipt->created_at }}</td>
-
                 </tr>
             @endforeach
 
@@ -61,6 +62,14 @@
         {{-- {{ $goodsReceipts->links() }} --}}
     </div>
 @endsection
+
+@push('css')
+    <style>
+        tr:hover {
+            background-color: rgb(230, 247, 236);
+        }
+    </style>
+@endpush
 
 @push('js')
     <script>

@@ -228,5 +228,9 @@
             padding: 100px;
             text-align: center;
         }
+
+        input[type="number"] {
+            text-align: end;
+        }
     </style>
 @endpush

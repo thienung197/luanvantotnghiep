@@ -51,8 +51,8 @@
             @foreach ($comprehensiveStockReports as $comprehensiveStockReport)
                 <tr class="comprehensive-stock-report-row" data-id="{{ $comprehensiveStockReport->id }}">
                     <td>{{ $comprehensiveStockReport->code }}</td>
-                    <td>{{ $comprehensiveStockReport->start_date }}</td>
-                    <td>{{ $comprehensiveStockReport->end_date }}</td>
+                    <td><span class="order-status">{{ $comprehensiveStockReport->start_date }}</span></td>
+                    <td><span class="order-status">{{ $comprehensiveStockReport->end_date }}</span></td>
                     <td>{{ $comprehensiveStockReport->getUserName() }}</td>
 
                     <td>{{ $comprehensiveStockReport->created_at }}</td>
@@ -74,8 +74,8 @@
                 <tr class="goods-issue-details" id="details-{{ $comprehensiveStockReport->id }}" style="display: none;">
                     <td colspan="5">
                         <div class="details-container">
-                            <h4>Các sản phẩm được báo cáo xuất nhập tồn</h4>
-                            <table class="table table-bordered">
+                            <h4 class="order-label">Các sản phẩm được báo cáo xuất nhập tồn</h4>
+                            <table class="table table-bordered table-product">
                                 <thead>
                                     <tr>
                                         <th>Mã hàng</th>
@@ -122,39 +122,13 @@
         @if (Session::has('message'))
             toastr.success("{{ Session::get('message') }}");
         @endif
-
-        // document.addEventListener("DOMContentLoaded", function() {
-        //     const rows = document.querySelectorAll(".comprehensive-stock-report-row");
-
-        //     rows.forEach(row => {
-        //         row.addEventListener("click", function() {
-        //             const stockRequestId = this.getAttribute("data-id");
-        //             const detailsRow = document.getElementById(`details-${stockRequestId}`);
-
-        //             if (detailsRow.style.display === "none") {
-        //                 detailsRow.style.display = "table-row";
-        //             } else {
-        //                 detailsRow.style.display = "none";
-        //             }
-        //         });
-        //     });
-        // });
-        document.addEventListener("DOMContentLoaded", function() {
-            const rows = document.querySelectorAll(".comprehensive-stock-report-row");
-            rows.forEach(row => {
-                row.addEventListener("click", function() {
-                    const comprehensiveStockReportId = this.getAttribute("data-id");
-                    const detailsRow = document.getElementById(
-                        `details-${comprehensiveStockReportId}`);
-                    console.log(detailsRow);
-
-                    if (detailsRow.style.display === "none") {
-                        detailsRow.style.display = "table-row";
-                    } else {
-                        detailsRow.style.display = "none";
-                    }
-                })
-            });
-        })
     </script>
+@endpush
+
+@push('css')
+    <style>
+        .order-label {
+            font-size: 20px;
+        }
+    </style>
 @endpush

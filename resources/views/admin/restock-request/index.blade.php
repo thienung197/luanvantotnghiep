@@ -10,12 +10,13 @@
             <p><a href="">Home</a> > <a href="">Phiếu đề nghị nhập hàng</a></p>
         </div>
     </div>
-    <div class="btn-cs btn-add">
-        <a href="{{ route('restock-request.create') }}">Thêm phiếu</a>
-    </div>
+
     <div class="table_container">
         <div class="table_title">
             Danh sách phiếu
+            {{-- <div class="btn-cs btn-add">
+                <a href="{{ route('restock-request.create') }}">Thêm phiếu</a>
+            </div> --}}
         </div>
         <div class="table_filter-controls">
             <form action="{{ route('goodsissues.index') }}" method="GET">
@@ -54,11 +55,11 @@
                     <td>{{ $restockRequest->warehouse->name }}</td>
                     <td class="status-cell" data-status="{{ $restockRequest->status }}">
                         @if ($restockRequest->status == 'pending')
-                            Yêu cầu này chưa được phê duyệt
+                            <span class="order-status">Yêu cầu này chưa được phê duyệt</span>
                         @elseif($restockRequest->status == 'in_review')
-                            Yêu cầu này đang được phê duyệt
+                            <span class="order-status">Yêu cầu này đang được phê duyệt</span>
                         @elseif($restockRequest->status == 'reviewed')
-                            Bạn cầu này đã được phê duyệt
+                            <span class="order-status">Bạn cầu này đã được phê duyệt</span>
                         @endif
                     </td>
                     <td>{{ $restockRequest->created_at }}</td>
@@ -71,8 +72,8 @@
                 <tr class="goods-issue-details" id="details-{{ $restockRequest->id }}" style="display: none;">
                     <td colspan="5">
                         <div class="details-container">
-                            <h4>Các sản phẩm được đề nghị nhập hàng</h4>
-                            <table class="table table-bordered">
+                            <h4 class="order-label">Các sản phẩm được đề nghị nhập hàng</h4>
+                            <table class="table table-bordered table-product    ">
                                 <thead>
                                     <tr>
                                         <th>Mã hàng</th>
@@ -134,8 +135,12 @@
 
                         if (detailsRow.style.display === "none") {
                             detailsRow.style.display = "table-row";
+                            row.style.backgroundColor = "rgb(230, 247, 236)";
+
                         } else {
                             detailsRow.style.display = "none";
+                            row.style.backgroundColor = "#fff";
+
                         }
                     }
                 })

@@ -10,28 +10,29 @@
             <p><a href="">Home</a> > <a href="">Người dùng</a></p>
         </div>
     </div>
-    <div class="btn-cs btn-add">
-        <a href="{{ route('users.create') }}">Thêm người dùng</a>
-    </div>
+
     <div class="table_container">
         <div class="table_title">
             Danh sách người dùng
+            <div class="btn-cs btn-add">
+                <a href="{{ route('users.create') }}">Thêm người dùng</a>
+            </div>
         </div>
         <div class="table_filter-controls">
             <form action="{{ route('users.index') }}" method="GET">
-                <label for="">Hiển thị </label>
+                {{-- <label for="">Hiển thị </label>
                 <select name="entries" id="entries" onchange="this.form.submit()">
                     <option value="5" {{ request('entries') == 5 ? 'selected' : '' }}>5</option>
                     <option value="10" {{ request('entries') == 10 ? 'selected' : '' }}>10</option>
                     <option value="25" {{ request('entries') == 25 ? 'selected' : '' }}>25</option>
                 </select>
-                mục
+                mục --}}
             </form>
             <div class="table_search-box">
                 <form action="{{ route('users.index') }}" method="GET">
                     <input type="text" name="search" id="search" value="{{ request('search') }}"
                         placeholder="Nhập tên người dùng">
-                    <button type="submit">Tìm </button>
+                    {{-- <button type="submit">Tìm </button> --}}
                 </form>
             </div>
         </div>
@@ -44,7 +45,9 @@
                 <th>Số điện thoại</th>
                 <th>Email</th>
                 <th>Trạng thái hoạt động</th>
-                <th>Ngày tạo </th>
+                <th>Vai trò</th>
+                <th>Nhà kho</th>
+                {{-- <th>Ngày tạo </th> --}}
                 <th>Thao tác</th>
             </tr>
             @php
@@ -60,9 +63,12 @@
                     <td>{{ $user->gender == 'male' ? 'Nam' : 'Nữ' }}</td>
                     <td>{{ $user->phone }}</td>
                     <td>{{ $user->email }}</td>
-                    <td>{{ $user->status == 'active' ? 'Đang hoạt động' : ($user->status == 'inactive' ? 'Ngừng hoạt động' : 'Bị khóa') }}
+                    <td><span
+                            class="order-status">{{ $user->status == 'active' ? 'Đang hoạt động' : ($user->status == 'inactive' ? 'Ngừng hoạt động' : 'Bị khóa') }}</span>
                     </td>
-                    <td>{{ $user->created_at }}</td>
+                    <td>{{ $user->roles->first()?->name ?? 'Không có vai trò' }}</td>
+                    <td style="max-width: 80px">{{ $user->warehouse->name ?? 'Không có' }}</td>
+                    {{-- <td>{{ $user->created_at }}</td> --}}
                     <td class="btn-cell">
                         <a href="{{ route('users.edit', $user->id) }}"><img src="{{ asset('img/edit.png') }}"
                                 alt=""></a>

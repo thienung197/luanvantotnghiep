@@ -16,20 +16,20 @@
         </div>
         <div class="table_filter-controls">
             <form action="{{ route('goodsissues.index') }}" method="GET">
-                <label for="">Hiển thị </label>
+                {{-- <label for="">Hiển thị </label>
                 <select name="entries" id="entries" onchange="this.form.submit()">
                     <option value="5" {{ request('entries') == 5 ? 'selected' : '' }}>5</option>
                     <option value="10" {{ request('entries') == 10 ? 'selected' : '' }}>10</option>
                     <option value="25" {{ request('entries') == 25 ? 'selected' : '' }}>25</option>
                 </select>
-                mục
+                mục --}}
             </form>
             <div class="table_search-box">
-                <form action="{{ route('goodsissues.index') }}" method="GET">
+                {{-- <form action="{{ route('goodsissues.index') }}" method="GET">
                     <input type="text" name="search" id="search" value="{{ request('search') }}"
                         placeholder="Nhập tên phiếu báo cáo xuất nhập tồn">
                     <button type="submit">Tìm </button>
-                </form>
+                </form> --}}
             </div>
         </div>
 
@@ -69,10 +69,10 @@
                 </tr>
 
                 <tr class="goods-issue-details" id="details-{{ $comprehensiveStockReport->id }}" style="display: none;">
-                    <td colspan="5">
+                    <td colspan="6">
                         <div class="details-container">
-                            <h4>Các sản phẩm được báo cáo xuất nhập tồn</h4>
-                            <table class="table table-bordered">
+                            <h4 class="order-lable">Các sản phẩm được báo cáo xuất nhập tồn</h4>
+                            <table class="table table-bordered table-product">
                                 <thead>
                                     <tr>
                                         <th>Mã hàng</th>
@@ -147,8 +147,10 @@
 
                     if (detailsRow.style.display === "none") {
                         detailsRow.style.display = "table-row";
+                        row.style.backgroundColor = "rgb(230, 247, 236)";
                     } else {
                         detailsRow.style.display = "none";
+                        row.style.backgroundColor = "#fff";
                     }
                 })
             });

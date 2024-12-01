@@ -21,32 +21,34 @@
     </div>
     <div>
         {{-- <a href="{{ route('attributes.create') }}">Thêm thuộc tính</a> --}}
-        <div class="btn-cs btn-add">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAttributeValueModal">
-                Thêm giá trị
-            </button>
-        </div>
+
         @include('admin.attributes.createAttributeValueModal')
         <div class="table_container">
             <div class="table_title">
                 Danh sách giá trị thuộc tính
+                <div class="btn-cs btn-add">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                        data-bs-target="#addAttributeValueModal">
+                        Thêm giá trị
+                    </button>
+                </div>
             </div>
             <div class="table_filter-controls">
                 <form action="{{ route('attributes.index') }}" method="GET">
-                    <label for="">Hiển thị </label>
+                    {{-- <label for="">Hiển thị </label>
                     <select name="entries" id="entries" onchange="this.form.submit()">
                         <option value="5" {{ request('entries') == 5 ? 'selected' : '' }}>5</option>
                         <option value="10" {{ request('entries') == 10 ? 'selected' : '' }}>10</option>
                         <option value="25" {{ request('entries') == 25 ? 'selected' : '' }}>25</option>
                     </select>
-                    mục
+                    mục --}}
                 </form>
                 <div class="table_search-box">
-                    <form action="{{ route('attributes.index') }}" method="GET">
+                    {{-- <form action="{{ route('attributes.index') }}" method="GET">
                         <input type="text" name="search" id="search" value="{{ request('search') }}"
                             placeholder="Nhập tên thuộc tính">
                         <button type="submit">Tìm </button>
-                    </form>
+                    </form> --}}
                 </div>
             </div>
             <input type="hidden" name="" id="attributeId" value="{{ $attributeId }}">

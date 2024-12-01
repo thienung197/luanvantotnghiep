@@ -53,6 +53,10 @@ class User extends Authenticatable
         return $this->hasMany(StockTake::class);
     }
 
+    public function warehouse()
+    {
+        return $this->belongsTo(Warehouse::class);
+    }
     public function location()
     {
         return $this->belongsTo(Location::class);
