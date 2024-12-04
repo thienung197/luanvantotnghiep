@@ -63,6 +63,38 @@
                 <tr class="goods-issue-details" id="details-{{ $purchaseOrder->id }}" style="display: none;">
                     <td colspan="5">
                         <div class="details-container">
+                            <strong>Các hàng hóa đã phân phối</strong>
+                            <table class="table table-bordered table-product" id="product-table-{{ $purchaseOrder->id }}">
+                                <thead>
+                                    <tr>
+                                        <th>Mã hàng</th>
+                                        <th>Tên hàng</th>
+                                        <th>Đơn vị tính</th>
+                                        <th>Số lượng</th>
+                                        <th>NSX - HSD (nếu có)</th>
+                                        <th>Giá bán (Đơn vị VNĐ)</th>
+                                        <th>Giảm giá (Đơn vị VNĐ)</th>
+                                        <th>Thành tiền (Đơn vị VNĐ)</th>
+                                        <th>Phân phối hàng hóa</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($purchaseOrder->recordedProducts as $product)
+                                        <tr>
+                                            <td>{{ $product->product_code }}</td>
+                                            <td>{{ $product->product_name }}</td>
+                                            <td>{{ $product->unit_name }}</td>
+                                            <td>{{ $product->received_quantity }}</td>
+                                            <td>{{ $product->nsx }} - {{ $product->hsd }}</td>
+                                            <td>{{ number_format($product->unit_price, 2) }}</td>
+                                            <td>{{ number_format($product->discount, 2) }}</td>
+                                            <td>{{ number_format($product->received_quantity * $product->unit_price - $product->discount, 2) }}
+                                            </td>
+                                            <td>{{ $product->warehouse_name }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                             <strong class="order-label">Ghi nhận và phân phối hàng hóa</strong>
                             <table class="table table-bordered table-product" id="product-table-{{ $purchaseOrder->id }}">
                                 <thead>
@@ -84,11 +116,13 @@
                                         <form action="{{ route('goodsreceipts.store-receipt') }}" method="POST">
                                             @csrf
                                             <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
+                                            <input type="hidden" name="purchase_order" value="{{ $purchaseOrder->id }}">
                                             <input type="hidden" name="provider_id"
                                                 value="{{ $purchaseOrder->provider->id }}">
                                             <input type="hidden" name="product_id" value="{{ $detail->product->id }}">
 
                                             <tr>
+
                                                 <td>{{ $detail->product->code }}</td>
                                                 <td>{{ $detail->product->name ?? 'N/A' }}</td>
                                                 <td>{{ $detail->product->unit->name }}</td>
@@ -261,7 +295,7 @@
             margin-bottom: 15px;
             padding: 10px;
             /* background: #f9f9f9;
-                                    border: 1px solid #ddd; */
+                                                                                        border: 1px solid #ddd; */
             border-radius: 5px;
         }
 

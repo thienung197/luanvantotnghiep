@@ -898,3 +898,23 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     color: #000;
     font-weight: 600;
 }
+
+.input-has-border-bottom {
+    border-bottom: 1px solid #000;
+    border-radius: unset;
+    width: 90%;
+    margin: 0 auto;
+}
+
+.form-control:disabled,
+.form-control[readonly] {
+    background-color: #fff !important;
+}
+
+.form-control:focus {
+    box-shadow: none !important;
+}
+
+.toast {
+    z-index: 9999 !important;
+}

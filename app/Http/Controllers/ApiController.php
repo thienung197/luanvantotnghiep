@@ -650,8 +650,8 @@ class ApiController extends Controller
                     $distance = $data['routes'][0]['summary']['distance'] / 1000;
 
                     $warehousesWithDistance[] = [
-                        'warehouse' => $warehouse, // Trả về cả đối tượng Warehouse
-                        'distance' => round($distance, 2), // Làm tròn khoảng cách đến 2 chữ số thập phân
+                        'warehouse' => $warehouse,
+                        'distance' => round($distance, 2),
                     ];
                 }
             } catch (\GuzzleHttp\Exception\RequestException $e) {
@@ -661,24 +661,17 @@ class ApiController extends Controller
             }
         }
 
-        // Sắp xếp danh sách nhà kho theo khoảng cách (tăng dần)
         usort($warehousesWithDistance, function ($a, $b) {
             return $a['distance'] <=> $b['distance'];
         });
 
-        // Ghi log danh sách nhà kho và khoảng cách (gọn gàng)
-        // info('Warehouses with distances:', array_map(function ($item) {
-        //     return [
-        //         'warehouse_name' => $item['warehouse']->name,
-        //         'distance' => $item['distance'],
-        //     ];
-        // }, $warehousesWithDistance));
 
         return $warehousesWithDistance;
     }
 
     public function getBatches(Request $request)
     {
+        // dd($request->all());
         $productsData = json_decode($request->input('productsData'), true);
         $batchesByProduct = [];
         $groupedBatchDetails = [];
@@ -689,7 +682,7 @@ class ApiController extends Controller
             $unitPrice = $productData['unitPrice'];
             $discount = $productData['discount'];
             $totalPrice = $productData['totalPrice'];
-
+            $unit = $productData['unit'];
             $customerLocation = $this->fetchLocationById($customerLocationId);
             $warehouses = $this->fetchAllWarehouseWithLocation();
 
@@ -782,6 +775,7 @@ class ApiController extends Controller
                     $selectedBatches[] = [
                         'batch_id' => $batch->batch_id,
                         'batch_code' => $batchCode,
+                        'unit' => $unit,
                         'quantityAvailable' => $availableQuantity,
                         'quantityToTake' => $quantityToTake,
                         'expiry_date' => $batch->expiry_date,

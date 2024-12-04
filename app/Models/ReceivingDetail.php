@@ -17,4 +17,14 @@ class ReceivingDetail extends Model
         'manufacturing_date',
         'expiry_date'
     ];
+
+    public function receivingNote()
+    {
+        return $this->belongsTo(ReceivingNote::class, 'receiving_notes_id');
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id');
+    }
 }

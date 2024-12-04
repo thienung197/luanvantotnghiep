@@ -34,7 +34,7 @@
                             <th>Mã hàng</th>
                             <th>Tên hàng</th>
                             <th>Đơn vị tính</th>
-                            <th>Tồn đầu kỳ</th>
+                            {{-- <th>Tồn đầu kỳ</th> --}}
                             <th>Nhập trong kỳ</th>
                             <th>Xuất trong kỳ</th>
                             <th>Tồn cuối kỳ</th>
@@ -45,8 +45,8 @@
                             <tr>
                                 <input type="hidden" name="products[{{ $loop->index }}][product_id]"
                                     value="{{ $product['product_id'] }}">
-                                <input type="hidden" name="products[{{ $loop->index }}][beginning_inventory]"
-                                    value="{{ $product['beginning_inventory'] }}">
+                                {{-- <input type="hidden" name="products[{{ $loop->index }}][beginning_inventory]"
+                                    value="{{ $product['beginning_inventory'] }}"> --}}
                                 <input type="hidden" name="products[{{ $loop->index }}][stock_in]"
                                     value="{{ $product['total_received'] }}">
                                 <input type="hidden" name="products[{{ $loop->index }}][stock_out]"
@@ -56,7 +56,7 @@
                                 <td>{{ $product['product_code'] }}</td>
                                 <td>{{ $product['product_name'] }}</td>
                                 <td>{{ $product['unit_name'] }}</td>
-                                <td>{{ $product['beginning_inventory'] }}</td>
+                                {{-- <td>{{ $product['beginning_inventory'] }}</td> --}}
                                 <td>{{ $product['total_received'] }}</td>
                                 <td>{{ $product['total_issued'] }}</td>
                                 <td>{{ $product['ending_inventory'] }}</td>
@@ -120,14 +120,14 @@
                     const row = `
                     <tr>
                         <input type="hidden" name="products[${product.product_id}][product_id]" value="${product.product_id}">
-                        <input type="hidden" name="products[${product.product_id}][beginning_inventory]" value="${product.beginning_inventory}">
+                       
                         <input type="hidden" name="products[${product.product_id}][stock_in]" value="${product.total_received}">
                         <input type="hidden" name="products[${product.product_id}][stock_out]" value="${product.total_issued}">
                         <input type="hidden" name="products[${product.product_id}][ending_inventory]" value="${product.ending_inventory}">
                         <td>${product.product_code}</td>
                         <td>${product.product_name}</td>
                         <td>${product.unit_name}</td>
-                        <td>${product.beginning_inventory}</td>
+                       
                         <td>${product.total_received}</td>
                         <td>${product.total_issued}</td>
                         <td>${product.ending_inventory}</td>

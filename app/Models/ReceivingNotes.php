@@ -14,4 +14,14 @@ class ReceivingNotes extends Model
         'user_id',
         'status'
     ];
+
+    public function receivingDetails()
+    {
+        return $this->hasMany(ReceivingDetail::class, 'receiving_notes_id');
+    }
+
+    public function purchaseOrder()
+    {
+        return $this->belongsTo(PurchaseOrder::class, 'purchase_order_id');
+    }
 }

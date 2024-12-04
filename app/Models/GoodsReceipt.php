@@ -14,6 +14,7 @@ class GoodsReceipt extends Model
         'creator_id',
         'provider_id',
         'discount',
+        'receiving_detail_id'
     ];
 
     public function provider()

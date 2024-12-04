@@ -98,7 +98,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/warehouse/orders', [EmployeeController::class, 'showOrders'])->name('manager.goodsissues.order');
     Route::get('/warehouse/inventory', [EmployeeController::class, 'showInventory'])->name('employee.inventory');
     Route::get('/customer/dashboard', [CustomerDashboardController::class, 'index'])->name('customer.dashboard');
-    Route::post('/card/add', [CustomerDashboardController::class, 'addToCart'])->name('cart.add');
+    Route::post('/cart/toggle', [CustomerDashboardController::class, 'toggleCart']);
     Route::delete('/cart/remove/{productId}', [GoodsIssueController::class, 'removeFromCart'])->name('cart.remove');
     Route::post('/cart/store-order', [GoodsIssueController::class, 'storeOrder'])->name('cart.storeOrder');
 });

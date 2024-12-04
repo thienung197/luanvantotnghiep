@@ -58,7 +58,7 @@
                         @if ($goodsIssue->status == 'pending')
                             <span class="order-status">Đơn hàng chưa được xử lý</span>
                         @elseif($goodsIssue->status == 'approved')
-                            <span class="order-status">Đơn hàng đã được phê duyệt</span>
+                            <span class="order-status">Đơn hàng đã được phân bổ đến các kho</span>
                         @elseif($goodsIssue->status == 'processing')
                             <span class="order-status">Đơn hàng đang trong quá trình lấy hàng từ kho</span>
                         @elseif($goodsIssue->status == 'shipping')
@@ -142,16 +142,15 @@
                                 <button id="btn-create">Đề xuất</button>
                                 <button id="btn-distribute">Phân kho </button>
                             </div>
-                            <strong class="order-label">Bảng khoảng cách từ nhà kho đến vị trí khách hàng, tính bằng
-                                km</strong>
+
                             <div id="warehouse-details-container">
 
                             </div>
                             <div id="batch-details-container">
-                                <strong class="order-label">Thông tin về các lô hàng tại có nhà kho</strong>
+
                             </div>
                             <div class="suggestion-container">
-                                <strong class="order-label">Đề xuất phân phối lô hàng từ nhà kho</strong>
+                                <div id="suggest-label"></div>
 
                                 <form action="{{ route('admin.goodsissue.store') }}" method="POST" id="distribution-form">
                                     @csrf
@@ -160,21 +159,7 @@
                                     {{-- <h6>Chọn <span id="batch-product-name"></span> sản phẩm từ lô hàng </h6> --}}
                                     <table id="batch-table-{{ $goodsIssue->id }}"
                                         class="table table-border batch-table table-product">
-                                        <thead>
-                                            <tr>
-                                                <th>Lô hàng</th>
-                                                <th>Ngày sản xuất</th>
-                                                <th>Ngày hết hạn</th>
-                                                <th>Số lượng có sẵn</th>
-                                                <th>Số lượng chọn</th>
-                                                <th>Đơn giá (VNĐ)</th>
-                                                <th>Giảm giá (VNĐ)</th>
-                                                <th>Thành tiền</th>
-                                                <th>Xuất từ kho</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="batch-tbody">
-                                        </tbody>
+
                                     </table>
                                 </form>
                             </div>
@@ -189,6 +174,13 @@
 
 @push('css')
     <style>
+        #btn-distribute,
+        #btn-create {
+            border-radius: 2px;
+            background-color: var(--color-blue);
+            font-size: 20px;
+        }
+
         .form-control:disabled,
         .form-control[readonly] {
             background-color: #fff;
@@ -206,9 +198,6 @@
             border: none;
         }
 
-        .suggestion-container {
-            display: none;
-        }
 
 
 
@@ -258,19 +247,19 @@
             toastr.success("{{ Session::get('message') }}");
         @endif
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const btnCreate = document.getElementById('btn-create');
-            const suggestionContainer = document.querySelector('.suggestion-container');
+        // document.addEventListener('DOMContentLoaded', function() {
+        //     const btnCreate = document.getElementById('btn-create');
+        //     const suggestionContainer = document.querySelector('.suggestion-container');
 
-            btnCreate.addEventListener('click', function() {
-                if (suggestionContainer.style.display === 'none' || suggestionContainer.style.display ===
-                    '') {
-                    suggestionContainer.style.display = 'block';
-                } else {
-                    suggestionContainer.style.display = 'none';
-                }
-            });
-        });
+        //     btnCreate.addEventListener('click', function() {
+        //         if (suggestionContainer.style.display === 'none' || suggestionContainer.style.display ===
+        //             '') {
+        //             suggestionContainer.style.display = 'block';
+        //         } else {
+        //             suggestionContainer.style.display = 'none';
+        //         }
+        //     });
+        // });
 
         $(document).on("click", "#btn-distribute", function(e) {
             let goodIssueId = $(".goods-issue-id").first().text().trim();
@@ -281,15 +270,21 @@
 
         $(document).on("click", "#btn-create", function() {
             let batchId = $("#goodIssueId").text().trim();
+            const suggestLabel = document.querySelector("#suggest-label");
+            const strongLabel = document.createElement("strong");
+            strongLabel.classList.add("order-label");
+            strongLabel.textContent = `Đề xuất phân phối lô hàng từ nhà kho`;
+            suggestLabel.appendChild(strongLabel);
             let productsData = [];
             $(`#product-table-${batchId} tbody tr`).each(function() {
 
                 let locationId = $("#customer_location_id").text().trim();
                 let productId = $(this).find('td').eq(1).text().trim();
                 let quantity = $(this).find('td').eq(4).text().trim();
-                let unitPrice = $(this).find('td').eq(5).text().trim();
-                let discount = $(this).find('td').eq(6).text().trim();
-                let totalPrice = $(this).find('td').eq(7).text().trim();
+                let unit = $(this).find('td').eq(5).text().trim();
+                let unitPrice = $(this).find('td').eq(6).text().trim();
+                let discount = $(this).find('td').eq(7).text().trim();
+                let totalPrice = $(this).find('td').eq(8).text().trim();
                 if (locationId && quantity && productId) {
                     productsData.push({
                         productId: productId,
@@ -297,13 +292,16 @@
                         locationId: locationId,
                         unitPrice,
                         discount,
-                        totalPrice
+                        totalPrice,
+                        unit
                     });
 
                 }
             });
 
             if (productsData.length > 0) {
+                console.log(productsData);
+
                 fetchBatches(productsData);
             } else {
                 console.error("No valid product data found.");
@@ -376,6 +374,10 @@
 
             table.appendChild(tbody);
             document.querySelector("#warehouse-details-container").innerHTML = '';
+            const strongLabel = document.createElement("strong");
+            strongLabel.classList.add("order-label");
+
+            document.querySelector("#warehouse-details-container").appendChild(strongLabel);
             document.querySelector("#warehouse-details-container").appendChild(table);
         }
 
@@ -390,6 +392,10 @@
             // Tạo phần nội dung cho tab
             const tabContent = document.createElement('div');
             tabContent.classList.add('tab-content');
+            const strongLabel = document.createElement("strong");
+            strongLabel.classList.add("order-label");
+            strongLabel.textContent = `Thông tin về các lô hàng tại có nhà kho`;
+            container.appendChild(strongLabel);
             container.appendChild(tabContent);
 
             let isFirstTab = true;
@@ -490,10 +496,24 @@
                     const batchDetails = res.batchDetails;
                     createWarehouseDetail(warehouseDetails);
                     createBatchDetail(batchDetails);
-                    let batchTbody = document.getElementById("batch-tbody");
+                    let batchTbody = document.querySelector(".batch-table");
                     batchTbody.innerHTML = "";
-
+                    const thead = document.createElement('thead');
+                    const trHead = document.createElement('tr');
+                    const headers = ['Lô hàng', 'Ngày sản xuất', 'Ngày hết hạn',
+                        'Đơn vị tính', 'Số lượng có sẵn', 'Số lượng chọn',
+                        'Đơn giá (VNĐ)', 'Giảm giá (VNĐ)', 'Thành tiền (VNĐ)',
+                        'Xuất từ kho'
+                    ];
+                    headers.forEach(header => {
+                        const th = document.createElement('th');
+                        th.textContent = header;
+                        trHead.appendChild(th);
+                    });
+                    thead.appendChild(trHead);
+                    batchTbody.appendChild(thead);
                     res.batches.forEach(productBatches => {
+                        console.log(productBatches);
 
                         let productId = productBatches.productId;
 
@@ -504,7 +524,6 @@
                         let newRow = document.createElement("tr");
                         newRow.style.display = "none";
 
-                        // Product ID Cell with Input
                         let productCell = document.createElement("td");
                         let productInput = document.createElement("input");
                         productInput.setAttribute("type", "hidden");
@@ -514,7 +533,6 @@
                         productCell.appendChild(productInput);
                         newRow.appendChild(productCell);
 
-                        // Total Required Cell with Input
                         let totalRequiredCell = document.createElement("td");
                         let totalRequiredInput = document.createElement("input");
                         totalRequiredInput.setAttribute("type", "hidden");
@@ -587,6 +605,10 @@
                             expiryDateCell.appendChild(expiryDateInput);
                             batchRow.appendChild(expiryDateCell);
 
+                            let unitCell = document.createElement("td");
+                            unitCell.textContent = batch.unit;
+                            batchRow.appendChild(unitCell);
+
                             // Available Quantity Cell with Input
                             let availableQuantityCell = document.createElement("td");
                             let availableQuantityInput = document.createElement("input");
@@ -614,6 +636,7 @@
                             quantityInput.setAttribute("value", batch.quantityToTake);
                             quantityInput.setAttribute("min", 1);
                             quantityInput.setAttribute("max", batch.quantity);
+                            // quantityInput.disabled = "true";
                             quantityCell.appendChild(quantityInput);
                             batchRow.appendChild(quantityCell);
 
@@ -628,6 +651,7 @@
                             let unitPrice = parseFloat(batch.unitPrice.replace(/,/g, '') ||
                                 0); // Loại bỏ dấu phẩy
                             unitPriceInput.setAttribute("value", unitPrice);
+                            // unitPriceInput.disabled = "true";
                             unitPriceCell.appendChild(unitPriceInput);
                             batchRow.appendChild(unitPriceCell);
 
@@ -640,8 +664,9 @@
                             discountInput.setAttribute("name",
                                 `batchData[${productId}][batches][${index}][discount]`);
                             let discount = parseFloat(batch.discount.replace(/,/g, '') ||
-                                0); // Loại bỏ dấu phẩy
+                                0);
                             discountInput.setAttribute("value", discount);
+                            // discountInput.disabled = "true";
                             discountCell.appendChild(discountInput);
                             batchRow.appendChild(discountCell);
 
@@ -652,10 +677,19 @@
                             totalAmountInput.classList.add("form-control");
                             totalAmountInput.style.textAlign = "right";
                             totalAmountInput.setAttribute("name",
-                                `batchData[${productId}][batches][${index}]totalAmount]`);
+                                `batchData[${productId}][batches][${index}][totalAmount]`);
                             // let totalAmount = parseFloat(discount.replace(/,/g, '') ||
-                            //     0); // Loại bỏ dấu phẩy
+                            //     0); 
                             totalAmountInput.setAttribute("value", discount);
+                            // totalAmountInput.disabled = "true";
+                            const quantityToTake = parseFloat(batch.quantityToTake) || 0;
+                            const unitPriceToCal = parseFloat(batch.unitPrice.replace(/,/g,
+                                    '')) ||
+                                0;
+                            const discountToCal = parseFloat(batch.discount) || 0;
+                            const totalAmount = (quantityToTake * unitPriceToCal) -
+                                discountToCal;
+                            totalAmountInput.value = totalAmount;
                             totalAmountCell.appendChild(totalAmountInput);
                             batchRow.appendChild(totalAmountCell);
 
@@ -669,6 +703,8 @@
                             warehouseInput.setAttribute("name",
                                 `batchData[${productId}][batches][${index}][warehouse]`);
                             warehouseInput.setAttribute("value", batch.warehouse);
+                            // warehouseInput.disabled = "true";
+                            warehouseInput.style.minWidth = "340px";
                             warehouseCell.appendChild(warehouseInput);
                             batchRow.appendChild(warehouseCell);
 
@@ -685,7 +721,8 @@
                             warehouseIdCell.appendChild(warehouseIdInput);
                             batchRow.appendChild(warehouseIdCell);
 
-                            batchTbody.appendChild(batchRow);
+
+                            batchTbody.appendChild(batchRow)
                         });
                     });
                 },

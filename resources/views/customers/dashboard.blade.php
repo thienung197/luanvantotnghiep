@@ -145,20 +145,30 @@
         .card-body span {
             width: 50px;
         }
+
+        .add-to-cart-btn.in-cart {
+            opacity: 0.6;
+        }
     </style>
 @endpush
 
 @push('js')
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            const cart = @json($cart);
 
             document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+                const productId = parseInt(button.getAttribute('data-product-id'));
+
+                if (cart.includes(productId)) {
+                    button.textContent = "Đã thêm vào giỏ hàng";
+                    button.classList.add("in-cart");
+                }
+
                 button.addEventListener("click", function() {
-                    this.textContent = "Đã thêm vào giỏ hàng";
-                    this.classList.add("diabled");
-                    this.disabled = true;
-                    const productId = this.getAttribute('data-product-id');
-                    fetch('/card/add', {
+                    const isAdded = this.classList.contains("in-cart");
+
+                    fetch('/cart/toggle', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -169,12 +179,17 @@
                                 product_id: productId
                             })
                         })
-                        .then(res => res.json())
+                        .then(response => response.json())
                         .then(data => {
-                            console.log("Sản phẩm đã được thêm vào giỏ hàng!");
-
+                            if (data.status === 'added') {
+                                this.textContent = "Đã thêm vào giỏ hàng";
+                                this.classList.add("in-cart");
+                            } else {
+                                this.textContent = "Thêm vào giỏ hàng";
+                                this.classList.remove("in-cart");
+                            }
                         })
-                        .catch(err => console.error('Error: ', err))
+                        .catch(err => console.error('Error: ', err));
                 });
             });
         });

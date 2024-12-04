@@ -12,6 +12,8 @@ use App\Models\Product;
 use App\Models\Provider;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderDetail;
+use App\Models\ReceivingDetail;
+use App\Models\ReceivingNotes;
 use App\Models\User;
 use App\Models\Warehouse;
 use Illuminate\Http\Request;
@@ -172,6 +174,25 @@ class AdminGoodsReceiptController extends Controller
         $lastCode = $lastGoodsReceipt ? $lastGoodsReceipt->code : 'PNH0000';
         $nextCodeNumber = intval(substr($lastCode, 3)) + 1;
 
+        $lastReceive = ReceivingNotes::latest('id')->first();
+        $lastCodeReceive = $lastReceive ? $lastReceive->code : 'PNH0000';
+        $nextCodeReceiveNumber = intval(substr($lastCodeReceive, 3)) + 1;
+        $receive = ReceivingNotes::create([
+            'purchase_order_id' => $request->purchase_order,
+            'provider_id' => $request->provider_id,
+            'user_id' => $request->user_id,
+        ]);
+        $receiveDetail = ReceivingDetail::create([
+            'receiving_notes_id' => $receive->id,
+            'product_id' => $request->product_id,
+            'quantity' => $request->delivered_quantity,
+            'unit_price' => $request->unit_price,
+            'discount' => $request->discount,
+            'manufacturing_date' => $request->nsx,
+            'expiry_date' => $request->hsd
+        ]);
+
+
         foreach ($request->distributions as $distribution) {
             // if (!is_array($distribution)) {
             //     throw new \Exception("Dữ liệu phân phối không hợp lệ. Giá trị phân phối không phải là mảng.");
@@ -181,7 +202,7 @@ class AdminGoodsReceiptController extends Controller
             //     throw new \Exception("Thông tin chi tiết phân phối không hợp lệ.");
             // }
 
-            $newCode = 'PNHNCC' . str_pad($nextCodeNumber, 5, '0', STR_PAD_LEFT);
+            $newCode = 'PNHNCC' . str_pad($nextCodeNumber, 4, '0', STR_PAD_LEFT);
             $nextCodeNumber++;
 
             $goodsReceipt = GoodsReceipt::create([
@@ -189,9 +210,13 @@ class AdminGoodsReceiptController extends Controller
                 'provider_id' => $request->provider_id,
                 'creator_id' => $request->user_id,
                 'warehouse_id' => $distribution['warehouse_id'],
+                'receiving_detail_id' => $receiveDetail->id,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
+
+            PurchaseOrderDetail::where('purchase_order_id', $request->purchase_order)
+                ->where('product_id', $distribution['product_id'])->update(['status' => 'fulfilled']);
 
             GoodsReceiptDetail::create([
                 'goods_receipt_id' => $goodsReceipt->id,
@@ -204,6 +229,10 @@ class AdminGoodsReceiptController extends Controller
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
+            $newCodeReceive = 'PGN' . str_pad($nextCodeReceiveNumber, 5, '0', STR_PAD_LEFT);
+            $nextCodeReceiveNumber++;
+
+
             $latestCode = Batch::orderByDesc('id')->first();
             if ($latestCode) {
                 $lastNumber = (int)substr($latestCode->code, 2);
@@ -243,7 +272,7 @@ class AdminGoodsReceiptController extends Controller
         }
 
         DB::commit();
-        return redirect()->route('goodsreceipts.index')->with('message', 'Phiếu nhận hàng đã được tạo thành công.');
+        return redirect()->route('goodsreceipts.display')->with('message', 'Phiếu nhận hàng đã được tạo thành công.');
         // } catch (\Exception $e) {
         //     DB::rollBack();
         //     return back()->with('error', 'Đã xảy ra lỗi khi tạo phiếu nhận hàng: ' . $e->getMessage());
@@ -254,24 +283,27 @@ class AdminGoodsReceiptController extends Controller
      * Display the specified resource.
      */
     public function show() {}
-
     public function display()
     {
         // dd(route('goodsreceipts.display'));
-        $purchaseOrders = $this->purchaseOrder::with([
-            'purchaseOrderDetails.product' => function ($query) {
+        $purchaseOrders = $this->purchaseOrder::where('status', 'pending')->with(['purchaseOrderDetails' => function ($query) {
+            $query->where('status', 'pending')->with(['product' => function ($query) {
                 $query->select('id', 'code', 'name', 'unit_id')->with('unit:id,name');
-            },
-            'provider:id,name',
-        ])->latest('id')->get();
-
-        $productIds = $purchaseOrders->flatMap(function ($order) {
-            return $order->purchaseOrderDetails->pluck('product_id');
+            }]);
+        }, 'provider:id,name'])->latest('id')->get();
+        $recordedProducts = ReceivingDetail::join('products', 'receiving_details.product_id', '=', 'products.id')->join('units', 'products.unit_id', '=', 'units.id')->join('receiving_notes', 'receiving_details.receiving_notes_id', '=', 'receiving_notes.id')->join('goods_receipts', 'receiving_details.id', '=', 'goods_receipts.receiving_detail_id')->join('goods_receipt_details', 'goods_receipts.id', '=', 'goods_receipt_details.goods_receipt_id')->join('warehouses', 'goods_receipts.warehouse_id', '=', 'warehouses.id')->join('purchase_orders', 'receiving_notes.purchase_order_id', '=', 'purchase_orders.id')->select('products.code as product_code', 'products.name as product_name', 'units.name as unit_name', 'receiving_details.quantity as received_quantity', 'receiving_details.manufacturing_date as nsx', 'receiving_details.expiry_date as hsd', 'receiving_details.unit_price as unit_price', 'receiving_details.discount as discount', 'warehouses.name as warehouse_name', 'goods_receipt_details.quantity as warehouse_quantity', 'receiving_notes.purchase_order_id')->get()->groupBy('purchase_order_id');
+        $productPendingIds = $purchaseOrders->flatMap(function ($order) {
+            return $order->purchaseOrderDetails->where('status', 'pending')->pluck('product_id');
         });
+        foreach ($purchaseOrders as $purchaseOrder) {
+            $purchaseOrder->recordedProducts = $recordedProducts->get($purchaseOrder->id, collect());
+        }
+
+        info($purchaseOrders);
 
         $distributionData = DB::table('restock_request_details')
             ->join('restock_requests', 'restock_request_details.restock_request_id', '=', 'restock_requests.id')
-            ->whereIn('restock_request_details.product_id', $productIds)
+            ->whereIn('restock_request_details.product_id', $productPendingIds)
             ->where('restock_request_details.status', 'ordered')
             ->select(
                 'restock_request_details.product_id',
@@ -279,6 +311,7 @@ class AdminGoodsReceiptController extends Controller
                 'restock_requests.warehouse_id'
             )
             ->get();
+        info($distributionData);
         $warehouses = $this->warehouse->all();
         // info($purchaseOrders);
         // info($distributionData);

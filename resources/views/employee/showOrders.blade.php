@@ -7,7 +7,7 @@
         </div>
         <div class="content_header--path">
             <img src="{{ asset('img/home.png') }}" alt="">
-            <p><a href="">Home</a> > <a href="{{ route('manager.goodsissues.order') }}">Yêu cầu xuất hàng</a></p>
+            <p><a href="">Home</a> > <a href="{{ route('manager.goodsissues.order') }}">Yêu cầu xuất kho</a></p>
         </div>
     </div>
     {{-- <div class="btn-cs btn-add">
@@ -122,5 +122,22 @@
         @if (Session::has('message'))
             toastr.success("{{ Session::get('message') }}");
         @endif
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const rows = document.querySelectorAll('.goods-issue-row');
+
+            rows.forEach(row => {
+                row.addEventListener('click', function() {
+                    const goodsIssueId = this.dataset.id;
+                    const detailsRow = document.getElementById(`details-${goodsIssueId}`);
+
+                    if (detailsRow.style.display === 'none' || detailsRow.style.display === '') {
+                        detailsRow.style.display = 'table-row';
+                    } else {
+                        detailsRow.style.display = 'none';
+                    }
+                });
+            });
+        });
     </script>
 @endpush

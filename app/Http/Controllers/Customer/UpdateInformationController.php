@@ -111,7 +111,7 @@ class UpdateInformationController extends Controller
                 $user->images()->create(['url' => $dataUpdate['image']]);
             }
 
-            return to_route('customers.update.index')->with(['message' => 'Cập nhật thông tin khách hàng thành công!']);
+            return to_route('customers.update.index')->with(['message' => 'Cập nhật thông tin thành công!']);
         } else {
             return back()->withErrors(['user' => 'Không tìm thấy người dùng.']);
         }

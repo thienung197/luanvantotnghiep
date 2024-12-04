@@ -127,7 +127,7 @@ class ComprehensiveStockReportController extends Controller
             ComprehensiveStockReportDetail::create([
                 'comprehensive_stock_report_id' => $comprehensiveStockReport->id,
                 'product_id' => $product['product_id'],
-                'beginning_inventory' => $product['beginning_inventory'],
+                // 'beginning_inventory' => $product['beginning_inventory'],
                 'stock_in' => $product['stock_in'],
                 'stock_out' => $product['stock_out'],
                 'ending_inventory' => $product['ending_inventory'],

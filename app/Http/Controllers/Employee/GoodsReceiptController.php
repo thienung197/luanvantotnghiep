@@ -46,7 +46,7 @@ class GoodsReceiptController extends Controller
     {
         $user = Auth::user();
         $warehouseId = $user->warehouse_id;
-        $goodsReceipts = GoodsReceipt::where('warehouse_id', $warehouseId)->get();
+        $goodsReceipts = GoodsReceipt::where('warehouse_id', $warehouseId)->latest('id')->get();
         return view('employee.goods-receipts.index', compact('goodsReceipts'));
     }
 

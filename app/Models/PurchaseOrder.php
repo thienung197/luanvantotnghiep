@@ -29,6 +29,11 @@ class PurchaseOrder extends Model
         return $this->hasMany(PurchaseOrderDetail::class);
     }
 
+    public function receivingNotes()
+    {
+        return $this->hasMany(ReceivingNotes::class);
+    }
+
     public function getTotalAmountAttribute()
     {
         return $this->purchaseOrderDetails->sum(function ($detail) {
