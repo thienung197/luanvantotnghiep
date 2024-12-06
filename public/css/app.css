@@ -487,7 +487,7 @@ img.avatar {
 }
 
 .table > :not(caption) > * > * {
-    background-color: transparent !important;
+    /* background-color: transparent !important; */
     box-shadow: none !important;
 }
 
@@ -633,7 +633,7 @@ img.avatar {
 /* css cho toast  */
 
 .toast {
-    font-size: 18px; /* Change this value to your desired font size */
+    font-size: 18px;
 }
 
 /* css cho modal  */
@@ -917,4 +917,16 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .toast {
     z-index: 9999 !important;
+}
+
+strong {
+    color: #000 !important;
+}
+
+input[type="number"] {
+    text-align: center !important;
+}
+
+table.table-product th {
+    background-color: yellowgreen !important;
 }

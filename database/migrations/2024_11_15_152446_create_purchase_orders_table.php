@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('code', 20);
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Provider::class)->constrained()->cascadeOnDelete();
+            $table->enum('status', ['pending', 'fulfilled', 'processing']);
             $table->timestamps();
         });
     }

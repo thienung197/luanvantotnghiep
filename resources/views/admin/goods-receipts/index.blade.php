@@ -46,6 +46,7 @@
                                             @foreach ($product['restock_details'] as $detail)
                                                 <li>
                                                     <strong>Nhà kho: </strong> {{ $detail['warehouse_name'] }}<br />
+
                                                     <strong>Số lượng yêu cầu: </strong><span class="order-status">
                                                         {{ $detail['quantity'] }}</span>
                                                 </li>
@@ -64,6 +65,9 @@
                                             value="{{ $product['unit'] }}">
                                         <input type="hidden" name="products[{{ $product['id'] }}][totalQuantity]"
                                             value="{{ $product['totalQuantity'] }}">
+                                        <input type="hidden"
+                                            name="products[{{ $product['id'] }}][restock_request_detail_ids]"
+                                            value="{{ implode(',', $product['restock_request_detail_ids']) }}">
                                     </td>
                                 </tr>
                             @endforeach

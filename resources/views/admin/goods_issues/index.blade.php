@@ -50,7 +50,6 @@
             @foreach ($goodsIssues as $goodsIssue)
                 <tr class="goods-issue-row" data-id="{{ $goodsIssue->id }}">
                     <td>{{ $goodsIssue->code }}</td>
-                    {{-- <td>{{ $goodsIssue->getCustomerCode() }}</td> --}}
                     <td>{{ $goodsIssue->getCustomerName() }}</td>
                     <td>{{ $goodsIssue->created_at }}</td>
                     <td>{{ $goodsIssue->getTotalAmount() }}</td>
@@ -76,19 +75,6 @@
                             Chưa có người phê duyệt
                         @endif
                     </td>
-                    {{-- <td class="btn-cell">
-                        <a href="{{ route('goodsissues.edit', $goodsIssue->id) }}">
-                            <img src="{{ asset('img/edit.png') }}" alt="">
-                        </a>
-                        <form action="{{ route('goodsissues.destroy', $goodsIssue->id) }}" method="POST"
-                            id="form-delete{{ $goodsIssue->id }}">
-                            @csrf
-                            @method('delete')
-                        </form>
-                        <button type="submit" class="btn-delete" data-id="{{ $goodsIssue->id }}">
-                            <img src="{{ asset('img/delete.png') }}" alt="">
-                        </button>
-                    </td> --}}
                 </tr>
 
                 <tr class="goods-issue-details" id="details-{{ $goodsIssue->id }}" style="display: none;">
@@ -106,63 +92,99 @@
                                 </p>
                             </div>
                             <p style="display: none" id="goodIssueId">{{ $goodsIssue->id }}</p>
-                            {{-- <strong>Sản phẩm</strong> --}}
-                            <table class="table table-bordered table-product" id="product-table-{{ $goodsIssue->id }}">
-                                <thead>
-                                    <tr>
-                                        <th>Mã hàng</th>
-                                        <th>Tên hàng</th>
-                                        <th>Số lượng</th>
-                                        <th>Đơn vị tính</th>
-                                        <th>Giá bán (VNĐ)</th>
-                                        <th>Giảm giá (VNĐ)</th>
-                                        <th>Thành tiền (VNĐ)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($goodsIssue->goodsIssueDetails as $detail)
-                                        <tr>
-                                            <td style="display: none" class="goods-issue-id">{{ $detail->goods_issue_id }}
-                                            </td>
-                                            <td style="display: none">{{ $detail->product->id }}</td>
-                                            <td>{{ $detail->product->code }}</td>
-                                            <td>{{ $detail->product->name ?? 'N/A' }}</td>
-                                            <td>{{ $detail->quantity }}</td>
-                                            <td>{{ $detail->product->unit->name }}</td>
-                                            <td class="goods-issue-unit-price">{{ number_format($detail->unit_price, 2) }}
-                                            </td>
-                                            <td class="goods-issue-discount">{{ number_format($detail->discount, 2) }}</td>
-                                            <td>{{ number_format($detail->quantity * $detail->unit_price - $detail->discount, 2) }}
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                            <div class="d-flex button-container">
-                                <button id="btn-create">Đề xuất</button>
-                                <button id="btn-distribute">Phân kho </button>
-                            </div>
-
-                            <div id="warehouse-details-container">
-
-                            </div>
-                            <div id="batch-details-container">
-
-                            </div>
-                            <div class="suggestion-container">
-                                <div id="suggest-label"></div>
-
-                                <form action="{{ route('admin.goodsissue.store') }}" method="POST" id="distribution-form">
-                                    @csrf
-                                    <input type="hidden" name="goods-issue" id="goods-issue">
-
-                                    {{-- <h6>Chọn <span id="batch-product-name"></span> sản phẩm từ lô hàng </h6> --}}
-                                    <table id="batch-table-{{ $goodsIssue->id }}"
-                                        class="table table-border batch-table table-product">
-
+                            @if ($goodsIssue->goodsIssueBatches->isNotEmpty())
+                                <div class="goods-issue-batch-container "> <strong class="batch-label">Thông
+                                        tin các lô
+                                        hàng</strong>
+                                    <table class="table table-bordered table-product">
+                                        <thead>
+                                            <tr>
+                                                <th>Tên sản phẩm</th>
+                                                <th>Mã lô hàng</th>
+                                                <th>Kho</th>
+                                                <th>Số lượng</th>
+                                                <th>Đơn giá</th>
+                                                <th>Giảm giá</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($goodsIssue->goodsIssueBatches as $batch)
+                                                <tr>
+                                                    <td>{{ $batch->batch->product->name }}</td>
+                                                    <td>{{ $batch->batch->code }}</td>
+                                                    <td>{{ $batch->warehouse->name }}</td>
+                                                    <td>{{ $batch->quantity }}</td>
+                                                    <td>{{ $batch->unit_price }}</td>
+                                                    <td>{{ $batch->discount }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
                                     </table>
-                                </form>
-                            </div>
+                                </div>
+                            @else
+                                <table class="table table-bordered table-product" id="product-table-{{ $goodsIssue->id }}">
+                                    <thead>
+                                        <tr>
+                                            <th>Mã hàng</th>
+                                            <th>Tên hàng</th>
+                                            <th>Số lượng</th>
+                                            <th>Đơn vị tính</th>
+                                            <th>Giá bán (VNĐ)</th>
+                                            <th>Giảm giá (VNĐ)</th>
+                                            <th>Thành tiền (VNĐ)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($goodsIssue->goodsIssueDetails as $detail)
+                                            <tr>
+                                                <td style="display: none" class="goods-issue-id">
+                                                    {{ $detail->goods_issue_id }}
+                                                </td>
+                                                <td style="display: none">{{ $detail->product->id }}</td>
+                                                <td>{{ $detail->product->code }}</td>
+                                                <td>{{ $detail->product->name ?? 'N/A' }}</td>
+                                                <td>{{ $detail->quantity }}</td>
+                                                <td>{{ $detail->product->unit->name }}</td>
+                                                <td class="goods-issue-unit-price">
+                                                    {{ number_format($detail->unit_price, 2) }}
+                                                </td>
+                                                <td class="goods-issue-discount">{{ number_format($detail->discount, 2) }}
+                                                </td>
+                                                <td>{{ number_format($detail->quantity * $detail->unit_price - $detail->discount, 2) }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                                <div class="d-flex button-container">
+                                    <button id="btn-create">Đề xuất</button>
+                                    <button id="btn-distribute">Phân kho </button>
+                                </div>
+
+                                <div id="warehouse-details-container">
+
+                                </div>
+                                <div id="batch-details-container">
+
+                                </div>
+                                <div class="suggestion-container">
+                                    <div id="suggest-label"></div>
+
+                                    <form action="{{ route('admin.goodsissue.store') }}" method="POST"
+                                        id="distribution-form">
+                                        @csrf
+                                        <input type="hidden" name="goods-issue" id="goods-issue">
+
+                                        {{-- <h6>Chọn <span id="batch-product-name"></span> sản phẩm từ lô hàng </h6> --}}
+                                        <table id="batch-table-{{ $goodsIssue->id }}"
+                                            class="table table-border batch-table table-product">
+
+                                        </table>
+                                    </form>
+                                </div>
+                            @endif
+                            {{-- <strong>Sản phẩm</strong> --}}
+
                         </div>
                     </td>
                 </tr>

@@ -1,13 +1,13 @@
 @extends('layouts.app')
-@section('title', 'Phiếu báo cáo xuất nhập tồn')
+@section('title', 'Phiếu báo cáo xuất nhập ')
 @section('content')
     <div class="content_header">
         <div class="content_header--title">
-            Quản lý phiếu báo cáo xuất nhập tồn
+            Quản lý phiếu báo cáo xuất nhập
         </div>
         <div class="content_header--path">
             <img src="{{ asset('img/home.png') }}" alt="">
-            <p><a href="">Home</a> > <a href="">Phiếu báo cáo xuất nhập tồn</a></p>
+            <p><a href="">Home</a> > <a href="">Phiếu báo cáo xuất nhập </a></p>
         </div>
     </div>
     <div class="table_container">
@@ -51,21 +51,7 @@
                     <td>{{ $comprehensiveStockReport->start_date }}</td>
                     <td>{{ $comprehensiveStockReport->end_date }}</td>
                     <td>{{ $comprehensiveStockReport->getUserName() }}</td>
-
                     <td>{{ $comprehensiveStockReport->created_at }}</td>
-                    {{-- <td class="btn-cell">
-                        <a href="{{ route('comprehensive-stock-report.edit', $comprehensiveStockReport->id) }}">
-                            <img src="{{ asset('img/edit.png') }}" alt="">
-                        </a>
-                        <form action="{{ route('comprehensive-stock-report.destroy', $comprehensiveStockReport->id) }}"
-                            method="POST" id="form-delete{{ $comprehensiveStockReport->id }}">
-                            @csrf
-                            @method('delete')
-                        </form>
-                        <button type="submit" class="btn-delete" data-id="{{ $comprehensiveStockReport->id }}">
-                            <img src="{{ asset('img/delete.png') }}" alt="">
-                        </button>
-                    </td> --}}
                 </tr>
 
                 <tr class="goods-issue-details" id="details-{{ $comprehensiveStockReport->id }}" style="display: none;">
@@ -78,32 +64,30 @@
                                         <th>Mã hàng</th>
                                         <th>Tên hàng</th>
                                         <th>Đơn vị tính</th>
-                                        <th>Tồn đầu kỳ</th>
+                                        {{-- <th>Tồn đầu kỳ</th> --}}
                                         <th>Nhập trong kỳ</th>
                                         <th>Xuất trong kỳ</th>
-                                        <th>Tồn cuối kỳ</th>
+                                        {{-- <th>Tồn cuối kỳ</th> --}}
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($comprehensiveStockReports as $comprehensiveStockReport)
-                                        @if ($comprehensiveStockReport->comprehensiveStockReportDetails->isNotEmpty())
-                                            @foreach ($comprehensiveStockReport->comprehensiveStockReportDetails as $detail)
-                                                <tr>
-                                                    <td>{{ $detail->product->code }}</td>
-                                                    <td>{{ $detail->product->name }}</td>
-                                                    <td>{{ $detail->product->unit->name }}</td>
-                                                    <td>{{ $detail->beginning_inventory }}</td>
-                                                    <td>{{ $detail->stock_in }}</td>
-                                                    <td>{{ $detail->stock_out }}</td>
-                                                    <td>{{ $detail->ending_inventory }}</td>
-                                                </tr>
-                                            @endforeach
-                                        @else
+                                    @if ($comprehensiveStockReport->comprehensiveStockReportDetails->isNotEmpty())
+                                        @foreach ($comprehensiveStockReport->comprehensiveStockReportDetails as $detail)
                                             <tr>
-                                                <td colspan="7">No data available</td>
+                                                <td>{{ $detail->product->code }}</td>
+                                                <td>{{ $detail->product->name }}</td>
+                                                <td>{{ $detail->product->unit->name }}</td>
+                                                {{-- <td>{{ $detail->beginning_inventory }}</td> --}}
+                                                <td>{{ $detail->stock_in }}</td>
+                                                <td>{{ $detail->stock_out }}</td>
+                                                {{-- <td>{{ $detail->ending_inventory }}</td> --}}
                                             </tr>
-                                        @endif
-                                    @endforeach
+                                        @endforeach
+                                    @else
+                                        <tr>
+                                            <td colspan="7">No data available</td>
+                                        </tr>
+                                    @endif
                                 </tbody>
                             </table>
                         </div>
@@ -111,6 +95,7 @@
                 </tr>
             @endforeach
         </table>
+
     </div>
 @endsection
 

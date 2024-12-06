@@ -130,7 +130,7 @@ class ComprehensiveStockReportController extends Controller
                 // 'beginning_inventory' => $product['beginning_inventory'],
                 'stock_in' => $product['stock_in'],
                 'stock_out' => $product['stock_out'],
-                'ending_inventory' => $product['ending_inventory'],
+                // 'ending_inventory' => $product['ending_inventory'],
             ]);
         }
 

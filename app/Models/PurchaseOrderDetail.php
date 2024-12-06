@@ -21,6 +21,11 @@ class PurchaseOrderDetail extends Model
         return $this->belongsTo(Product::class);
     }
 
+    public function goodsReceipt()
+    {
+        return $this->hasMany(GoodsReceipt::class);
+    }
+
     public function receivingDetails()
     {
         return $this->hasManyThrough(

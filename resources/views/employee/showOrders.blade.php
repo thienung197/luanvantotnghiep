@@ -133,8 +133,11 @@
 
                     if (detailsRow.style.display === 'none' || detailsRow.style.display === '') {
                         detailsRow.style.display = 'table-row';
+                        row.style.backgroundColor = "rgb(230, 247, 236)";
                     } else {
                         detailsRow.style.display = 'none';
+                        row.style.backgroundColor = "#fff";
+
                     }
                 });
             });

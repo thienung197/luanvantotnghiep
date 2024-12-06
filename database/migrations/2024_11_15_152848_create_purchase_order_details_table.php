@@ -18,8 +18,7 @@ return new class extends Migration
             $table->foreignIdFor(PurchaseOrder::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Product::class)->constrained()->cascadeOnDelete();
             $table->integer('quantity');
-            $table->decimal('unit_price', 10, 2);
-            $table->decimal('discount', 10, 2);
+            $table->enum('status', ['pending', 'fulfilled']);
             $table->timestamps();
         });
     }

@@ -24,6 +24,11 @@ class GoodsIssueBatch extends Model
         return $this->belongsTo(GoodsIssue::class);
     }
 
+    public function warehouse()
+    {
+        return $this->belongsTo(Warehouse::class);
+    }
+
     public function batch()
     {
         return $this->belongsTo(Batch::class);

@@ -176,3 +176,29 @@
         }
     </style>
 @endpush
+
+@push('js')
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const rows = document.querySelectorAll(".goods-issue-row");
+
+            rows.forEach((row) => {
+                row.addEventListener("click", function() {
+                    const goodsIssueId = this.getAttribute("data-id");
+
+                    const detailsRow = document.getElementById(
+                        `details-${goodsIssueId}`
+                    );
+
+                    if (detailsRow.style.display === "none") {
+                        detailsRow.style.display = "table-row";
+                        row.style.backgroundColor = "rgb(230, 247, 236)";
+                    } else {
+                        detailsRow.style.display = "none";
+                        row.style.backgroundColor = "#fff";
+                    }
+                });
+            });
+        });
+    </script>
+@endpush

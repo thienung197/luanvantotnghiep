@@ -53,9 +53,12 @@
                     <td>{{ $purchaseOrder->provider->name }}</td>
                     <td>
                         @if ($purchaseOrder->status == 'pending')
-                            <span class="order-status"> Đơn hàng đã được tạo và gửi đến nhà cung cấp</span>
-                        @elseif($purchaseOrder->status == 'fulfilled')
-                            <span class="order-status">Đã tạo phiếu nhập kho</span>
+                            <span class="order-status" style="background-color: #aaae7c">Chưa được ghi nhận</span>
+                        @elseif($purchaseOrder->status == 'processing')
+                            <span class="order-status" style="background-color: yellow;color:green !important">Đang ghi nhận
+                            </span>
+                        @else
+                            <span class="order-status">Đã ghi nhận xong </span>
                         @endif
                     </td>
                 </tr>
@@ -63,113 +66,123 @@
                 <tr class="goods-issue-details" id="details-{{ $purchaseOrder->id }}" style="display: none;">
                     <td colspan="5">
                         <div class="details-container">
-                            <strong>Các hàng hóa đã phân phối</strong>
-                            <table class="table table-bordered table-product" id="product-table-{{ $purchaseOrder->id }}">
-                                <thead>
-                                    <tr>
-                                        <th>Mã hàng</th>
-                                        <th>Tên hàng</th>
-                                        <th>Đơn vị tính</th>
-                                        <th>Số lượng</th>
-                                        <th>NSX - HSD (nếu có)</th>
-                                        <th>Giá bán (Đơn vị VNĐ)</th>
-                                        <th>Giảm giá (Đơn vị VNĐ)</th>
-                                        <th>Thành tiền (Đơn vị VNĐ)</th>
-                                        <th>Phân phối hàng hóa</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($purchaseOrder->recordedProducts as $product)
+                            @if ($purchaseOrder->recordedProducts->isNotEmpty())
+                                <strong>Các hàng hóa đã phân phối</strong>
+
+                                <table class="table table-bordered table-product"
+                                    id="product-table-{{ $purchaseOrder->id }}">
+                                    <thead>
                                         <tr>
-                                            <td>{{ $product->product_code }}</td>
-                                            <td>{{ $product->product_name }}</td>
-                                            <td>{{ $product->unit_name }}</td>
-                                            <td>{{ $product->received_quantity }}</td>
-                                            <td>{{ $product->nsx }} - {{ $product->hsd }}</td>
-                                            <td>{{ number_format($product->unit_price, 2) }}</td>
-                                            <td>{{ number_format($product->discount, 2) }}</td>
-                                            <td>{{ number_format($product->received_quantity * $product->unit_price - $product->discount, 2) }}
-                                            </td>
-                                            <td>{{ $product->warehouse_name }}</td>
+                                            <th>Mã hàng</th>
+                                            <th>Tên hàng</th>
+                                            <th>Đơn vị tính</th>
+                                            <th>Số lượng</th>
+                                            <th>NSX - HSD (nếu có)</th>
+                                            <th>Giá bán (Đơn vị VNĐ)</th>
+                                            <th>Giảm giá (Đơn vị VNĐ)</th>
+                                            <th>Thành tiền (Đơn vị VNĐ)</th>
+                                            <th>Phân phối hàng hóa</th>
                                         </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                            <strong class="order-label">Ghi nhận và phân phối hàng hóa</strong>
-                            <table class="table table-bordered table-product" id="product-table-{{ $purchaseOrder->id }}">
-                                <thead>
-                                    <tr>
-                                        <th>Mã hàng</th>
-                                        <th>Tên hàng</th>
-                                        <th>Đơn vị tính</th>
-                                        <th>Số lượng</th>
-                                        <th>NSX- HSD (nếu có)</th>
-                                        <th>Giá bán<br> (Đơn vị VNĐ)</th>
-                                        <th>Giảm giá <br> (Đơn vị VNĐ)</th>
-                                        <th>Thành tiền <br> (Đơn vị VNĐ)</th>
-                                        <th>Phân phối hàng hóa</th>
-                                        <th>Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($purchaseOrder->purchaseOrderDetails as $detail)
-                                        <form action="{{ route('goodsreceipts.store-receipt') }}" method="POST">
-                                            @csrf
-                                            <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
-                                            <input type="hidden" name="purchase_order" value="{{ $purchaseOrder->id }}">
-                                            <input type="hidden" name="provider_id"
-                                                value="{{ $purchaseOrder->provider->id }}">
-                                            <input type="hidden" name="product_id" value="{{ $detail->product->id }}">
-
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($purchaseOrder->recordedProducts as $product)
                                             <tr>
-
-                                                <td>{{ $detail->product->code }}</td>
-                                                <td>{{ $detail->product->name ?? 'N/A' }}</td>
-                                                <td>{{ $detail->product->unit->name }}</td>
-                                                <td class="order-details">
-                                                    Số lượng đặt: <span class="quantity">{{ $detail->quantity }}</span><br>
-                                                    Số lượng giao:
-                                                    <input type="number" class="quantity-input" name="delivered_quantity"
-                                                        value="{{ $detail->delivered_quantity }}" min="0">
+                                                <td>{{ $product->product_code }}</td>
+                                                <td>{{ $product->product_name }}</td>
+                                                <td>{{ $product->unit_name }}</td>
+                                                <td>{{ $product->warehouse_quantity }}</td>
+                                                <td>{{ $product->nsx }} - {{ $product->hsd }}</td>
+                                                <td>{{ number_format($product->unit_price, 2) }}</td>
+                                                <td>{{ number_format($product->discount, 2) }}</td>
+                                                <td>{{ number_format($product->received_quantity * $product->unit_price - $product->discount, 2) }}
                                                 </td>
-                                                <td>
-                                                    <div class="date-group">
-                                                        <div class="date-field">
-                                                            <label for="nsx">Ngày sản xuất:</label>
-                                                            <input type="date" name="nsx" id="nsx"
-                                                                class="form-control">
+                                                <td>{{ $product->warehouse_name }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            @endif
+                            @if ($purchaseOrder->purchaseOrderDetails->isNotEmpty())
+                                <strong class="order-label">Ghi nhận và phân phối hàng hóa</strong>
+                                <table class="table table-bordered table-product"
+                                    id="product-table-{{ $purchaseOrder->id }}">
+                                    <thead>
+                                        <tr>
+                                            <th>Mã hàng</th>
+                                            <th>Tên hàng</th>
+                                            <th>Đơn vị tính</th>
+                                            <th>Số lượng</th>
+                                            <th>NSX- HSD (nếu có)</th>
+                                            <th>Giá bán<br> (Đơn vị VNĐ)</th>
+                                            <th>Giảm giá <br> (Đơn vị VNĐ)</th>
+                                            <th>Thành tiền <br> (Đơn vị VNĐ)</th>
+                                            <th>Phân phối hàng hóa</th>
+                                            <th>Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                        @foreach ($purchaseOrder->purchaseOrderDetails as $detail)
+                                            <form action="{{ route('goodsreceipts.store-receipt') }}" method="POST">
+                                                @csrf
+                                                <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
+                                                <input type="hidden" name="purchase_order"
+                                                    value="{{ $purchaseOrder->id }}">
+                                                <input type="hidden" name="provider_id"
+                                                    value="{{ $purchaseOrder->provider->id }}">
+                                                <input type="hidden" name="product_id" value="{{ $detail->product->id }}">
+
+                                                <tr>
+
+                                                    <td>{{ $detail->product->code }}</td>
+                                                    <td>{{ $detail->product->name ?? 'N/A' }}</td>
+                                                    <td>{{ $detail->product->unit->name }}</td>
+                                                    <td class="order-details">
+                                                        Số lượng đặt:<br> <span
+                                                            class="quantity">{{ $detail->quantity }}</span><br>
+                                                        Số lượng giao:<br>
+                                                        <input type="number" class="quantity-input"
+                                                            name="delivered_quantity"
+                                                            value="{{ $detail->delivered_quantity }}" min="0">
+                                                    </td>
+                                                    <td>
+                                                        <div class="date-group">
+                                                            <div class="date-field">
+                                                                <label for="nsx">Ngày sản xuất:</label>
+                                                                <input type="date" name="nsx" id="nsx"
+                                                                    class="form-control">
+                                                            </div>
+                                                            <div class="date-field">
+                                                                <label for="hsd">Hạn sử dụng:</label>
+                                                                <input type="date" name="hsd" id="hsd"
+                                                                    class="form-control">
+                                                            </div>
                                                         </div>
-                                                        <div class="date-field">
-                                                            <label for="hsd">Hạn sử dụng:</label>
-                                                            <input type="date" name="hsd" id="hsd"
-                                                                class="form-control">
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <input type="number" class="unit-price" name="unit_price"
-                                                        value="{{ $detail->unit_price }}" min="0">
-                                                </td>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" class="unit-price" name="unit_price"
+                                                            value="{{ $detail->unit_price }}" min="0">
+                                                    </td>
 
-                                                <td>
-                                                    <input type="number" class="discount" name="discount"
-                                                        value="{{ $detail->discount }}" min="0">
-                                                </td>
+                                                    <td>
+                                                        <input type="number" class="discount" name="discount"
+                                                            value="{{ $detail->discount }}" min="0">
+                                                    </td>
 
-                                                <td>
-                                                    <input type="number" class="total-price" name="total_price"
-                                                        value="" readonly>
-                                                </td>
-                                                <td class="distribution-details">
-                                                    @php
+                                                    <td>
+                                                        <input type="number" class="total-price" name="total_price"
+                                                            value="" readonly>
+                                                    </td>
+                                                    <td class="distribution-details">
+                                                        {{-- @php
                                                         $filteredDistributions = $distributionData->where(
                                                             'product_id',
                                                             $detail->product->id,
                                                         );
                                                     @endphp
-                                                    @if ($filteredDistributions->isNotEmpty())
+                                                    @if ($filteredDistributions->isNotEmpty()) --}}
                                                         <ul class="distribution-list">
-                                                            @foreach ($filteredDistributions as $distribution)
+                                                            @foreach ($detail->requestDetails as $distribution)
                                                                 <li class="distribution-item">
                                                                     <span class="warehouse-name">
                                                                         {{ $warehouses->firstWhere('id', $distribution->warehouse_id)->name ?? 'N/A' }}:
@@ -180,9 +193,10 @@
                                                                                 {{ $distribution->quantity }}</span>
                                                                         </span>
                                                                         <span class="distribution-allocated">
-                                                                            Phân phối:<span class="order-status">
-                                                                                {{ $distribution->quantity }}</span>
+                                                                            Ngày yêu cầu:<span style="color: red">
+                                                                                {{ $distribution->created_at }}</span>
                                                                         </span>
+
                                                                     </div>
                                                                     <input type="hidden"
                                                                         name="distributions[{{ $distribution->warehouse_id }}][quantity]"
@@ -202,22 +216,25 @@
                                                                 </li>
                                                             @endforeach
                                                         </ul>
-                                                    @else
+                                                        {{-- @else
                                                         <p class="no-distribution-data">Không có dữ liệu phân phối</p>
-                                                    @endif
-                                                </td>
-                                                <td>
-                                                    <button type="submit" class="btn btn-primary btn-custom">Phân
-                                                        phối</button>
-                                                </td>
-                                            </tr>
-                                        </form>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                            <p>Tổng tiền hàng:
-                                {{-- {{ $purchaseOrder->total_amount }}  --}}
-                            </p>
+                                                    @endif --}}
+                                                    </td>
+                                                    <td>
+                                                        <button type="submit" class="btn btn-primary btn-custom">Phân
+                                                            phối</button>
+                                                    </td>
+                                                </tr>
+                                            </form>
+                                        @endforeach
+
+
+                                    </tbody>
+                                </table>
+                            @endif
+                            {{-- <p>Tổng tiền hàng:
+                                {{ $purchaseOrder->total_amount }} 
+                            </p> --}}
                         </div>
                     </td>
                 </tr>
@@ -295,13 +312,14 @@
             margin-bottom: 15px;
             padding: 10px;
             /* background: #f9f9f9;
-                                                                                        border: 1px solid #ddd; */
+                                                                                                                                                                                                    border: 1px solid #ddd; */
             border-radius: 5px;
         }
 
         .warehouse-name {
             font-weight: bold;
             color: #007bff;
+            font-size: 16px;
         }
 
         .distribution-info {
@@ -314,6 +332,7 @@
         .distribution-allocated {
             display: block;
             margin-bottom: 3px;
+            font-size: 16px;
         }
 
         .no-distribution-data {

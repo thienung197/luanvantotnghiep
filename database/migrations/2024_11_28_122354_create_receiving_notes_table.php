@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignIdFor(PurchaseOrder::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Provider::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
-            $table->enum('status', ['pending', 'fulfilled']);
+            // $table->enum('status', ['pending', 'fulfilled']);
             $table->timestamps();
         });
     }

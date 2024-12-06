@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Báo cáo xuất nhập tồn')
+@section('title', 'Báo cáo xuất nhập ')
 @section('content')
     <div class="content_header">
         <div class="content_header--title">
@@ -7,14 +7,14 @@
         </div>
         <div class="content_header--path">
             <img src="{{ asset('img/home.png') }}" alt="">
-            <p><a href="">Home</a> > <a href="{{ route('stocktakes.index') }}">Báo cáo xuất nhập tồn</a> > <a
+            <p><a href="">Home</a> > <a href="{{ route('stocktakes.index') }}">Báo cáo xuất nhập </a> > <a
                     href="">Thêm báo cáo</a>
             </p>
         </div>
     </div>
 
     <div class="content-10">
-        <h2>Báo cáo xuất nhập tồn</h2>
+        <h2>Báo cáo xuất nhập </h2>
         <form action="{{ route('comprehensive-stock-report.store') }}" method="POST">
             @csrf
             <input type="hidden" name="warehouse_id" value="{{ $warehouse_id }}" id="warehouse_id">
@@ -37,7 +37,7 @@
                             {{-- <th>Tồn đầu kỳ</th> --}}
                             <th>Nhập trong kỳ</th>
                             <th>Xuất trong kỳ</th>
-                            <th>Tồn cuối kỳ</th>
+                            {{-- <th>Tồn cuối kỳ</th> --}}
                         </tr>
                     </thead>
                     <tbody>
@@ -51,15 +51,15 @@
                                     value="{{ $product['total_received'] }}">
                                 <input type="hidden" name="products[{{ $loop->index }}][stock_out]"
                                     value="{{ $product['total_issued'] }}">
-                                <input type="hidden" name="products[{{ $loop->index }}][ending_inventory]"
-                                    value="{{ $product['ending_inventory'] }}">
+                                {{-- <input type="hidden" name="products[{{ $loop->index }}][ending_inventory]"
+                                    value="{{ $product['ending_inventory'] }}"> --}}
                                 <td>{{ $product['product_code'] }}</td>
                                 <td>{{ $product['product_name'] }}</td>
                                 <td>{{ $product['unit_name'] }}</td>
                                 {{-- <td>{{ $product['beginning_inventory'] }}</td> --}}
                                 <td>{{ $product['total_received'] }}</td>
                                 <td>{{ $product['total_issued'] }}</td>
-                                <td>{{ $product['ending_inventory'] }}</td>
+                                {{-- <td>{{ $product['ending_inventory'] }}</td> --}}
                             </tr>
                         @endforeach
                     </tbody>
@@ -123,14 +123,12 @@
                        
                         <input type="hidden" name="products[${product.product_id}][stock_in]" value="${product.total_received}">
                         <input type="hidden" name="products[${product.product_id}][stock_out]" value="${product.total_issued}">
-                        <input type="hidden" name="products[${product.product_id}][ending_inventory]" value="${product.ending_inventory}">
                         <td>${product.product_code}</td>
                         <td>${product.product_name}</td>
                         <td>${product.unit_name}</td>
                        
                         <td>${product.total_received}</td>
                         <td>${product.total_issued}</td>
-                        <td>${product.ending_inventory}</td>
                     </tr>
                 `;
                     tbody.insertAdjacentHTML('beforeend', row);

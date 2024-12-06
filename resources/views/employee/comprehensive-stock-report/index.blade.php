@@ -1,13 +1,13 @@
 @extends('layouts.app')
-@section('title', 'Báo cáo xuất nhập tồn')
+@section('title', 'Báo cáo xuất nhập ')
 @section('content')
     <div class="content_header">
         <div class="content_header--title">
-            báo cáo xuất nhập tồn
+            báo cáo xuất nhập
         </div>
         <div class="content_header--path">
             <img src="{{ asset('img/home.png') }}" alt="">
-            <p><a href="">Home</a> > <a href="">Báo cáo xuất nhập tồn</a></p>
+            <p><a href="">Home</a> > <a href="">Báo cáo xuất nhập </a></p>
         </div>
     </div>
 
@@ -54,59 +54,56 @@
                     <td><span class="order-status">{{ $comprehensiveStockReport->start_date }}</span></td>
                     <td><span class="order-status">{{ $comprehensiveStockReport->end_date }}</span></td>
                     <td>{{ $comprehensiveStockReport->getUserName() }}</td>
-
                     <td>{{ $comprehensiveStockReport->created_at }}</td>
                     {{-- <td class="btn-cell">
-                        <a href="{{ route('comprehensive-stock-report.edit', $comprehensiveStockReport->id) }}">
-                            <img src="{{ asset('img/edit.png') }}" alt="">
-                        </a>
-                        <form action="{{ route('comprehensive-stock-report.destroy', $comprehensiveStockReport->id) }}"
-                            method="POST" id="form-delete{{ $comprehensiveStockReport->id }}">
-                            @csrf
-                            @method('delete')
-                        </form>
-                        <button type="submit" class="btn-delete" data-id="{{ $comprehensiveStockReport->id }}">
-                            <img src="{{ asset('img/delete.png') }}" alt="">
-                        </button>
-                    </td> --}}
+                            <a href="{{ route('comprehensive-stock-report.edit', $comprehensiveStockReport->id) }}">
+                                <img src="{{ asset('img/edit.png') }}" alt="">
+                            </a>
+                            <form action="{{ route('comprehensive-stock-report.destroy', $comprehensiveStockReport->id) }}"
+                                method="POST" id="form-delete{{ $comprehensiveStockReport->id }}">
+                                @csrf
+                                @method('delete')
+                            </form>
+                            <button type="submit" class="btn-delete" data-id="{{ $comprehensiveStockReport->id }}">
+                                <img src="{{ asset('img/delete.png') }}" alt="">
+                            </button>
+                        </td> --}}
                 </tr>
 
                 <tr class="goods-issue-details" id="details-{{ $comprehensiveStockReport->id }}" style="display: none;">
                     <td colspan="5">
                         <div class="details-container">
-                            <h4 class="order-label">Các sản phẩm được báo cáo xuất nhập tồn</h4>
+                            <h4 class="order-label">Các sản phẩm được báo cáo xuất nhập</h4>
                             <table class="table table-bordered table-product">
                                 <thead>
                                     <tr>
                                         <th>Mã hàng</th>
                                         <th>Tên hàng</th>
                                         <th>Đơn vị tính</th>
-                                        <th>Tồn đầu kỳ</th>
+                                        {{-- <th>Tồn đầu kỳ</th> --}}
                                         <th>Nhập trong kỳ</th>
                                         <th>Xuất trong kỳ</th>
-                                        <th>Tồn cuối kỳ</th>
+                                        {{-- <th>Tồn cuối kỳ</th> --}}
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($comprehensiveStockReports as $comprehensiveStockReport)
-                                        @if ($comprehensiveStockReport->comprehensiveStockReportDetails->isNotEmpty())
-                                            @foreach ($comprehensiveStockReport->comprehensiveStockReportDetails as $detail)
-                                                <tr>
-                                                    <td>{{ $detail->product->code }}</td>
-                                                    <td>{{ $detail->product->name }}</td>
-                                                    <td>{{ $detail->product->unit->name }}</td>
-                                                    <td>{{ $detail->beginning_inventory }}</td>
-                                                    <td>{{ $detail->stock_in }}</td>
-                                                    <td>{{ $detail->stock_out }}</td>
-                                                    <td>{{ $detail->ending_inventory }}</td>
-                                                </tr>
-                                            @endforeach
-                                        @else
+                                    @if ($comprehensiveStockReport->comprehensiveStockReportDetails->isNotEmpty())
+                                        @foreach ($comprehensiveStockReport->comprehensiveStockReportDetails as $detail)
                                             <tr>
-                                                <td colspan="7">No data available</td>
+                                                <td>{{ $detail->product->code }}</td>
+                                                <td>{{ $detail->product->name }}</td>
+                                                <td>{{ $detail->product->unit->name }}</td>
+                                                {{-- <td>{{ $detail->beginning_inventory }}</td> --}}
+                                                <td>{{ $detail->stock_in }}</td>
+                                                <td>{{ $detail->stock_out }}</td>
+                                                {{-- <td>{{ $detail->ending_inventory }}</td> --}}
                                             </tr>
-                                        @endif
-                                    @endforeach
+                                        @endforeach
+                                    @else
+                                        <tr>
+                                            <td colspan="7">No data available</td>
+                                        </tr>
+                                    @endif
                                 </tbody>
                             </table>
                         </div>
@@ -114,6 +111,7 @@
                 </tr>
             @endforeach
         </table>
+
     </div>
 @endsection
 
@@ -122,6 +120,34 @@
         @if (Session::has('message'))
             toastr.success("{{ Session::get('message') }}");
         @endif
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Lấy tất cả các hàng trong bảng
+            const rows = document.querySelectorAll('.comprehensive-stock-report-row');
+
+            rows.forEach(row => {
+                row.addEventListener('click', () => {
+                    // Lấy ID của báo cáo từ thuộc tính data-id
+                    const reportId = row.dataset.id;
+
+                    // Lấy hàng chi tiết tương ứng
+                    const detailsRow = document.getElementById(`details-${reportId}`);
+
+                    if (detailsRow) {
+                        // Kiểm tra trạng thái hiển thị
+                        const isHidden = detailsRow.style.display === 'none';
+
+                        // Ẩn tất cả các hàng chi tiết khác
+                        document.querySelectorAll('.goods-issue-details').forEach(detail => {
+                            detail.style.display = 'none';
+                        });
+
+                        // Hiển thị hoặc ẩn hàng chi tiết hiện tại
+                        detailsRow.style.display = isHidden ? 'table-row' : 'none';
+                    }
+                });
+            });
+        });
     </script>
 @endpush
 

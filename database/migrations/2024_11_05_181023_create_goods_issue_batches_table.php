@@ -13,10 +13,14 @@ return new class extends Migration
     {
         Schema::create('goods_issue_batches', function (Blueprint $table) {
             $table->id();
+            $table->string('code', 100);
             $table->unsignedBigInteger('goods_issue_id');
             $table->unsignedBigInteger('warehouse_id');
             $table->unsignedBigInteger('batch_id');
             $table->integer('quantity');
+            $table->decimal('unit_price', 10, 2);
+            $table->decimal('discount', 10, 2);
+            $table->enum('status', ['processing', 'shipping', 'delivered']);
             $table->timestamps();
 
             $table->foreign('goods_issue_id')

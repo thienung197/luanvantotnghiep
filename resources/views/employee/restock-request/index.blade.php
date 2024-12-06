@@ -86,9 +86,12 @@
                                             <td>{{ $detail->product->unit->name }}</td>
                                             <td>
                                                 @if ($detail->status == 'rejected')
-                                                    <span class="order-status"> Sản phẩm bị từ chối</span>
+                                                    <span class="order-status" style="background-color: red"> Sản phẩm bị
+                                                        từ chối</span>
                                                 @elseif ($detail->status == 'pending')
-                                                    <span class="order-status">Sản phẩm đang chờ duyệt</span>
+                                                    <span class="order-status"
+                                                        style="color: green !important;background-color:yellow">Sản
+                                                        phẩm đang chờ duyệt</span>
                                                 @else
                                                     <span class="order-status">Sản phẩm được duyệt</span>
                                                 @endif
@@ -112,6 +115,29 @@
         @if (Session::has('message'))
             toastr.success("{{ Session::get('message') }}");
         @endif
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const rows = document.querySelectorAll('.restock-request-row');
+
+            rows.forEach(row => {
+                row.addEventListener('click', () => {
+                    const requestId = row.dataset.id;
+
+                    const detailsRow = document.getElementById(`details-${requestId}`);
+
+                    if (detailsRow) {
+                        const isHidden = detailsRow.style.display === 'none';
+
+                        document.querySelectorAll('.goods-issue-details').forEach(detail => {
+                            detail.style.display = 'none';
+                        });
+
+                        detailsRow.style.display = isHidden ? 'table-row' : 'none';
+                    }
+                });
+            });
+        });
     </script>
 @endpush
 

@@ -52,6 +52,8 @@
                                 <td style="display: none">
                                     <input type="hidden" name="products[{{ $key }}][id]"
                                         value="{{ $product['product_id'] }}">
+                                    <input type="hidden" name="products[{{ $key }}][restock_request_detail_ids]"
+                                        value="{{ $product['restock_request_detail_ids'] }}">
                                 </td>
                                 <td>{{ $product['product_code'] }}</td>
                                 <td>{{ $product['product_name'] }}</td>

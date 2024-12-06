@@ -45,7 +45,7 @@
                         <th>Số lượng</th>
                         <th>Giá bán</th>
                         <th>Giảm giá</th>
-                        <th>Thành tiền</th>
+                        <th style="min-width: 260px !important;text-align:center">Thành tiền </th>
                         <th>Xóa</th>
                     </tr>
                 </thead>
@@ -71,7 +71,7 @@
                                     min="0" step="1" id="discount-{{ $product->id }}"
                                     name="discount-{{ $product->id }}">
                             </td>
-                            <td>
+                            <td style="text-align: center">
                                 <span id="total-{{ $product->id }}">
                                     {{ ($product->selling_price - $product->discount) * 1 }}
                                     VNĐ

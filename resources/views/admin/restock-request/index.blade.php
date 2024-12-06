@@ -55,11 +55,14 @@
                     <td>{{ $restockRequest->warehouse->name }}</td>
                     <td class="status-cell" data-status="{{ $restockRequest->status }}">
                         @if ($restockRequest->status == 'pending')
-                            <span class="order-status">Yêu cầu này chưa được phê duyệt</span>
+                            <span class="order-status" style="background-color: #aaae7c">Yêu cầu này chưa được phê
+                                duyệt</span>
                         @elseif($restockRequest->status == 'in_review')
-                            <span class="order-status">Yêu cầu này đang được phê duyệt</span>
+                            <span class="order-status" style="background-color: yellow;color:green !important">Yêu cầu này
+                                đang được phê
+                                duyệt</span>
                         @elseif($restockRequest->status == 'reviewed')
-                            <span class="order-status">Bạn cầu này đã được phê duyệt</span>
+                            <span class="order-status">Yêu cầu này đã được phê duyệt</span>
                         @endif
                     </td>
                     <td>{{ $restockRequest->created_at }}</td>
@@ -93,16 +96,30 @@
                                             <td>{{ $detail->product->name }}</td>
                                             <td>{{ $detail->quantity }}</td>
                                             <td class="btn-cell">
-                                                <button class="btn btn-primary btn-approve" data-id="{{ $detail->id }}"
-                                                    data-parent-id="{{ $restockRequest->id }}"
-                                                    data-status="{{ $detail->status }}">
-                                                    {{ $detail->status === 'approved' ? 'Đã phê duyệt' : 'Phê duyệt' }}
-                                                </button>
-                                                <button class="btn btn-primary btn-reject" data-id="{{ $detail->id }}"
-                                                    data-parent-id="{{ $restockRequest->id }}"
-                                                    data-status="{{ $detail->status }}">
-                                                    {{ $detail->status === 'rejected' ? 'Đã từ chối' : 'Từ chối' }}
-                                                </button>
+                                                @if ($detail->status == 'fulfilled')
+                                                    <span class="order-status" style="background-color: blue">Sản phẩm được
+                                                        phân phối xuống các kho</span>
+                                                @elseif($detail->status == 'approved')
+                                                    <span class="order-status">Sản phẩm được được duyệt</span>
+                                                @elseif($detail->status == 'rejected')
+                                                    <span class="order-status" style="background-color: red">Sản phẩm được
+                                                        bị từ chối nhập hàng</span>
+                                                @else
+                                                    <button
+                                                        class="btn
+                                                        btn-primary btn-approve"
+                                                        data-id="{{ $detail->id }}"
+                                                        data-parent-id="{{ $restockRequest->id }}"
+                                                        data-status="{{ $detail->status }}">
+                                                        {{ $detail->status === 'approved' ? 'Đã phê duyệt' : 'Phê duyệt' }}
+                                                    </button>
+                                                    <button class="btn btn-primary btn-reject"
+                                                        data-id="{{ $detail->id }}"
+                                                        data-parent-id="{{ $restockRequest->id }}"
+                                                        data-status="{{ $detail->status }}">
+                                                        {{ $detail->status === 'rejected' ? 'Đã từ chối' : 'Từ chối' }}
+                                                    </button>
+                                                @endif
                                             </td>
                     </td>
                 </tr>

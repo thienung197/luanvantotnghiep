@@ -24,7 +24,8 @@ class AdminGoodsIssueController extends Controller
 
     public function index()
     {
-        $goodsIssues = $this->goods_issue::with('user')->latest('id')->get();
+        $goodsIssues = $this->goods_issue::with(['user', 'goodsIssueBatches'])->latest('id')->get();
+        info($goodsIssues);
         return view('admin.goods_issues.index', compact('goodsIssues'));
     }
 

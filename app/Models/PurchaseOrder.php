@@ -8,11 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 class PurchaseOrder extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'code',
         'user_id',
         'provider_id',
     ];
+
+    // Khai báo thuộc tính tùy chỉnh
+    protected $recordedProducts = [];
 
     public function provider()
     {
@@ -28,6 +32,18 @@ class PurchaseOrder extends Model
     {
         return $this->hasMany(PurchaseOrderDetail::class);
     }
+
+    public function setRecordedProducts($recordedProducts)
+    {
+        $this->recordedProducts = $recordedProducts;
+    }
+
+    public function getRecordedProducts()
+    {
+        return $this->recordedProducts;
+    }
+
+
 
     public function receivingNotes()
     {
