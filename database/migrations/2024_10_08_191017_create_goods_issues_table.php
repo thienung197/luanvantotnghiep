@@ -21,7 +21,7 @@ return new class extends Migration
             // $table->foreignIdFor(Warehouse::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(User::class, 'customer_id')->constrained('users')->cascadeOnDelete();
             $table->foreignIdFor(User::class, 'approved_by')->nullable()->constrained('users')->cascadeOnDelete();
-            $table->enum('status', ['pending', 'approved', 'processing', 'shipping', 'delivered']);
+            $table->enum('status', ['pending', 'approved']);
             // $table->decimal('discount', 10, 2)->default(0);
             $table->timestamps();
         });

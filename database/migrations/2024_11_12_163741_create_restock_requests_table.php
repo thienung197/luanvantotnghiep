@@ -19,8 +19,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Warehouse::class)->constrained()->cascadeOnDelete();
-            $table->enum('status', ['pending', 'approved', 'rejected']);
-            $table->foreignIdFor(RestockRequestReason::class)->constrained()->cascadeOnDelete();
+            $table->enum('status', ['pending', 'in_review', 'ordered', 'reviewed']);
             $table->timestamps();
         });
     }

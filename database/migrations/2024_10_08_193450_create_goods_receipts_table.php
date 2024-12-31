@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Provider;
+use App\Models\ReceivingDetail;
 use App\Models\User;
 use App\Models\Warehouse;
 use Illuminate\Database\Migrations\Migration;
@@ -16,6 +17,7 @@ return new class extends Migration
     {
         Schema::create('goods_receipts', function (Blueprint $table) {
             $table->id();
+            $table->foreignIdFor(ReceivingDetail::class)->constrained()->cascadeOnDelete();
             $table->string('code', 30);
             $table->foreignIdFor(Warehouse::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(User::class, 'creator_id')->constrained('users')->cascadeOnDelete();

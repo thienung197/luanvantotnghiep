@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignIdFor(RestockRequest::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Product::class)->constrained()->cascadeOnDelete();
             $table->integer('quantity');
+            $table->enum('status', ['pending', 'approved', 'rejected', 'ordered', 'fulfilled']);
             $table->timestamps();
         });
     }
